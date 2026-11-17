@@ -1,0 +1,50 @@
+chink	35	CH IH1 NG K
+chinks	35	CH IH1 NG K S
+coon	50	K UW1 N
+cooner	90	K UW1 N ER0
+coones	90	K UW1 N Z
+coons	50	K UW1 N Z
+darkie	55	D AA1 R K IY0
+dyke	40	D AY1 K
+dykes	40	D AY1 K S
+fag	40	F AE1 G
+fager	90	F EY1 G ER0
+fagg	90	F AE1 G
+faggart	90	F AE1 G AA0 R T
+faggot	35	F AE1 G AH0 T
+fagin	80	F EY1 G IH0 N
+fags	40	F AE1 G Z
+gook	50	G UH1 K
+gookin	90	G UH1 K IH0 N
+heeb	90	HH IY1 B
+homo	60	HH OW1 M OW0
+honky	55	HH AO1 NG K IY0
+hymie	90	HH AY1 M IY0
+hymies	90	HH AY1 M IY0 Z
+jap	80	JH AE1 P
+japs	80	JH AE1 P S
+kiker	90	K AY1 K ER0
+knigge	90	N IH1 G
+kraut	60	K R AW1 T
+krauter	90	K R AW1 T ER0
+mong	70	M AO1 NG
+negro	55	N IY1 G R OW0
+negroes	90	N IY1 G R OW0 Z
+negros	90	N IY1 G R OW0 Z
+nigg	90	N IH1 G
+nigger	40	N IH1 G ER0
+niggers	40	N IH1 G ER0 Z
+polack	90	P OW1 L AE0 K
+poof	55	P UW1 F
+redskin	40	R EH1 D S K IH2 N
+redskins	40	R EH1 D S K IH2 N Z
+retard	35	R IH0 T AA1 R D|R IY0 T AA1 R D
+retarded	35	R IH0 T AA1 R D IH0 D|R IY0 T AA1 R D AH0 D|R IY0 T AA1 R D IH0 D
+retards	35	R IH0 T AA1 R D Z|R IY0 T AA1 R D Z
+sambo	70	S AE1 M B OW0
+spastic	40	S P AE1 S T IH0 K
+spaz	80	S P AE1 Z
+spazes	90	S P AE1 Z EH0 Z
+spic	55	S P IH1 K
+wop	55	W AA1 P
+wops	55	W AA1 P S

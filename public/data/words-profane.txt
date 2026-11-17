@@ -1,0 +1,242 @@
+anal	35	EY1 N AH0 L
+anus	35	EY1 N AH0 S
+arse	90	AA1 R S
+arsehole	90	AA1 R S HH OW2 L
+arses	90	AA1 R S IH0 Z
+ass	20	AE1 S
+assed	80	AE1 S T
+asses	35	AE1 S AH0 Z
+asshole	40	AE1 S HH OW0 L
+assholes	40	AE1 S HH OW0 L Z
+badass	80	B AE1 D AE2 S
+bastard	20	B AE1 S T ER0 D
+bastards	20	B AE1 S T ER0 D Z
+bebitch	90	B EH1 B IH0 CH
+bestiality	35	B EH0 S CH AE1 L IH0 T IY0
+bimbos	40	B IH1 M B OW0 S
+bitch	35	B IH1 CH
+bitches	35	B IH1 CH IH0 Z
+bitchiness	55	B IH1 CH IY0 N AH0 S
+bitching	35	B IH1 CH IH0 NG
+bitchy	40	B IH1 CH IY0
+blowjob	60	B L OW1 JH AA2 B
+blowjobs	60	B L OW1 JH AA2 B Z
+bollocks	55	B AO1 L AO0 K S
+bondage	35	B AA1 N D IH0 JH
+boner	50	B OW1 N ER0
+boob	40	B UW1 B
+boobs	40	B UW1 B Z
+booby	35	B UW1 B IY0
+bugger	20	B AH1 G ER0
+buggers	20	B AH1 G ER0 Z
+bukkake	90	B UW2 K AA1 K EH2
+bullshit	40	B UH1 L SH IH2 T
+bullshitter	55	B UH1 L SH IH2 T ER0
+bullshitting	40	B UH1 L SH IH2 T IH0 NG
+bustier	55	B AH1 S T Y ER0
+busty	55	B AH1 S T IY0
+butt	35	B AH1 T
+butts	35	B AH1 T S
+cialis	90	S IY2 AA1 L AH0 S
+clites	90	K L AY1 T S
+clitoris	35	K L AY0 T AO1 R IH0 S
+cock	35	K AA1 K
+cocks	35	K AA1 K S
+cocksucker	50	K AA1 K S AH2 K ER0
+crap	20	K R AE1 P
+crapps	90	K R AE1 P S
+crappy	40	K R AE1 P IY2
+craps	40	K R AE1 P S
+cum	90	K AH1 M
+cumming	10	K AH1 M IH0 NG
+cummings	90	K AH1 M IH0 NG Z
+cunnilingus	50	K AH2 N AH0 L IH1 NG G AH0 S
+cunt	50	K AH1 N T
+cushitic	90	K AH0 SH IH1 T IH0 K
+cyberporn	90	S AY1 B ER0 P AO2 R N
+dammit	55	D AE1 M IH0 T
+damn	20	D AE1 M
+damned	20	D AE1 M D
+damning	20	D AE1 M IH0 NG
+damns	20	D AE1 M Z
+dick	40	D IH1 K
+dickes	90	D IH1 K S
+dickhead	55	D IH1 K HH EH2 D
+dickie	90	D IH1 K IY0
+dicks	40	D IH1 K S
+dicky	90	D IH1 K IY0
+dildo	55	D IH1 L D OW2
+dildos	55	D IH1 L D OW2 Z
+dipshit	80	D IH1 P SH IH2 T
+douche	50	D UW1 SH
+dumbass	90	D AH1 M B AE2 S
+ejaculation	35	IY0 JH AE2 K Y UW0 L EY1 SH AH0 N
+erotic	35	IH0 R AA1 T IH0 K
+eunuch	40	Y UW1 N AH0 K
+fecal	40	F IY1 K AH0 L
+felch	90	F EH1 L CH
+fellatio	50	F AH0 L EY1 SH IY0 OW0
+fuck	40	F AH1 K
+fucked	40	F AH1 K T
+fucker	40	F AH1 K ER0
+fuckers	40	F AH1 K ER0 Z
+fuckin	90	F AH1 K IH0 N
+fucking	40	F AH1 K IH0 NG
+fucks	40	F AH1 K S
+gangbanger	80	G AE1 NG B AE0 NG G ER0
+gangbangers	80	G AE1 NG B AE0 NG G ER0 Z
+genitals	35	JH EH1 N AH0 T AH0 L Z
+goddamn	40	G AA1 D D AE2 M
+goddamned	40	G AA1 D D AE2 M D
+grope	35	G R OW1 P
+groped	35	G R OW1 P T
+gropes	35	G R OW1 P S
+groping	35	G R OW1 P IH0 NG
+hell	10	HH EH1 L
+heller	70	HH EH1 L ER0
+hellier	80	HH EH1 L Y ER0
+helling	80	HH EH1 L IH0 NG
+hellish	35	HH EH1 L IH0 SH
+hoe	35	HH OW1
+hoes	35	HH OW1 Z
+hoesly	90	HH OW1 S L IY0
+hoey	90	HH OW1 IY0
+hooker	40	HH UH1 K ER0
+hookers	40	HH UH1 K ER0 Z
+horny	35	HH AO1 R N IY0
+horseshit	55	HH AO1 R S SH IH2 T
+incest	35	IH1 N S EH2 S T
+intercourse	20	IH1 N T ER0 K AO2 R S|IH1 N ER0 K AO2 R S
+jackass	35	JH AE1 K AE2 S
+kinky	35	K IH1 NG K IY0
+kinoshita	90	K IY0 N OW0 SH IY1 T AH0
+lifshitz	90	L IH1 F SH IH0 T S
+lolita	90	L OW0 L IY1 T AH0
+lovemaking	50	L AH1 V M EY0 K IH0 NG
+masturbate	40	M AE1 S T ER0 B EY2 T
+masturbated	40	M AE1 S T ER0 B EY2 T IH0 D
+masturbates	40	M AE1 S T ER0 B EY2 T S
+masturbating	40	M AE1 S T ER0 B EY2 T IH0 NG
+masturbation	35	M AE2 S T ER0 B EY1 SH AH0 N
+matsushita	90	M AA0 T S UW0 SH IY1 T AH0|M AA0 T S UW1 SH IY0 T AH0
+morishita	90	M AO0 R IY0 SH IY1 T AH0
+motherfucker	40	M AH1 DH ER0 F AH2 K ER0
+motherfuckers	40	M AH1 DH ER0 F AH2 K ER0 Z
+motherfucking	50	M AH1 DH ER0 F AH2 K IH0 NG
+nambla	90	N AE1 M B L AH0
+neonazi	90	N IY2 OW0 N AA1 T S IY0
+neonazis	90	N IY2 OW0 N AA1 T S IY0 Z
+nipple	35	N IH1 P AH0 L
+nipples	35	N IH1 P AH0 L Z
+nude	35	N UW1 D
+nudes	35	N UW1 D Z
+nudey	90	N UW1 D IY0
+nudity	35	N UW1 D IH0 T IY0
+nympho	55	N IH2 M F OW0
+orgasm	35	AO1 R G AE0 Z AH0 M
+orgasms	40	AO1 R G AE0 Z AH0 M Z
+orgies	35	AO1 R JH IY0 Z
+orgy	35	AO1 R JH IY0
+oshita	90	OW0 SH IY1 T AH0
+panties	35	P AE1 N T IY0 Z
+panty	90	P AE1 N T IY0
+pedophile	55	P EH1 D OW0 F AY0 L|P EH1 D AH0 F IH0 L
+pedophiles	55	P EH1 D OW0 F AY0 L Z|P EH1 D AH0 F IH0 L Z
+pegging	35	P EH1 G IH0 NG
+penis	35	P IY1 N IH0 S
+penises	35	P IY1 N IH0 S IH0 Z
+piss	40	P IH1 S
+pissed	40	P IH1 S T
+pisses	40	P IH1 S IH2 Z
+pissing	40	P IH1 S IH2 NG
+playboy	40	P L EY1 B OY2
+poon	70	P UW1 N
+porn	40	P AO1 R N
+porno	50	P AO1 R N OW0
+pornographer	40	P AO2 R N AA1 G R AH0 F ER0
+pornographers	40	P AO2 R N AA1 G R AH0 F ER0 Z
+pornographic	35	P AO2 R N AH0 G R AE1 F IH0 K
+pornography	20	P AO0 R N AA1 G R AH0 F IY0
+prick	35	P R IH1 K
+pricks	35	P R IH1 K S
+pussies	35	P UH1 S IY0 Z
+pussy	35	P UH1 S IY0
+rape	20	R EY1 P
+raped	35	R EY1 P T
+raper	60	R EY1 P ER0
+rapers	60	R EY1 P ER0 Z
+rapes	35	R EY1 P S
+raping	35	R EY1 P IH0 NG
+rapist	35	R EY1 P IH0 S T
+rapists	35	R EY1 P IH0 S T S
+rectum	35	R EH1 K T AH0 M
+sadism	35	S EY1 D IH0 Z AH0 M
+santorum	90	S AE0 N T AO1 R AH0 M
+scates	90	S K EY1 T S
+semen	35	S IY1 M AH0 N
+sex	10	S EH1 K S
+sexed	35	S EH1 K S T
+sexes	20	S EH1 K S AH0 Z|S EH1 K S IH0 Z
+sexier	40	S EH1 K S IY0 ER0
+sexiest	40	S EH1 K S IY0 AH0 S T
+sexual	20	S EH1 K SH UW0 AH0 L
+sexuality	20	S EH2 K SH UW0 AE1 L AH0 T IY0
+sexually	20	S EH1 K SH UW0 AH0 L IY0
+sexy	20	S EH1 K S IY0
+shag	50	SH AE1 G
+shagging	50	SH AE1 G IH0 NG
+shags	50	SH AE1 G Z
+shit	40	SH IH1 T
+shithead	55	SH IH1 T HH EH2 D
+shithole	90	SH IH1 T HH OW2 L
+shitila	90	SH AH0 T IH1 L AH0
+shitload	55	SH IH1 T L OW2 D
+shits	40	SH IH1 T S
+shitstorm	90	SH IH1 T S T AO2 R M
+shitting	40	SH IH1 T IH0 NG
+shitty	40	SH IH1 T IY2
+skeet	50	S K IY1 T
+skeets	80	S K IY1 T S
+slut	35	S L AH1 T
+sluts	35	S L AH1 T S
+slutsky	90	S L AH1 T S K IY0
+slutty	55	S L AH1 T IY2
+slutz	90	S L AH1 T S
+slutzky	90	S L AH1 T S K IY0
+smartass	80	S M AA1 R T AE1 S
+smut	35	S M AH1 T
+smutty	40	S M AH1 T IY2
+snowballing	35	S N OW1 B AO2 L IH0 NG
+sodomize	55	S AO1 D AH0 M AY2 Z
+sodomized	55	S AO1 D AH0 M AY2 Z D
+sodomizer	90	S AO1 D AH0 M AY2 Z ER0
+sodomizes	55	S AO1 D AH0 M AY2 Z AH0 Z
+sodomizing	55	S AO1 D AH0 M AY2 Z IH0 NG
+sodomy	35	S AA1 D AH0 M IY0
+sporn	90	S P AO1 R N
+spunk	35	S P AH1 NG K
+swastika	50	S W AA1 S T IH0 K AH0
+swastikas	50	S W AA1 S T IH0 K AH0 Z
+swinger	50	S W IH1 NG ER0
+swingers	50	S W IH1 NG ER0 Z
+takeshita	90	T AA2 K AH0 SH IY1 T AA2
+threesome	50	TH R IY1 S AH0 M
+tit	35	T IH1 T
+tits	35	T IH1 T S
+topless	40	T AA1 P L AH0 S
+twat	55	T W AA1 T
+twats	55	T W AA1 T S
+twink	70	T W IH1 NG K
+vagina	35	V AH0 JH AY1 N AH0
+viagra	90	V IY0 AE1 G R AH0
+vibrator	50	V AY1 B R EY0 T ER0
+vibrators	50	V AY1 B R EY0 T ER0 Z
+voyeur	40	V OY2 Y UW1 R
+vulva	50	V UH1 L V AH0
+wank	55	W AA1 NG K
+wanker	55	W AA1 NG K ER0
+wankers	55	W AA1 NG K ER0 Z
+whore	35	HH AO1 R
+whorehouse	50	HH AO1 R HH AW2 S
+whores	35	HH AO1 R Z
+yamashita	90	Y AA0 M AA0 SH IY1 T AH0
