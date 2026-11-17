@@ -133,6 +133,22 @@ try {
   check(blocks.join(" ").includes("????"), "first-word difficulty should hide later words");
   await shot(page, "07-double-first");
 
+  // Explicit words: switch them on and check a good share of prompt groups use them.
+  await page.click("[data-tool='options']");
+  await page.click("dialog[open] .switch[data-key='explicit']");
+  await page.keyboard.press("Escape");
+  await page.waitForFunction(() => window.__ir.index()?.loaded.has("profane") && window.__ir.deck(), { timeout: 8000 });
+  await sleep(300);
+  const explicitShare = await page.evaluate(() => {
+    const deck = window.__ir.deck();
+    const index = window.__ir.index();
+    let hit = 0;
+    for (let g = 1000; g < 1060; g++) if ([0, 1, 2, 3].some((s) => index.entry(deck.word(g, s))?.tier === "profane")) hit++;
+    return hit / 60;
+  });
+  console.log(`explicit on: ${Math.round(explicitShare * 100)}% of groups use a swear word`);
+  check(explicitShare >= 0.25, "explicit words were too rare with the switch on");
+
   // Space stops.
   await page.keyboard.press("Space");
   await sleep(200);

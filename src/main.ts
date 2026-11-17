@@ -670,7 +670,7 @@ document.addEventListener("visibilitychange", () => {
 window.addEventListener("pagehide", () => endSession());
 
 // ?debug exposes internals to the browser check script (scripts/check.mjs).
-if (new URLSearchParams(location.search).has("debug")) Object.assign(window, { __ir: { engine, stage, tap, loops, settings: () => settings, own: () => own } });
+if (new URLSearchParams(location.search).has("debug")) Object.assign(window, { __ir: { engine, stage, tap, loops, settings: () => settings, own: () => own, deck: () => deck, index: () => index } });
 
 stage.setBallOn(settings.ball);
 stage.announceOn = settings.announce;

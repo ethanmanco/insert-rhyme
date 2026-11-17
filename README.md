@@ -10,7 +10,7 @@ Free 8-bit freestyle rap practice. Pick a beat, watch the ball bounce across eac
 
 - **Real recorded beats**, all free-licensed (CC0 or CC BY): boom bap, laid back, jazzy, G-funk, phonk, trap and drill. Each is cut to an exact 16-bar loop. The tempo slider works like a turntable: speed and pitch move together, from 60% to 160% (slow it right down for a screwed Houston feel).
 - **Use your own beat:** pick any song or beat file on your phone. The app finds its tempo and first bar by itself, and you can fix it with half, double, bar shift or tap to sync. The file never leaves your device.
-- **Word themes:** 9 rap styles (crunk, Houston slab, Memphis, Chicago drill, UK grime, West Coast, New York boom bap, Atlanta trap, old school) and 17 topics (food, cars, money, sports and more). The first word of each rhyme comes from the theme.
+- **Word themes:** 25 rap styles (crunk, Houston slab, Memphis, Chicago drill, UK drill, Brooklyn drill, UK grime, Bay Area hyphy, New Orleans bounce, Detroit, Philly, Miami bass, Midwest chopper, battle rap, conscious, horrorcore, emo rap, rage, afroswing, Jersey club and more) and 33 topics (food, cars, money, family, hustle, pirates, Halloween and more). The first word of each rhyme comes from the theme.
 - **A bar view that shows exactly when to rhyme.** Each bar is a row of four blocks, one per beat. The ball lands on each block right on the beat, the target block where your rhyme should land is highlighted, and the next three bars wait underneath so you can plan.
 - **6 rhyme schemes:** AABB, ABAB, AAAA, skip-line (only every other line rhymes), half-time (a rhyme every two bars) and double-time (two rhymes per bar).
 - **Word prompts with three levels:** every rhyme word shown, only the first word of each rhyme shown (you find the rest), or no words (free practice with the scheme only).
@@ -34,7 +34,7 @@ Rhymes are found by sound, not spelling, using pronunciations from the CMU Prono
 - **Near rhymes** share the vowel sounds from the stressed vowel on, while the consonants differ: night, ride and time all have `AY`.
 - Results are sorted by how common the word is (using the SCOWL word lists), then by how close the syllable count is.
 
-Prompt words come from nearly 200 everyday seed words with lots of easy rhymes. A test checks that every seed still has at least 8 common rhymes, so a player never gets an impossible word.
+Prompt words are dealt by rhyme sound, like cards: every sound in the dictionary with at least 8 everyday rhymes goes in a shuffled deck (a few hundred of them), and no sound comes back until the deck has been played through. Each group draws its words at random from up to 40 everyday words for its sound, leaning toward common words and skipping ones you saw recently, and the app remembers recent sounds and words between visits. Tests check that 150 groups in a row never repeat a sound and that almost every word in 60 groups is new.
 
 Everything works offline after the first load. `scripts/build-rhymes.ts` builds the word files in `public/data` from pinned copies of the sources: the dictionary and the word lists are joined, and every word is sorted into one of three files. Everyday words go in the default file. Explicit words and slurs each get their own file, which only downloads when its switch is on.
 
