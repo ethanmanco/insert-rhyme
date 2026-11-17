@@ -4,6 +4,7 @@ import "./styles/app.css";
 import { Engine, useRelaxedAudioTiming } from "./audio/engine";
 import { canRecord, Recorder, type Take } from "./audio/recorder";
 import { beatById } from "./core/beats";
+import { categoryWords, CATEGORIES } from "./core/categories";
 import { PromptDeck } from "./core/prompts";
 import { allowedTiers, RhymeIndex, type Tier } from "./core/rhymes";
 import { SCHEMES } from "./core/schemes";
@@ -52,7 +53,8 @@ async function loadTier(tier: Tier): Promise<void> {
 async function refreshWords(): Promise<void> {
   const want = [...allowed()].filter((t) => !index?.loaded.has(t));
   for (const tier of want) await loadTier(tier);
-  if (index) deck = new PromptDeck(index, allowed());
+  const category = CATEGORIES.find((c) => c.id === settings.category);
+  if (index) deck = new PromptDeck(index, allowed(), Date.now(), category ? categoryWords(category, settings.explicit) : null);
   stage.refresh();
   helper.refresh();
 }
@@ -83,7 +85,8 @@ chips.className = "chips";
 chips.innerHTML = `
   <button class="chip px" type="button" data-chip="beat"></button>
   <button class="chip px solid" type="button" data-chip="scheme"></button>
-  <button class="chip px" type="button" data-chip="words"></button>`;
+  <button class="chip px" type="button" data-chip="words"></button>
+  <button class="chip px" type="button" data-chip="theme"></button>`;
 
 const stage = new Stage({
   scheme: settings.scheme,
@@ -182,6 +185,8 @@ function showChips() {
   set("scheme", scheme.name, `Rhyme scheme: ${scheme.name}`);
   const words = DIFFICULTIES.find((d) => d.id === settings.difficulty)!;
   set("words", words.name, `Words: ${words.name.toLowerCase()}`);
+  const theme = CATEGORIES.find((c) => c.id === settings.category);
+  set("theme", theme ? theme.name : "ANY THEME", `Word theme: ${theme ? theme.name.toLowerCase() : "any"}`);
   const streak = currentStreak(stats, dayKey(new Date()));
   streakChip.textContent = `STREAK ${streak}`;
   streakChip.setAttribute("aria-label", `${streak} day streak. Open options and stats.`);
@@ -276,7 +281,7 @@ function change(patch: Partial<Settings>) {
   if (patch.ball !== undefined) stage.setBallOn(settings.ball);
   if (patch.announce !== undefined) stage.announceOn = settings.announce;
   if (patch.difficulty) stage.refresh();
-  if (patch.explicit !== undefined || patch.slurs !== undefined) void refreshWords();
+  if (patch.explicit !== undefined || patch.slurs !== undefined || patch.category) void refreshWords();
   saveSettings(settings);
   showChips();
   showPlaying();

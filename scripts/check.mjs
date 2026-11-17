@@ -118,7 +118,11 @@ try {
   await shot(page, "06-options");
   await page.click("dialog[open] input[value='double']");
   await page.click("dialog[open] input[value='first']");
+  await page.click("dialog[open] input[value='food']");
+  await shot(page, "06b-themes");
   await page.keyboard.press("Escape");
+  const themeChip = await page.evaluate(() => document.querySelector("[data-chip='theme']").textContent);
+  check(themeChip === "FOOD", `the theme chip should say FOOD, got ${themeChip}`);
   await sleep(300);
   const blocks = await page.evaluate(() => [...document.querySelectorAll(".next .row")].map((r) => [...r.children].map((b) => b.textContent).join("|")));
   console.log("double-time, first word only:", JSON.stringify(blocks));

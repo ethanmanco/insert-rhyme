@@ -1,4 +1,5 @@
 import { beatById } from "./core/beats";
+import { isCategory } from "./core/categories";
 import { isScheme, type SchemeId } from "./core/schemes";
 import { clampBpm } from "./core/timing";
 import { load, save } from "./storage";
@@ -13,6 +14,8 @@ export interface Settings {
   bpm: number;
   scheme: SchemeId;
   difficulty: Difficulty;
+  /** A word category id, or "any". */
+  category: string;
   /** Swear words and crude words in prompts and rhymes. Off by default. */
   explicit: boolean;
   /** Slurs, a separate toggle. Off by default. */
@@ -38,6 +41,7 @@ export function loadSettings(reducedMotion: boolean): Settings {
     bpm: clampBpm(raw.bpm, beat.bpm),
     scheme: isScheme(raw.scheme) ? raw.scheme : "aabb",
     difficulty: DIFFICULTIES.some((d) => d.id === raw.difficulty) ? (raw.difficulty as Difficulty) : "all",
+    category: isCategory(raw.category) ? String(raw.category) : "any",
     explicit: bool(raw.explicit, false),
     slurs: bool(raw.slurs, false),
     ball: bool(raw.ball, !reducedMotion),

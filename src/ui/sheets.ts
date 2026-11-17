@@ -1,4 +1,5 @@
 import { BEATS } from "../core/beats";
+import { CATEGORIES } from "../core/categories";
 import type { RhymeIndex, Tier } from "../core/rhymes";
 import { SCHEMES } from "../core/schemes";
 import { currentStreak, dayKey, type Stats } from "../core/stats";
@@ -50,6 +51,23 @@ export function optionsSheet(get: () => Settings, stats: () => Stats, change: (p
         .join("")}
     </fieldset>`;
 
+  const mini = (id: string, name: string, hint: string, value: string) => `
+    <label class="choice mini px" title="${esc(hint)}">
+      <input type="radio" name="category" value="${id}" ${id === value ? "checked" : ""} />
+      <span class="choice-name">${esc(name)}</span>
+    </label>`;
+
+  const themes = (value: string) => `
+    <fieldset class="group">
+      <legend>WORD THEME</legend>
+      <p class="choice-hint">With a theme, the first word of each rhyme comes from it. Drug and weapon words in the rap styles only show with explicit words on.</p>
+      <div class="minis">${mini("any", "ANY WORDS", "Everyday words with lots of rhymes.", value)}</div>
+      <p class="sub">RAP STYLES</p>
+      <div class="minis">${CATEGORIES.filter((c) => c.kind === "style").map((c) => mini(c.id, c.name, c.hint, value)).join("")}</div>
+      <p class="sub">TOPICS</p>
+      <div class="minis">${CATEGORIES.filter((c) => c.kind === "topic").map((c) => mini(c.id, c.name, c.hint, value)).join("")}</div>
+    </fieldset>`;
+
   const toggle = (key: keyof Settings, name: string, hint: string, on: boolean) => `
     <div class="toggle-row">
       <div><p class="choice-name">${name}</p><p class="choice-hint">${hint}</p></div>
@@ -85,6 +103,7 @@ export function optionsSheet(get: () => Settings, stats: () => Stats, change: (p
       )}
       ${radios("scheme", "RHYME SCHEME", SCHEMES.map((x) => ({ id: x.id, name: x.name, hint: x.hint })), s.scheme)}
       ${radios("difficulty", "WORDS", DIFFICULTIES, s.difficulty)}
+      ${themes(s.category)}
       <fieldset class="group">
         <legend>DISPLAY AND WORDS</legend>
         ${toggle("ball", "BOUNCING BALL", "Off: the block for each beat lights up instead.", s.ball)}
