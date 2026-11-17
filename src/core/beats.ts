@@ -42,14 +42,14 @@ export const ENCODER_DELAY = 1105 / 44100;
 const CC0 = "https://creativecommons.org/publicdomain/zero/1.0/";
 const FMA = "https://freemusicarchive.org/music/";
 
-const beat = (id: string, name: string, style: string, bpm: number, credit: Credit): Beat => ({
+const beat = (id: string, name: string, style: string, bpm: number, credit: Credit, bars = 16): Beat => ({
   id,
   name,
   style,
   file: `${id}.mp3`,
   bpm,
   start: 0.25,
-  bars: 16,
+  bars,
   credit,
 });
 
@@ -80,6 +80,41 @@ export const BEATS: Beat[] = [
   beat("vision-2", "Vision 2", "Uptempo", 110, { title: "Vision 2", artist: "Ketsa", license: "CC BY 4.0", licenseUrl: BY4, url: `${FMA}Ketsa/cc-by-free-to-use-for-anything/vision-2-1/` }),
   beat("off-days", "Off Days", "Soulful", 81, { title: "Off Days", artist: "Ketsa", license: "CC BY 4.0", licenseUrl: BY4, url: `${FMA}Ketsa/cc-by-free-to-use-for-anything/off-days/` }),
   beat("my-town", "My Town", "Boom bap", 90, { title: "My Town", artist: "Ketsa", license: "CC BY 4.0", licenseUrl: BY4, url: `${FMA}Ketsa/cc-by-free-to-use-for-anything/my-town/` }),
+  beat("reflections", "Reflections", "Trap", 70, { title: "Reflections", artist: "1000 Handz", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freemusicarchive.org/music/1000-handz/cc-by-free-to-use-melodic-rap-instrumentals/reflections-7/" }, 16),
+  beat("my-way", "My Way", "Trap", 71, { title: "My Way - Hard Trap Beat", artist: "AudioByKB", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freesound.org/people/AudioWay/sounds/482327/" }, 16),
+  beat("ambition", "Ambition", "Trap", 70, { title: "Ambition", artist: "1000 Handz", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freemusicarchive.org/music/1000-handz/cc-by-free-to-use-melodic-rap-instrumentals/ambition-1/" }, 16),
+  beat("mercury", "Mercury", "Trap", 80, { title: "Mercury", artist: "1000 Handz", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freemusicarchive.org/music/1000-handz/cc-by-free-to-use-melodic-rap-instrumentals/mercury-5/" }, 16),
+  beat("pollen", "Pollen", "Trap", 70, { title: "Pollen", artist: "1000 Handz", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freemusicarchive.org/music/1000-handz/cc-by-free-to-use-melodic-rap-instrumentals/pollen/" }, 16),
+  beat("vanquish", "Vanquish", "Trap", 80, { title: "Vanquish", artist: "1000 Handz", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freemusicarchive.org/music/1000-handz/cc-by-free-to-use-melodic-rap-instrumentals-vol-2/vanquish-1/" }, 16),
+  beat("achilles", "Achilles", "Trap", 65, { title: "Achilles", artist: "1000 Handz", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freemusicarchive.org/music/1000-handz/cc-by-free-to-use-melodic-rap-instrumentals/achilles-1/" }, 16),
+  beat("recess", "Recess", "Trap", 75, { title: "Recess", artist: "1000 Handz", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freemusicarchive.org/music/1000-handz/cc-by-free-to-use-melodic-rap-instrumentals/recess-1/" }, 16),
+  beat("tension", "Tension", "Trap", 80, { title: "Tension", artist: "1000 Handz", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freemusicarchive.org/music/1000-handz/cc-by-free-to-use-melodic-rap-instrumentals-vol-2/tension-4/" }, 16),
+  beat("sahara", "Sahara", "Trap", 85, { title: "Sahara", artist: "1000 Handz", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freemusicarchive.org/music/1000-handz/cc-by-free-to-use-melodic-rap-instrumentals/sahara/" }, 16),
+  beat("contra", "Contra", "Trap", 80, { title: "Contra", artist: "1000 Handz", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freemusicarchive.org/music/1000-handz/cc-by-free-to-use-melodic-rap-instrumentals/contra/" }, 16),
+  beat("nectar", "Nectar", "Trap", 70.0, { title: "Nectar", artist: "1000 Handz", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freemusicarchive.org/music/1000-handz/cc-by-free-to-use-melodic-rap-instrumentals/nectar/" }, 16),
+  beat("blizzard", "Blizzard", "Trap", 90, { title: "Blizzard", artist: "1000 Handz", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freemusicarchive.org/music/1000-handz/cc-by-free-to-use-melodic-rap-instrumentals/blizzard/" }, 16),
+  beat("freedom", "Freedom", "Trap", 85, { title: "Freedom", artist: "1000 Handz", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freemusicarchive.org/music/1000-handz/cc-by-free-to-use-melodic-rap-instrumentals-vol-2/freedom-11/" }, 16),
+  beat("white-doves", "White Doves", "Trap", 85, { title: "White Doves", artist: "1000 Handz", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freemusicarchive.org/music/1000-handz/cc-by-free-to-use-melodic-rap-instrumentals-vol-2/white-doves/" }, 16),
+  beat("city-vibes", "City Vibes", "Trap", 90, { title: "City Vibes - Trap Music", artist: "AurosonMusic", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freemusicarchive.org/music/aurosonmusic/single/city-vibes-trap-music/" }, 16),
+  beat("dynamic", "Dynamic", "Trap", 80, { title: "Dynamic", artist: "1000 Handz", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freemusicarchive.org/music/1000-handz/cc-by-free-to-use-melodic-rap-instrumentals-vol-2/dynamic/" }, 16),
+  beat("blame-game", "Blame Game", "Trap", 70, { title: "Free rap trap type beat \"blame game\" e", artist: "MOHMOHRAP", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freemusicarchive.org/music/mohmohrap/blame-game/free-rap-trap-type-beat-blame-game-e/" }, 16),
+  beat("bag", "BAG", "Trap", 72.5, { title: "BAG - Hard Trap Beat", artist: "AudioByKB", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freesound.org/people/AudioWay/sounds/482328/" }, 16),
+  beat("kimura", "Kimura", "Trap", 82, { title: "Kimura", artist: "1000 Handz", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freemusicarchive.org/music/1000-handz/cc-by-free-to-use-melodic-rap-instrumentals/kimura/" }, 16),
+  beat("venom", "Venom", "Trap", 70, { title: "Venom", artist: "1000 Handz", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freemusicarchive.org/music/1000-handz/cc-by-free-to-use-melodic-rap-instrumentals/venom-1/" }, 16),
+  beat("bengal", "Bengal", "Trap", 80, { title: "Bengal", artist: "1000 Handz", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freemusicarchive.org/music/1000-handz/cc-by-free-to-use-melodic-rap-instrumentals/bengal/" }, 16),
+  beat("tei-pani", "Tei Pani", "Drill", 70, { title: "Tei Pani", artist: "kontraamusic", license: "CC0 1.0", licenseUrl: CC0, url: "https://freesound.org/people/kontraamusic/sounds/790935/" }, 16),
+  beat("black-wolf", "Black Wolf", "Drill", 70, { title: "Black Wolf", artist: "kontraamusic", license: "CC0 1.0", licenseUrl: CC0, url: "https://freesound.org/people/kontraamusic/sounds/790952/" }, 16),
+  beat("lose-my-mind", "Lose My Mind", "Drill", 71, { title: "Lose My Mind", artist: "kontraamusic", license: "CC0 1.0", licenseUrl: CC0, url: "https://freesound.org/people/kontraamusic/sounds/790941/" }, 16),
+  beat("suicide-doors", "Suicide Doors", "Drill", 70, { title: "Suicide Doors", artist: "kontraamusic", license: "CC0 1.0", licenseUrl: CC0, url: "https://freesound.org/people/kontraamusic/sounds/790947/" }, 16),
+  beat("vape", "Vape", "Drill", 70, { title: "Vape", artist: "kontraamusic", license: "CC0 1.0", licenseUrl: CC0, url: "https://freesound.org/people/kontraamusic/sounds/790939/" }, 16),
+  beat("blue-print", "Blue Print", "Drill", 70.5, { title: "Blue Print", artist: "kontraamusic", license: "CC0 1.0", licenseUrl: CC0, url: "https://freesound.org/people/kontraamusic/sounds/788622/" }, 12),
+  beat("karma", "Karma", "Drill", 72.5, { title: "Karma", artist: "kontraamusic", license: "CC0 1.0", licenseUrl: CC0, url: "https://freesound.org/people/kontraamusic/sounds/788432/" }, 16),
+  beat("battleground", "Battleground", "Drill", 70.5, { title: "Battleground", artist: "kontraamusic", license: "CC0 1.0", licenseUrl: CC0, url: "https://freesound.org/people/kontraamusic/sounds/790936/" }, 16),
+  beat("seizer", "Seizer", "Drill", 70.02, { title: "Seizer", artist: "kontraamusic", license: "CC0 1.0", licenseUrl: CC0, url: "https://freesound.org/people/kontraamusic/sounds/790945/" }, 16),
+  beat("emergence", "Emergence", "Drill", 70, { title: "Emergence", artist: "kontraamusic", license: "CC0 1.0", licenseUrl: CC0, url: "https://freesound.org/people/kontraamusic/sounds/788645/" }, 12),
+  beat("into-the-night", "Into The Night", "Drill", 70, { title: "Into The Night", artist: "kontraamusic", license: "CC0 1.0", licenseUrl: CC0, url: "https://freesound.org/people/kontraamusic/sounds/790934/" }, 16),
+  beat("gostorge", "Gostorge", "Drill", 70, { title: "Gostorge", artist: "kontraamusic", license: "CC0 1.0", licenseUrl: CC0, url: "https://freesound.org/people/kontraamusic/sounds/788627/" }, 12),
+  beat("goat", "Goat", "Drill", 71, { title: "Goat", artist: "kontraamusic", license: "CC0 1.0", licenseUrl: CC0, url: "https://freesound.org/people/kontraamusic/sounds/790938/" }, 16),
 ];
 
 export function beatById(id: unknown): Beat {
