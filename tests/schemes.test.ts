@@ -115,22 +115,31 @@ describe("double-time", () => {
 });
 
 describe("random scheme", () => {
-  const mix = (seed: number): Layout => ({ scheme: "mix", pace: "every", seed });
+  const mix = (seed: number, pace: PaceId = "every"): Layout => ({ scheme: "mix", pace, seed });
+  const blocks = (seed: number, count: number) => Array.from({ length: count }, (_, b) => schemeAt(mix(seed), b * BLOCK));
 
-  it(`keeps one scheme for ${BLOCK} bars, then switches to a different one`, () => {
-    for (const seed of [1, 2, 3, 4, 5]) {
-      for (let b = 0; b < 20; b++) {
-        const first = schemeAt(mix(seed), b * BLOCK);
-        for (let n = 1; n < BLOCK; n++) expect(schemeAt(mix(seed), b * BLOCK + n)).toBe(first);
-        expect(schemeAt(mix(seed), (b + 1) * BLOCK)).not.toBe(first);
-      }
+  it(`switches every ${BLOCK} bars, one verse at every-line pace`, () => {
+    expect(BLOCK).toBe(4);
+    for (const seed of [1, 2, 3]) {
+      for (let b = 0; b < 30; b++) for (let n = 1; n < BLOCK; n++) expect(schemeAt(mix(seed), b * BLOCK + n)).toBe(schemeAt(mix(seed), b * BLOCK));
     }
   });
 
+  it("can repeat a scheme once, but never three times in a row", () => {
+    let repeats = 0;
+    for (const seed of [1, 2, 3, 4, 5, 6, 7, 8]) {
+      const list = blocks(seed, 200);
+      for (let b = 2; b < list.length; b++) expect(list[b] === list[b - 1] && list[b] === list[b - 2]).toBe(false);
+      repeats += list.filter((p, b) => b > 0 && p === list[b - 1]).length;
+    }
+    // Repeats happen (about one switch in five), so it is not a strict rotation.
+    expect(repeats).toBeGreaterThan(100);
+    expect(repeats).toBeLessThan(500);
+  });
+
   it("uses every scheme over a long session, and differs between visits", () => {
-    const seen = new Set(Array.from({ length: 30 }, (_, b) => schemeAt(mix(7), b * BLOCK)));
-    expect(seen.size).toBe(SCHEMES.length - 1);
-    const runs = [11, 12, 13, 14].map((seed) => Array.from({ length: 6 }, (_, b) => schemeAt(mix(seed), b * BLOCK)).join());
+    expect(new Set(blocks(7, 60)).size).toBe(SCHEMES.length - 1);
+    const runs = [11, 12, 13, 14].map((seed) => blocks(seed, 8).join());
     expect(new Set(runs).size).toBeGreaterThan(1);
   });
 
@@ -139,6 +148,15 @@ describe("random scheme", () => {
       const plan = barPlan(mix(3), bar);
       expect(plan.scheme).toBe(schemeAt(mix(3), bar - INTRO_BARS));
       expect(plan.targets.map((t) => t.group)).toEqual(barPlan({ scheme: plan.scheme, pace: "every" }, bar).targets.map((t) => t.group));
+    }
+  });
+
+  it(`holds one scheme for a whole ${SEGMENT}-bar verse when skipping lines`, () => {
+    for (const seed of [1, 2, 3]) {
+      for (let s = 0; s < 12; s++) {
+        const first = barPlan(mix(seed, "skip"), INTRO_BARS + s * SEGMENT).scheme;
+        for (let n = 1; n < SEGMENT; n++) expect(barPlan(mix(seed, "skip"), INTRO_BARS + s * SEGMENT + n).scheme).toBe(first);
+      }
     }
   });
 });

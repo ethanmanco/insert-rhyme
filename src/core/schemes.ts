@@ -9,8 +9,9 @@ import { BEATS_PER_BAR } from "./timing";
  * of every line, at the end of every second line with a free line between,
  * or twice per line in double-time.
  *
- * Either can be random. A random scheme switches to a different pattern
- * every BLOCK bars; a random pace can flip between every line and skip a
+ * Either can be random. A random scheme picks a pattern for every verse
+ * (BLOCK bars, or a whole SEGMENT when skipping lines, since a skip-a-line
+ * verse is that long); a random pace can flip between every line and skip a
  * line every SEGMENT bars. Both come from a seed, so a bar's plan never
  * changes once worked out, and the bars shown ahead are always right.
  */
@@ -44,8 +45,8 @@ export interface PaceInfo {
   hint: string;
 }
 
-/** Bars per stretch of one random scheme. */
-export const BLOCK = 16;
+/** Bars per stretch of one random scheme: one verse at every-line pace. */
+export const BLOCK = 4;
 /** Bars per stretch of one random pace. Every stretch holds whole verses at any pace. */
 export const SEGMENT = 8;
 
@@ -55,7 +56,7 @@ export const SCHEMES: SchemeInfo[] = [
   { id: "aaaa", name: "AAAA", pattern: "AAAA", hint: "Four rhymes in a row on the same sound." },
   { id: "abba", name: "ABBA", pattern: "ABBA", hint: "A couplet wrapped inside another sound." },
   { id: "aaxa", name: "AAXA", pattern: "AAXA", hint: "Three rhymes on one sound, with a free spot before the last." },
-  { id: "mix", name: "RANDOM", pattern: "", hint: `Switches to a different scheme every ${BLOCK} bars. The bar title says which.` },
+  { id: "mix", name: "RANDOM", pattern: "", hint: `A new scheme every ${BLOCK} bars (${SEGMENT} when skipping lines). It can repeat once, never three times in a row. The bar title says which.` },
 ];
 
 export const PACES: PaceInfo[] = [
@@ -94,13 +95,30 @@ function noise(seed: number, n: number): number {
   return (h >>> 0) / 2 ** 32;
 }
 
-/** The scheme in play on line `n`. A random scheme never picks the same pattern twice in a row. */
+/** Random scheme picks per seed, one per block, worked out once and kept. */
+const picks = new Map<number, number[]>();
+
+/**
+ * The random scheme of block `b`: any pattern, but never the same one three
+ * blocks in a row.
+ */
+function pickAt(seed: number, b: number): number {
+  let list = picks.get(seed);
+  if (!list) picks.set(seed, (list = [Math.floor(noise(seed, -1) * FIXED.length)]));
+  while (list.length <= b) {
+    const k = list.length;
+    const prev = list[k - 1]!;
+    const twice = k >= 2 && list[k - 2] === prev;
+    const r = noise(seed, k);
+    list.push(twice ? (prev + 1 + Math.floor(r * (FIXED.length - 1))) % FIXED.length : Math.floor(r * FIXED.length));
+  }
+  return list[b]!;
+}
+
+/** The scheme in play on line `n`, for a random scheme the pick of its block. */
 export function schemeAt(layout: Layout, n: number): FixedScheme {
   if (layout.scheme !== "mix") return layout.scheme;
-  const seed = layout.seed ?? 0;
-  let i = Math.floor(noise(seed, -1) * FIXED.length);
-  for (let b = 1; b <= Math.floor(n / BLOCK); b++) i = (i + 1 + Math.floor(noise(seed, b) * (FIXED.length - 1))) % FIXED.length;
-  return FIXED[i]!.id as FixedScheme;
+  return FIXED[pickAt(layout.seed ?? 0, Math.floor(n / BLOCK))]!.id as FixedScheme;
 }
 
 /** The pace in play on line `n`. A random pace starts on every line, then flips two times in three. */
@@ -171,8 +189,9 @@ function targetsFor(scheme: FixedScheme, pace: FixedPace, n: number): Target[] {
 /** Lay out one bar. Every bar after the count-in is one line of the verse. */
 export function barPlan(layout: Layout, bar: number): BarPlan {
   const n = Math.max(0, bar - INTRO_BARS);
-  const scheme = schemeAt(layout, n);
   const pace = paceAt(layout, n);
+  // A random scheme holds for a whole verse: a skip-a-line verse fills a segment.
+  const scheme = schemeAt(layout, pace === "skip" ? n - (n % SEGMENT) : n);
   if (bar < INTRO_BARS) return { bar, intro: true, line: -1, scheme, pace, targets: [] };
   return { bar, intro: false, line: n, scheme, pace, targets: targetsFor(scheme, pace, n) };
 }
