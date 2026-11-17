@@ -1,4 +1,4 @@
-import { barPlan, type BarPlan, type SchemeId } from "../core/schemes";
+import { barPlan, type BarPlan, type SchemeId, type Target } from "../core/schemes";
 import { ballPoint, beatPosition, BEATS_PER_BAR, snap, type BeatPosition } from "../core/timing";
 
 /** How many bars show below the current one. */
@@ -9,12 +9,31 @@ const FLASH = 0.35;
 const HOP = 28;
 const WRAP_HOP = 36;
 
+/** What a target block shows: a word, a hidden word to find, or only its letter. */
+export interface Label {
+  text: string;
+  /** The word, when it is shown and can be looked up. */
+  word?: string;
+}
+
+export interface StageOptions {
+  scheme: SchemeId;
+  label: (target: Target) => Label;
+  /** Screen reader news. */
+  announce: (text: string) => void;
+  /** A shown word was tapped. */
+  onWord: (word: string) => void;
+}
+
 const el = <K extends keyof HTMLElementTagNameMap>(tag: K, className = "", text = ""): HTMLElementTagNameMap[K] => {
   const node = document.createElement(tag);
   if (className) node.className = className;
   if (text) node.textContent = text;
   return node;
 };
+
+/** Longer words get a smaller size, so they fit the block. */
+const sizeClass = (text: string) => (text.length <= 4 ? "w-l" : text.length <= 6 ? "w-m" : "w-s");
 
 /**
  * The bar visualizer: the current bar as a row of four big blocks with the
@@ -29,16 +48,14 @@ export class Stage {
   private ball: HTMLDivElement;
   private current: HTMLDivElement;
   private next: HTMLDivElement;
-  private blocks: HTMLDivElement[] = [];
+  private blocks: HTMLElement[] = [];
   private shownBar = Number.NaN;
   private litBeat = -1;
   private lastGroup = -1;
   ballOn = true;
+  announceOn = true;
 
-  constructor(
-    private scheme: SchemeId,
-    private announce: (text: string) => void,
-  ) {
+  constructor(private opts: StageOptions) {
     this.root = el("section", "stage");
     this.root.setAttribute("aria-label", "Bars");
     this.caption = el("p", "caption");
@@ -50,7 +67,6 @@ export class Stage {
     const label = el("p", "caption", "> NEXT");
     label.setAttribute("aria-hidden", "true");
     this.next = el("div", "next");
-    this.next.setAttribute("aria-hidden", "true");
     this.root.append(this.caption, this.lane, this.current, label, this.next);
     this.showBar(0, false);
   }
@@ -58,6 +74,18 @@ export class Stage {
   setBallOn(on: boolean): void {
     this.ballOn = on;
     this.root.classList.toggle("no-ball", !on);
+  }
+
+  setScheme(scheme: SchemeId): void {
+    this.opts.scheme = scheme;
+    this.refresh();
+  }
+
+  /** Redraw the bars in place (after the scheme, words or difficulty change). */
+  refresh(): void {
+    const bar = Number.isNaN(this.shownBar) ? 0 : this.shownBar;
+    this.lastGroup = -1;
+    this.showBar(bar, false, true);
   }
 
   /** Back to the top, as when playback stops. */
@@ -100,16 +128,16 @@ export class Stage {
     this.blocks[beat]?.classList.add("lit");
   }
 
-  private showBar(bar: number, animate: boolean) {
+  private showBar(bar: number, animate: boolean, quiet = false) {
     this.shownBar = bar;
     this.litBeat = -1;
-    const plan = barPlan(this.scheme, bar);
-    this.caption.textContent = plan.intro ? "COUNT IN" : `LINE ${plan.line + 1}`;
+    const plan = barPlan(this.opts.scheme, bar);
+    this.caption.textContent = plan.intro ? "COUNT IN" : plan.targets.length ? `LINE ${plan.line + 1}` : `LINE ${plan.line + 1}: FREE`;
     this.blocks = this.fillRow(this.current, plan, true);
     this.next.replaceChildren();
     for (let i = 1; i <= AHEAD; i++) {
       const row = el("div", "row");
-      this.fillRow(row, barPlan(this.scheme, bar + i), false);
+      this.fillRow(row, barPlan(this.opts.scheme, bar + i), false);
       this.next.append(row);
     }
     if (animate) {
@@ -119,20 +147,32 @@ export class Stage {
         node.classList.add("shift");
       }
     }
-    this.speak(plan);
+    if (!quiet) this.speak(plan);
   }
 
-  private fillRow(row: HTMLDivElement, plan: BarPlan, current: boolean): HTMLDivElement[] {
-    const blocks: HTMLDivElement[] = [];
+  private fillRow(row: HTMLDivElement, plan: BarPlan, current: boolean): HTMLElement[] {
+    const blocks: HTMLElement[] = [];
     for (let beat = 0; beat < BEATS_PER_BAR; beat++) {
-      const block = el("div", "block px");
       const target = plan.targets.find((t) => t.beat === beat);
+      let block: HTMLElement;
       if (target) {
-        block.classList.add("target", target.group % 2 === 0 ? "a" : "b");
-        block.textContent = target.letter;
-      } else if (current) {
-        block.append(el("span", "num", String(beat + 1)));
+        const label = this.opts.label(target);
+        if (label.word) {
+          const word = label.word;
+          block = el("button", "block px target");
+          (block as HTMLButtonElement).type = "button";
+          block.setAttribute("aria-label", `${word}, rhyme ${target.letter}, beat ${beat + 1}. Show rhymes.`);
+          block.addEventListener("click", () => this.opts.onWord(word));
+        } else {
+          block = el("div", "block px target");
+        }
+        block.classList.add(target.group % 2 === 0 ? "a" : "b", sizeClass(label.text));
+        block.append(el("span", "", label.text));
+      } else {
+        block = el("div", "block px");
+        if (current) block.append(el("span", "num", String(beat + 1)));
       }
+      if (!target || !(block instanceof HTMLButtonElement)) block.setAttribute("aria-hidden", "true");
       blocks.push(block);
     }
     row.replaceChildren(...blocks);
@@ -140,17 +180,15 @@ export class Stage {
   }
 
   /**
-   * Screen reader news, kept rare so it never talks over the beat: once at
-   * the count-in and once when a new rhyme group starts.
+   * Screen reader news, kept rare so it never talks over the beat: once
+   * when a new rhyme group starts, naming its word when words are shown.
    */
   private speak(plan: BarPlan) {
-    if (plan.intro) {
-      if (plan.bar === 0) this.announce("");
-      return;
-    }
+    if (!this.announceOn || plan.intro) return;
     const target = plan.targets[0];
     if (!target || target.group === this.lastGroup) return;
     this.lastGroup = target.group;
-    this.announce(`New rhyme, group ${target.letter}, on beat ${target.beat + 1}.`);
+    const label = this.opts.label(target);
+    this.opts.announce(label.word ? `Next rhyme: ${label.word}.` : `New rhyme, group ${target.letter}.`);
   }
 }
