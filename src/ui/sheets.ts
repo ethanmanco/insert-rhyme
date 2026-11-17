@@ -38,16 +38,20 @@ const STAR_ICON = (() => {
 
 /* ---------- Options ---------- */
 
+/** Parts of the Options sheet a chip can jump to. */
+export type OptionsSection = "stats" | "music" | "beat" | "scheme" | "pace" | "words" | "theme";
+
 export interface OptionsSheet {
-  open(): void;
+  /** Open the sheet, scrolled to a section when one is given (else where it was left). */
+  open(section?: OptionsSection): void;
   render(): void;
 }
 
 export function optionsSheet(get: () => Settings, stats: () => Stats, change: (patch: Partial<Settings>) => void): OptionsSheet {
   const { dialog, body } = sheet("OPTIONS", "options");
 
-  const radios = (name: string, label: string, items: { id: string; name: string; hint: string }[], value: string) => `
-    <fieldset class="group">
+  const radios = (name: string, label: string, items: { id: string; name: string; hint: string }[], value: string, section = name) => `
+    <fieldset class="group" data-section="${section}">
       <legend>${label}</legend>
       ${items
         .map(
@@ -67,7 +71,7 @@ export function optionsSheet(get: () => Settings, stats: () => Stats, change: (p
     </label>`;
 
   const themes = (value: string) => `
-    <fieldset class="group">
+    <fieldset class="group" data-section="theme">
       <legend>WORD THEME</legend>
       <p class="choice-hint">With a theme, the first word of each rhyme comes from it. Drug and weapon words in the rap styles only show with explicit words on.</p>
       <div class="minis">${mini("any", "ANY WORDS", "Everyday words with lots of rhymes.", value)}</div>
@@ -89,7 +93,7 @@ export function optionsSheet(get: () => Settings, stats: () => Stats, change: (p
     const streak = currentStreak(st, dayKey(new Date()));
     const minutes = Math.floor(st.seconds / 60);
     body.innerHTML = `
-      <section class="stats" aria-label="Your stats">
+      <section class="stats" aria-label="Your stats" data-section="stats">
         <div class="stat px"><span class="stat-n">${streak}</span><span>DAY STREAK</span></div>
         <div class="stat px"><span class="stat-n">${st.sessions}</span><span>SESSIONS</span></div>
         <div class="stat px"><span class="stat-n">${minutes}</span><span>MINUTES</span></div>
@@ -104,8 +108,9 @@ export function optionsSheet(get: () => Settings, stats: () => Stats, change: (p
           { id: "tap", name: "TAP TEMPO", hint: "Music playing somewhere else? Tap along and the bars follow." },
         ],
         s.mode,
+        "music",
       )}
-      <fieldset class="group">
+      <fieldset class="group" data-section="beat">
         <legend>BEAT</legend>
         <div class="minis">${BEATS.map(
           (b) => `<label class="choice mini px" title="${esc(`${b.style} by ${b.credit.artist}`)}">
@@ -116,7 +121,7 @@ export function optionsSheet(get: () => Settings, stats: () => Stats, change: (p
       </fieldset>
       ${radios("scheme", "RHYME SCHEME", SCHEMES, s.scheme)}
       ${radios("pace", "RHYME PACE", PACES, s.pace)}
-      ${radios("difficulty", "WORDS", DIFFICULTIES, s.difficulty)}
+      ${radios("difficulty", "WORDS", DIFFICULTIES, s.difficulty, "words")}
       ${themes(s.category)}
       <fieldset class="group">
         <legend>DISPLAY AND WORDS</legend>
@@ -148,10 +153,25 @@ export function optionsSheet(get: () => Settings, stats: () => Stats, change: (p
     body.querySelector<HTMLButtonElement>(`.switch[data-key="${key}"]`)?.focus();
   });
 
+  /** Scroll a section to the top of the sheet, and keep its chosen item in view (the beat and theme lists are long). */
+  function jumpTo(section: OptionsSection) {
+    const part = body.querySelector<HTMLElement>(`[data-section="${section}"]`);
+    if (!part) return;
+    const top = () => body.getBoundingClientRect().top;
+    body.scrollTop += part.getBoundingClientRect().top - top() - 12;
+    const chosen = part.querySelector<HTMLInputElement>("input:checked");
+    if (!chosen) return;
+    const item = (chosen.closest("label") ?? chosen).getBoundingClientRect();
+    const bottom = body.getBoundingClientRect().bottom;
+    if (item.bottom > bottom - 12) body.scrollTop += item.bottom - bottom + body.clientHeight / 3;
+    chosen.focus({ preventScroll: true });
+  }
+
   return {
-    open() {
+    open(section) {
       render();
       dialog.showModal();
+      if (section) jumpTo(section);
     },
     render,
   };

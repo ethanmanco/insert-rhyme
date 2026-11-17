@@ -14,7 +14,7 @@ import { TapTempo } from "./core/tapTempo";
 import { MAX_BPM, MIN_BPM } from "./core/timing";
 import { DIFFICULTIES, loadSettings, saveSettings, type Settings } from "./settings";
 import { load, save } from "./storage";
-import { helperSheet, micExplainer, optionsSheet } from "./ui/sheets";
+import { helperSheet, micExplainer, optionsSheet, type OptionsSection } from "./ui/sheets";
 import { Stage } from "./ui/stage";
 
 const isTouch = () => window.matchMedia("(pointer: coarse)").matches;
@@ -141,8 +141,11 @@ chips.innerHTML = `
   <button class="chip px" type="button" data-chip="words"></button>
   <button class="chip px" type="button" data-chip="theme"></button>`;
 
+/** Picks the random schemes and paces: new on each visit. */
+const layoutSeed = Math.floor(Math.random() * 2 ** 31);
+
 const stage = new Stage({
-  layout: { scheme: settings.scheme, pace: settings.pace },
+  layout: { scheme: settings.scheme, pace: settings.pace, seed: layoutSeed },
   announce,
   onWord: (word) => helper.open(word),
   label(t) {
@@ -378,7 +381,7 @@ function change(patch: Partial<Settings>) {
     void useBeat();
   }
   showTempo();
-  if (patch.scheme || patch.pace) stage.setLayout({ scheme: settings.scheme, pace: settings.pace });
+  if (patch.scheme || patch.pace) stage.setLayout({ scheme: settings.scheme, pace: settings.pace, seed: layoutSeed });
   if (patch.ball !== undefined) stage.setBallOn(settings.ball);
   if (patch.announce !== undefined) stage.announceOn = settings.announce;
   if (patch.difficulty) stage.refresh();
@@ -617,9 +620,12 @@ tempo.querySelectorAll<HTMLButtonElement>("[data-step]").forEach((b) =>
   b.addEventListener("click", () => setBpm(settings.bpm + Number(b.dataset.step))),
 );
 chips.addEventListener("click", (e) => {
-  if ((e.target as HTMLElement).closest(".chip")) options.open();
+  const chip = (e.target as HTMLElement).closest<HTMLButtonElement>(".chip")?.dataset.chip;
+  if (!chip) return;
+  const sections: Record<string, OptionsSection> = { beat: settings.mode === "beat" ? "beat" : "music", scheme: "scheme", words: "words", theme: "theme" };
+  options.open(sections[chip]);
 });
-streakChip.addEventListener("click", () => options.open());
+streakChip.addEventListener("click", () => options.open("stats"));
 tools.addEventListener("click", (e) => {
   const tool = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-tool]")?.dataset.tool;
   if (tool === "options") options.open();
