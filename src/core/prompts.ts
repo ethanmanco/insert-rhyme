@@ -19,8 +19,8 @@ export const SEEDS = [
   "steal", "mic", "bike", "like", "strike", "cash", "flash", "dash", "crash", "bread", "head", "red",
   "said", "bed", "king", "ring", "sing", "thing", "bring", "beach", "reach", "teach", "speech", "boat",
   "note", "coat", "vote", "wrote", "cake", "make", "take", "shake", "break", "lake", "rhyme", "climb",
-  "prime", "dime", "space", "place", "race", "face", "case", "pace", "bounce", "ice", "nice",
-  "price", "dice", "slice", "grow", "snow", "glow", "home", "phone", "zone", "stone", "bone", "alone",
+  "prime", "dime", "space", "place", "race", "face", "case", "pace", "ice", "nice",
+  "price", "dice", "slice", "grow", "snow", "glow", "phone", "zone", "stone", "bone", "alone",
   "loud", "crowd", "proud", "cloud", "bright", "kite", "white", "tight",
   "jump", "pump", "bump", "dance", "chance", "car", "star", "far", "bar", "guitar", "boss",
   "cross", "toss", "lost", "cost", "speed", "need", "lead", "feed", "seed",
@@ -35,7 +35,13 @@ export const MAX_LETTERS = 8;
 export const COMMON_SIZE = 35;
 
 /** Short sounds that are words in a dictionary but not good prompts. */
-const SKIP = new Set(["re", "mi", "fa", "la", "ti", "ma", "pa", "ha", "ah", "eh", "er", "um", "hm", "uh", "nay", "ye"]);
+const SKIP = new Set([
+  "re", "mi", "fa", "la", "ti", "ma", "pa", "ha", "ah", "eh", "er", "um", "hm", "uh", "nay", "ye", "dos", "bras",
+  "dike", "the", "an", "than", "nor", "oh", "owe", "doe", "lain", "bloc", "ting", "ohm", "czar", "char", "par",
+  "dross", "leach", "lop", "bop", "tome", "loam", "lance", "bred", "doled", "sowed", "cowed", "vat", "ounce",
+]);
+/** Everyday words first: size 20 and below, topped up from size 35 when a family is small. */
+const EVERYDAY = 20;
 
 /** How many of a family's most common words are kept for prompts. */
 export const FAMILY_SIZE = 16;
@@ -57,7 +63,9 @@ export function family(index: RhymeIndex, seed: string, allowed: ReadonlySet<Tie
   }
   // The near-identical "leave / believe" echoes are fine here: they are separate words to say.
   const sorted = [...found.values()].sort((a, b) => a.size - b.size || (a.word < b.word ? -1 : 1));
-  return sorted.slice(0, FAMILY_SIZE).map((e) => e.word);
+  const everyday = sorted.filter((e) => e.size <= EVERYDAY || e.tier !== "clean");
+  const pick = everyday.length >= MIN_FAMILY ? everyday : sorted.slice(0, Math.max(MIN_FAMILY, everyday.length));
+  return pick.slice(0, FAMILY_SIZE).map((e) => e.word);
 }
 
 /** A small seeded random generator, so tests (and replays) are repeatable. */
