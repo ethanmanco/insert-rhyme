@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { BEATS, beatById, DEFAULT_BEAT } from "../src/core/beats";
 import { ownGain } from "../src/core/ownBeat";
@@ -33,6 +33,11 @@ describe("built-in beats", () => {
   it("falls back to Dynamic, the default, for an unknown or removed id", () => {
     expect(DEFAULT_BEAT).toBe("dynamic");
     for (const id of ["nope", "phonk-remix", "trench-work", "kimura", undefined]) expect(beatById(id).id).toBe("dynamic");
+  });
+
+  it("are each credited in the README", () => {
+    const readme = readFileSync("README.md", "utf8");
+    for (const b of BEATS) expect(readme, b.id).toContain(`](${b.credit.url})`);
   });
 
   it("ship no loop files that no beat uses", () => {
