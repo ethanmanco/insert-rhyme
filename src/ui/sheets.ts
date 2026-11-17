@@ -96,12 +96,15 @@ export function optionsSheet(get: () => Settings, stats: () => Stats, change: (p
         ],
         s.mode,
       )}
-      ${radios(
-        "beat",
-        "BEAT",
-        BEATS.map((b) => ({ id: b.id, name: b.name.toUpperCase(), hint: `${b.style}, ${b.bpm} BPM. By ${b.credit.artist}.` })),
-        s.beat,
-      )}
+      <fieldset class="group">
+        <legend>BEAT</legend>
+        <div class="minis">${BEATS.map(
+          (b) => `<label class="choice mini px" title="${esc(`${b.style} by ${b.credit.artist}`)}">
+            <input type="radio" name="beat" value="${b.id}" ${b.id === s.beat ? "checked" : ""} />
+            <span><span class="choice-name">${esc(b.name.toUpperCase())}</span><span class="choice-hint mini-hint">${esc(b.style)}, ${Math.round(b.bpm)}</span></span>
+          </label>`,
+        ).join("")}</div>
+      </fieldset>
       ${radios("scheme", "RHYME SCHEME", SCHEMES.map((x) => ({ id: x.id, name: x.name, hint: x.hint })), s.scheme)}
       ${radios("difficulty", "WORDS", DIFFICULTIES, s.difficulty)}
       ${themes(s.category)}

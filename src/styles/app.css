@@ -617,6 +617,11 @@ a.btn {
   line-height: 1;
 }
 
+.mini-hint {
+  display: block;
+  font-size: 15px;
+}
+
 .group .sub {
   font-family: var(--pixel);
   font-size: 9px;
