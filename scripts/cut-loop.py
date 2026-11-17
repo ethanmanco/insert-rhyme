@@ -32,8 +32,9 @@ def bands(x):
     rise = np.maximum(0, np.diff(logspec, axis=0))
     full = rise.sum(axis=1)
     low = rise[:, freqs < 150].sum(axis=1)
+    snare = rise[:, (freqs > 1500) & (freqs < 5000)].sum(axis=1)
     full = np.maximum(0, full - np.convolve(full, np.ones(32) / 32, mode="same"))
-    return full, low
+    return full, low, snare
 
 def grid_score(env, period, phase, fps):
     t = np.arange(phase, len(env) / fps - 0.05, period)
@@ -55,7 +56,7 @@ def main():
     a = ap.parse_args()
     x = decode(a.input)
     fps = SR / HOP
-    full, low = bands(x)
+    full, low, snare = bands(x)
     lo, hi = (a.bpm - 1.5, a.bpm + 1.5) if a.bpm else (70, 160)
     coarse = max(np.arange(lo, hi, 0.25), key=lambda b: best_phase(full, 60 / b, fps)[1])
     fine = max(np.arange(coarse - 0.3, coarse + 0.3, 0.01), key=lambda b: best_phase(full, 60 / b, fps)[1])
@@ -64,9 +65,16 @@ def main():
     phase, _ = best_phase(full, period, fps)
     # Downbeat: the beat in the bar with the strongest kicks over the whole track.
     beats = np.arange(phase, len(full) / fps - 0.05, period)
-    kick = [low[min(len(low) - 1, int(t * fps)) : min(len(low), int(t * fps) + 3)].max(initial=0) for t in beats]
+    peak = lambda env, t: env[min(len(env) - 1, int(t * fps)) : min(len(env), int(t * fps) + 3)].max(initial=0)
+    kick = [peak(low, t) for t in beats]
+    snr = [peak(snare, t) for t in beats]
     totals = [np.mean(kick[k::4]) for k in range(4)]
-    down = (int(np.argmax(totals)) + a.shift) % 4
+    snares = [np.mean(snr[k::4]) for k in range(4)]
+    # Bar 1 has a kick, and the snares land on beats 2 and 4 (the backbeat).
+    kn = np.array(totals) / max(totals)
+    sn = np.array(snares) / max(snares)
+    score = [kn[d] + 0.5 * kn[(d + 2) % 4] + sn[(d + 1) % 4] + sn[(d + 3) % 4] - sn[d] - 0.5 * sn[(d + 2) % 4] for d in range(4)]
+    down = (int(np.argmax(score)) + a.shift) % 4
     first_bar = phase + down * period
     duration = len(x) / SR
     start_from = a.start if a.start is not None else duration * 0.25
@@ -79,7 +87,7 @@ def main():
     cut_from = bar1 - PREROLL
     subprocess.run(["ffmpeg", "-v", "quiet", "-y", "-i", a.input, "-ss", f"{cut_from:.6f}", "-t", f"{PREROLL + length + POSTROLL:.6f}",
                     "-ac", "2", "-ar", "44100", "-c:a", "libmp3lame", "-b:a", "160k", a.output], check=True)
-    info = {"bpm": bpm, "start": PREROLL, "bars": a.bars, "cutAt": round(cut_from, 3), "downbeatShift": down, "kickByBeat": [round(float(t), 3) for t in totals]}
+    info = {"bpm": bpm, "start": PREROLL, "bars": a.bars, "cutAt": round(cut_from, 3), "downbeatShift": down, "kickByBeat": [round(float(t), 2) for t in totals], "snareByBeat": [round(float(t), 2) for t in snares], "score": [round(float(t), 2) for t in score]}
     print(json.dumps(info))
 
 main()
