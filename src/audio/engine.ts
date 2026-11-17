@@ -148,6 +148,11 @@ export class Engine {
     }
   }
 
+  /** The full mix, for recording. Null until audio has started. */
+  get mix(): Tone.ToneAudioNode | null {
+    return this.master ?? null;
+  }
+
   setBeat(beat: Beat): void {
     this.beat = beat;
     this.build();
