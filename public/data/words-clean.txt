@@ -1812,6 +1812,7 @@ apostrophe	20	AH0 P AA1 S T R AH0 F IY2
 apostrophes	35	AH0 P AA1 S T R AH0 F IY2 Z
 apothecary	50	AH0 P AA1 TH AH0 K EH2 R IY0
 apotheosis	50	AH0 P AA2 TH IY0 OW1 S AH0 S
+app	50	AE1 P
 appall	20	AH0 P AO1 L
 appalled	20	AH0 P AO1 L D
 appalling	20	AH0 P AO1 L IH0 NG
@@ -3095,6 +3096,7 @@ banter	35	B AE1 N T ER0
 bantered	35	B AE1 N T ER0 D
 bantering	35	B AE1 N T ER0 IH0 NG
 banyan	50	B AE1 N Y AH0 N
+bap	50	B AE1 P
 baptism	35	B AE1 P T IH0 Z AH0 M
 baptismal	40	B AE0 P T IH1 Z M AH0 L
 baptisms	35	B AE1 P T IH2 Z AH0 M Z
@@ -4117,6 +4119,7 @@ blindness	35	B L AY1 N D N AH0 S
 blinds	35	B L AY1 N D Z
 blindside	50	B L AY1 N D S AY2 D
 blindsided	50	B L AY1 N D S AY2 D IH0 D
+bling	50	B L IH1 NG
 blink	20	B L IH1 NG K
 blinked	35	B L IH1 NG K T
 blinking	35	B L IH1 NG K IH0 NG
@@ -4590,6 +4593,7 @@ bossed	35	B AA1 S T
 bosses	35	B AO1 S IH0 Z
 bossier	35	B AO1 S IY0 ER0
 bossy	35	B AO1 S IY0
+bot	50	B AA1 T
 botanic	60	B AH0 T AE1 N IH0 K
 botanical	35	B AH0 T AE1 N IH0 K AH0 L
 botanically	60	B AH0 T AE1 N AH0 K AH0 L IY0|B AH0 T AE1 N AH0 K L IY0
@@ -5087,6 +5091,7 @@ brutalizing	40	B R UW1 T AH0 L AY2 Z IH0 NG
 brutally	35	B R UW1 T AH0 L IY0
 brute	35	B R UW1 T
 brutish	35	B R UW1 T IH0 SH
+bruv	50	B R AH1 V
 bub	55	B AH1 B
 bubble	20	B AH1 B AH0 L
 bubbled	35	B AH1 B AH0 L D
@@ -5558,6 +5563,7 @@ caldera	60	K AE2 L D EH1 R AH0|K AO2 L D EH1 R AH0
 calendar	20	K AE1 L AH0 N D ER0
 calendars	35	K AE1 L AH0 N D ER0 Z
 calf	35	K AE1 F
+cali	50	K AE1 L IY0
 caliber	35	K AE1 L AH0 B ER0
 calibrate	35	K AE1 L AH0 B R EY2 T
 calibrated	35	K AE1 L AH0 B R EY2 T AH0 D
@@ -9566,6 +9572,7 @@ cruncher	50	K R AH1 N CH ER0
 crunches	20	K R AH1 N CH IH0 Z
 crunching	20	K R AH1 N CH IH0 NG
 crunchy	35	K R AH1 N CH IY0
+crunk	50	K R AH1 NG K
 crusade	35	K R UW0 S EY1 D
 crusader	35	K R UW0 S EY1 D ER0
 crusaders	35	K R UW0 S EY1 D ER0 Z
@@ -14952,6 +14959,7 @@ falter	35	F AO1 L T ER0
 faltered	35	F AA1 L T ER0 D
 faltering	35	F AO1 L T ER0 IH0 NG
 falters	35	F AO1 L T ER0 Z
+fam	50	F AE1 M
 fame	20	F EY1 M
 famed	35	F EY1 M D
 familial	50	F AH0 M IH1 L Y AH0 L
@@ -16976,6 +16984,7 @@ garlic	35	G AA1 R L IH0 K
 garlicky	50	G AA1 R L IH0 K IY0
 garment	35	G AA1 R M AH0 N T
 garments	35	G AA1 R M AH0 N T S
+garms	50	G AA1 R M Z
 garner	50	G AA1 R N ER0
 garnered	50	G AA1 R N ER0 D
 garnering	50	G AA1 R N ER0 IH0 NG
@@ -17441,6 +17450,7 @@ globetrotters	40	G L OW1 B T R AO0 T ER0 Z
 globs	40	G L AA1 B Z
 globular	35	G L AA1 B Y AH0 L ER0
 globulin	60	G L AA1 B Y AH0 L IH0 N
+glock	50	G L AA1 K
 glockenspiel	50	G L AA1 K AH0 N S P IY2 L
 gloom	35	G L UW1 M
 gloomier	35	G L UW1 M IY0 ER0
@@ -27654,6 +27664,7 @@ oppressive	35	AH0 P R EH1 S IH0 V
 oppressor	35	AH0 P R EH1 S ER0
 oppressors	35	AH0 P R EH1 S ER0 Z
 opprobrium	50	AH0 P R OW1 B R IY0 AH0 M
+opps	50	AA1 P S
 ops	55	AA1 P S
 opt	20	AA1 P T
 opted	20	AA1 P T IH0 D

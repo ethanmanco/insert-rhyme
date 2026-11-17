@@ -56,6 +56,26 @@ const OVERRIDES: Record<string, string[]> = {
 };
 for (const [word, list] of Object.entries(OVERRIDES)) prons.set(word, list);
 
+// Slang the word lists and dictionary are missing, used by the word categories.
+// Each one goes in as an everyday word (size 50).
+const EXTRA_WORDS: Record<string, string> = {
+  crunk: "K R AH1 NG K",
+  bling: "B L IH1 NG",
+  opps: "AA1 P S",
+  glock: "G L AA1 K",
+  bruv: "B R AH1 V",
+  garms: "G AA1 R M Z",
+  cali: "K AE1 L IY0",
+  bap: "B AE1 P",
+  app: "AE1 P",
+  bot: "B AA1 T",
+  fam: "F AE1 M",
+};
+for (const [word, pron] of Object.entries(EXTRA_WORDS)) {
+  prons.set(word, [pron]);
+  if (!size.has(word) || size.get(word)! > 50) size.set(word, 50);
+}
+
 const out: Record<Tier, string[]> = { clean: [], profane: [], slur: [] };
 for (const [word, list] of [...prons].sort(([a], [b]) => (a < b ? -1 : 1))) {
   if (word.length < 2) continue;
