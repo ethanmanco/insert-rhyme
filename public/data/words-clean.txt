@@ -4964,6 +4964,7 @@ britches	35	B R IH1 CH AH0 Z
 brittle	35	B R IH1 T AH0 L
 brittler	35	B R IH1 T L ER0
 brittlest	35	B R IH1 T L IH0 S T
+bro	50	B R OW1
 broach	35	B R OW1 CH
 broached	35	B R OW1 CH T
 broaches	35	B R OW1 CH IH0 Z
@@ -11369,6 +11370,7 @@ diocese	35	D AY1 AH0 S IY2 Z|D AY1 AH0 S AH0 S
 dioceses	35	D AY1 AH0 S IY2 Z|D AY1 AH0 S IY2 Z AH0 Z
 diode	50	D AY1 OW2 D
 diodes	50	D AY1 OW2 D Z
+dior	50	D IY0 AO1 R
 dioxide	35	D AY0 AA1 K S AY2 D
 dioxides	55	D AY0 AA1 K S AY0 D Z
 dioxin	50	D AY2 AA1 K S IH0 N
@@ -21995,6 +21997,7 @@ jaw	35	JH AO1
 jawbone	35	JH AO1 B OW2 N
 jawboning	35	JH AO1 B OW2 N IH0 NG
 jawed	35	JH AO1 D
+jawn	50	JH AO1 N
 jaws	35	JH AO1 Z
 jay	35	JH EY1
 jays	35	JH EY1 Z
@@ -41117,6 +41120,7 @@ this	10	DH IH1 S|DH IH0 S
 thistle	35	TH IH1 S AH0 L
 thistles	35	TH IH1 S AH0 L Z
 thither	50	DH IH1 TH ER2
+thizz	50	TH IH1 Z
 tho	50	DH OW1
 thole	60	TH OW1 L
 thong	35	TH AO1 NG
@@ -42449,6 +42453,7 @@ twelve	10	T W EH1 L V
 twenties	35	T W EH1 N T IY0 Z|T W EH1 N IY0 Z
 twentieth	20	T W EH1 N T IY0 AH0 TH|T W EH1 N T IY0 IH0 TH|T W EH1 N IY0 AH0 TH|T W EH1 N IY0 IH0 TH
 twenty	10	T W EH1 N T IY0|T W EH1 N IY0
+twerk	50	T W ER1 K
 twice	10	T W AY1 S
 twiddle	35	T W IH1 D AH0 L
 twiddling	35	T W IH1 D L IH0 NG
@@ -45495,6 +45500,7 @@ yawned	35	Y AO1 N D
 yawner	60	Y AO1 N ER0
 yawning	35	Y AO1 N IH0 NG
 yawns	35	Y AO1 N Z
+yay	50	Y EY1
 ye	50	Y IY1|Y EH1
 yea	50	Y EY1
 yeah	40	Y AE1

@@ -70,6 +70,12 @@ const EXTRA_WORDS: Record<string, string> = {
   app: "AE1 P",
   bot: "B AA1 T",
   fam: "F AE1 M",
+  yay: "Y EY1",
+  thizz: "TH IH1 Z",
+  twerk: "T W ER1 K",
+  jawn: "JH AO1 N",
+  dior: "D IY0 AO1 R",
+  bro: "B R OW1",
 };
 for (const [word, pron] of Object.entries(EXTRA_WORDS)) {
   prons.set(word, [pron]);
