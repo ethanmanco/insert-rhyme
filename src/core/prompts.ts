@@ -98,10 +98,16 @@ export class PromptDeck {
   private recent: string[] = [];
   private random: () => number;
 
+  /**
+   * `theme` is a word category's words: each group then starts with one of
+   * them (its first word, the one shown in first-word mode), followed by
+   * other theme words that rhyme, then everyday rhymes.
+   */
   constructor(
     private index: RhymeIndex,
     private allowed: ReadonlySet<Tier>,
     seed = Date.now(),
+    private theme: string[] | null = null,
   ) {
     this.random = rng(seed);
   }
@@ -119,6 +125,19 @@ export class PromptDeck {
   }
 
   private draw(): string[] {
+    if (this.theme?.length) {
+      const theme = this.theme;
+      const fresh = theme.filter((s) => !this.recent.includes(s));
+      for (const seed of shuffle(fresh.length ? fresh : theme, this.random)) {
+        const rhymes = family(this.index, seed, this.allowed).filter((w) => w !== seed);
+        if (rhymes.length < 3) continue;
+        const themed = rhymes.filter((w) => theme.includes(w));
+        const rest = rhymes.filter((w) => !theme.includes(w));
+        this.recent.push(seed, ...themed);
+        if (this.recent.length > theme.length * 0.6) this.recent.splice(0, this.recent.length - Math.floor(theme.length * 0.4));
+        return [seed, ...shuffle(themed, this.random), ...shuffle(rest, this.random)];
+      }
+    }
     const fresh = SEEDS.filter((s) => !this.recent.includes(s));
     for (const seed of shuffle(fresh, this.random)) {
       const words = family(this.index, seed, this.allowed);
