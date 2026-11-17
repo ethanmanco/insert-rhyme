@@ -17,7 +17,7 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { classify, type Tier } from "../filter/classify.ts";
+import { classify, rot13, type Tier } from "../filter/classify.ts";
 
 const src = process.argv[2];
 if (!src || !existsSync(join(src, "cmudict.dict"))) throw new Error("Usage: node scripts/build-rhymes.ts <source folder>");
@@ -77,6 +77,21 @@ const EXTRA_WORDS: Record<string, string> = {
   dior: "D IY0 AO1 R",
   bro: "B R OW1",
 };
+// Rap words the dictionary lacks, kept in their own tier by the filter. Rappers
+// say the n-word to rhyme with "bigger" and "trigger", so it gets that sound.
+// Stored in ROT13 like the filter's lists.
+const RAP_EXTRAS: Record<string, string> = {
+  avttn: "N IH1 G ER0",
+  avttnf: "N IH1 G ER0 Z",
+  gubg: "TH AA1 T",
+  gubgf: "TH AA1 T S",
+};
+for (const [encoded, pron] of Object.entries(RAP_EXTRAS)) {
+  const word = rot13(encoded);
+  prons.set(word, [pron]);
+  if (!size.has(word)) size.set(word, 50);
+}
+
 for (const [word, pron] of Object.entries(EXTRA_WORDS)) {
   prons.set(word, [pron]);
   if (!size.has(word) || size.get(word)! > 50) size.set(word, 50);

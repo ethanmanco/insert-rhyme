@@ -104,6 +104,7 @@ async function refreshWords(): Promise<void> {
   if (index)
     deck = new PromptDeck(index, allowed(), {
       theme: category ? categoryWords(category, settings.explicit) : null,
+      style: category?.id ?? null,
       explicit: settings.explicit,
       slurs: settings.slurs,
       memory: load<Memory>("recent", { sounds: [], words: [] }),

@@ -3,7 +3,7 @@ import clean from "../public/data/words-clean.txt?raw";
 import profane from "../public/data/words-profane.txt?raw";
 import slur from "../public/data/words-slur.txt?raw";
 import { classify } from "../filter/classify";
-import { EXPLICIT_PROMPTS } from "../src/core/explicit";
+import { CORE_CURSES, cursesFor, EXPLICIT_PROMPTS, RAP_SLURS, STYLES_WITH_CURSES } from "../src/core/explicit";
 import { perfectKey } from "../src/core/phonetics";
 import { dealableSounds, MIN_FAMILY, PromptDeck, soundOf, soundPools } from "../src/core/prompts";
 import { allowedTiers, RhymeIndex } from "../src/core/rhymes";
@@ -110,7 +110,54 @@ describe("explicit words and slurs in prompts", () => {
     expect(countTier(groups, "profane")).toBe(0);
   });
 
-  it("uses everyday swears that the filter really marks as explicit", () => {
+  it("uses everyday swears that the filter really marks as explicit, and slurs it marks as slurs", () => {
     for (const w of EXPLICIT_PROMPTS) expect([w, classify(w)]).toEqual([w, "profane"]);
+    for (const { word } of RAP_SLURS) expect([word, classify(word)]).toEqual([word, "slur"]);
+    for (const w of [...EXPLICIT_PROMPTS, ...RAP_SLURS.map((x) => x.word)]) expect([w, !!index.entry(w)]).toEqual([w, true]);
+  });
+
+  const leads = (deck: PromptDeck, groups: number, tier: string) =>
+    deal(deck, groups).map((g) => g[0]!).filter((w) => index.entry(w)!.tier === tier);
+  const share = (words: string[], top: string[]) => words.filter((w) => top.includes(w)).length / words.length;
+
+  it("with any words, leans on the curses regular rap uses most", () => {
+    const deck = new PromptDeck(index, allowedTiers(true, false), { seed: 11, explicit: true });
+    const led = leads(deck, 400, "profane");
+    const core = CORE_CURSES.map((w) => w.word);
+    for (const w of led) expect(core).toContain(w);
+    expect(share(led, ["shit", "fuck", "bitch", "ass", "bitches"])).toBeGreaterThan(0.45);
+    expect(new Set(led).size).toBeGreaterThanOrEqual(10);
+  });
+
+  it("follows the chosen rap style: every swear that shows up is on that style's list", () => {
+    for (const style of STYLES_WITH_CURSES) {
+      const deck = new PromptDeck(index, allowedTiers(true, false), { seed: 12, explicit: true, style });
+      const list = cursesFor(style).map((w) => w.word);
+      const seen = deal(deck, 150).flat().filter((w) => index.entry(w)!.tier === "profane");
+      expect(seen.length).toBeGreaterThan(30);
+      for (const w of seen) expect([style, w, list.includes(w)]).toEqual([style, w, true]);
+    }
+  });
+
+  it("curses like UK rappers in UK styles, and leads with ass in Miami bass", () => {
+    const uk = new PromptDeck(index, allowedTiers(true, false), { seed: 13, explicit: true, style: "ukdrill" });
+    const ukWords = new Set(deal(uk, 300).flat());
+    expect(["twat", "prick", "wanker", "arse"].some((w) => ukWords.has(w))).toBe(true);
+    expect(ukWords.has("thot")).toBe(false);
+    const miami = new PromptDeck(index, allowedTiers(true, false), { seed: 14, explicit: true, style: "miami" });
+    const led = leads(miami, 300, "profane");
+    const counts = new Map<string, number>();
+    for (const w of led) counts.set(w, (counts.get(w) ?? 0) + 1);
+    expect([...counts].sort((a, b) => b[1] - a[1])[0]![0]).toBe("ass");
+  });
+
+  it("uses the slurs rap uses, mostly the n-word, rhymed the way rappers say it", () => {
+    const deck = new PromptDeck(index, allowedTiers(false, true), { seed: 15, slurs: true, style: "trap" });
+    const groups = deal(deck, 300);
+    const seen = groups.flat().filter((w) => index.entry(w)!.tier === "slur");
+    const rap = RAP_SLURS.map((w) => w.word);
+    for (const w of seen) expect(rap).toContain(w);
+    expect(share(seen, rap.slice(0, 2))).toBeGreaterThan(0.6);
+    expect(index.lookup(rap[0]!, allowedTiers(false, true), 500).perfect).toEqual(expect.arrayContaining(["bigger", "trigger"]));
   });
 });

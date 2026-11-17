@@ -44,6 +44,8 @@ The filter (`filter/`) is thorough because the pronunciation dictionary contains
 
 The tests check every listed word and its forms, a set of innocent look-alikes, and every single word in the shipped default file. The word lists are stored in ROT13 so the repository does not show them as plain text.
 
+With a switch on, prompts don't use everything the filter catches. They use the words regular rap uses, weighted by how often (`src/core/explicit.ts`). Each rap style has its own list, so UK drill and grime curse like UK rappers and Miami bass leans on party words, while topics and any words use everyday rap cursing. Slur prompts are only the slurs rap uses, mostly the n-word, which the dictionary lacks; it's added with the sound rappers give it, so it rhymes with bigger and trigger. The rhyme helper still knows every word in the switched-on files.
+
 ## Credits and licenses
 
 - **CMU Pronouncing Dictionary**, Copyright (C) 1993-2015 Carnegie Mellon University, under a BSD-style license that asks you to keep the notice. Used at commit 7479086 of [cmusphinx/cmudict](https://github.com/cmusphinx/cmudict). Full notice: [licenses/cmudict.txt](licenses/cmudict.txt), also shipped next to the data.

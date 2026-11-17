@@ -220,6 +220,8 @@ swastikas	50	S W AA1 S T IH0 K AH0 Z
 swinger	50	S W IH1 NG ER0
 swingers	50	S W IH1 NG ER0 Z
 takeshita	90	T AA2 K AH0 SH IY1 T AA2
+thot	50	TH AA1 T
+thots	50	TH AA1 T S
 threesome	50	TH R IY1 S AH0 M
 tit	35	T IH1 T
 tits	35	T IH1 T S

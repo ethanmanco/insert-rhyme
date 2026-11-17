@@ -1,4 +1,4 @@
-import { EXPLICIT_PROMPTS } from "./explicit";
+import { cursesFor, EXPLICIT_PROMPTS, RAP_SLURS, slursFor, type Weighted } from "./explicit";
 import { perfectKey, syllables } from "./phonetics";
 import type { Entry, RhymeIndex, Tier } from "./rhymes";
 
@@ -16,7 +16,8 @@ import type { Entry, RhymeIndex, Tier } from "./rhymes";
  *
  * With explicit words on, a good share of groups starts with a swear word
  * (and swear words that rhyme get mixed into other groups); with slurs on,
- * slurs are mixed in the same way.
+ * slurs are mixed in the same way. Which swears, and how often each, follows
+ * the chosen rap style (see explicit.ts): the most used ones come up most.
  */
 
 /** Longest word that still reads on a block. */
@@ -66,11 +67,12 @@ export interface Sound {
 }
 
 const PROMPT_SWEARS = new Set(EXPLICIT_PROMPTS);
+const PROMPT_SLURS = new Set(RAP_SLURS.map((w) => w.word));
 const poolCache = new WeakMap<RhymeIndex, { sig: string; pools: Map<string, Sound> }>();
 
 /**
  * All sounds with their word pools, for the allowed tiers. Explicit pools
- * only take everyday swear words (EXPLICIT_PROMPTS) and slurs, not every
+ * only take the swear words and slurs rap uses (explicit.ts), not every
  * word the filter catches. Cached until the tiers or the data change.
  */
 export function soundPools(index: RhymeIndex, allowed: ReadonlySet<Tier>): Map<string, Sound> {
@@ -81,7 +83,7 @@ export function soundPools(index: RhymeIndex, allowed: ReadonlySet<Tier>): Map<s
   for (const [key, entries] of index.sounds()) {
     const clean = entries.filter(isCommonClean).sort((a, b) => a.size - b.size || (a.word < b.word ? -1 : 1)).slice(0, POOL_SIZE);
     const explicit = entries.filter(
-      (e) => allowed.has(e.tier) && e.word.length <= MAX_LETTERS && ((e.tier === "profane" && PROMPT_SWEARS.has(e.word)) || e.tier === "slur"),
+      (e) => allowed.has(e.tier) && e.word.length <= MAX_LETTERS && ((e.tier === "profane" && PROMPT_SWEARS.has(e.word)) || (e.tier === "slur" && PROMPT_SLURS.has(e.word))),
     );
     if (clean.length || explicit.length) pools.set(key, { key, clean, explicit });
   }
@@ -135,6 +137,8 @@ export interface DeckOptions {
   seed?: number;
   /** A word category's words: each group then starts with one of them. */
   theme?: string[] | null;
+  /** The word category's id, which picks the swear words (a rap style's own, or everyday rap cursing). */
+  style?: string | null;
   explicit?: boolean;
   slurs?: boolean;
   memory?: Memory;
@@ -152,8 +156,13 @@ export class PromptDeck {
   private themeQueue: string[] = [];
   private recentSounds: string[];
   private recentWords: string[];
-  private swears: Entry[] = [];
-  private slurs: Entry[] = [];
+  private swears: Weighted[] = [];
+  private slurs: Weighted[] = [];
+  /** Explicit words that may join a group: the ones on this deck's lists. */
+  private extras = new Map<string, number>();
+  /** The last explicit word that led a group, so it rarely leads twice running. */
+  private lastLead = "";
+  private topWeight = 1;
   private theme: string[] | null;
 
   constructor(
@@ -166,17 +175,23 @@ export class PromptDeck {
     this.recentSounds = [...(opts.memory?.sounds ?? [])].slice(-RECENT_SOUNDS);
     this.recentWords = [...(opts.memory?.words ?? [])].slice(-RECENT_WORDS);
     this.theme = opts.theme?.filter((w) => index.entry(w)) ?? null;
-    // Explicit prompts need at least three everyday rhymes to fill a group.
-    const rhymable = (e: Entry) => {
-      const key = soundOf(index, e.word, allowed);
-      return !!key && (this.pools.get(key)?.clean.length ?? 0) >= 3 && e.word.length <= MAX_LETTERS;
+    // Explicit prompts need at least three everyday rhymes to lead a group.
+    const rhymable = (w: Weighted) => {
+      const key = soundOf(index, w.word, allowed);
+      return !!key && (this.pools.get(key)?.clean.length ?? 0) >= 3 && w.word.length <= MAX_LETTERS;
     };
+    const known = (tier: Tier) => (w: Weighted) => index.entry(w.word)?.tier === tier;
     if (opts.explicit && allowed.has("profane")) {
-      this.swears = EXPLICIT_PROMPTS.map((w) => index.entry(w)).filter((e): e is Entry => !!e && e.tier === "profane" && rhymable(e));
+      const list = cursesFor(opts.style).filter(known("profane"));
+      list.forEach((w) => this.extras.set(w.word, w.weight));
+      this.swears = list.filter(rhymable);
     }
     if (opts.slurs && allowed.has("slur")) {
-      this.slurs = index.tierWords("slur").filter((e) => rhymable(e) && Math.min(...e.prons.map(syllables)) <= 3);
+      const list = slursFor(opts.style).filter(known("slur"));
+      list.forEach((w) => this.extras.set(w.word, w.weight));
+      this.slurs = list.filter(rhymable);
     }
+    this.topWeight = Math.max(1, ...this.extras.values());
   }
 
   /** The word for one target: the `slot`-th word of its group. */
@@ -244,24 +259,41 @@ export class PromptDeck {
     const sound = this.nextSound();
     const words = this.pick(sound.clean, 6, new Set());
     // With explicit words on, a matching swear or slur sometimes joins in.
-    if (sound.explicit.length && this.random() < 0.5) {
-      const extra = sound.explicit[Math.floor(this.random() * sound.explicit.length)]!.word;
-      words.splice(1 + Math.floor(this.random() * 2), 0, extra);
-    }
+    const extra = this.extraFor(sound, words);
+    if (extra) words.splice(1 + Math.floor(this.random() * 2), 0, extra);
     this.remember(sound.key, words);
     return words;
   }
 
-  /** A group led by an explicit word, filled with everyday rhymes. */
-  private explicitGroup(list: Entry[]): string[] {
-    const recent = new Set(this.recentWords);
-    const fresh = list.filter((e) => !recent.has(e.word));
-    const lead = (fresh.length ? fresh : list)[Math.floor(this.random() * (fresh.length || list.length))]!;
-    const key = soundOf(this.index, lead.word, this.allowed)!;
+  /**
+   * Sometimes, a swear or slur from this deck's lists that rhymes with the
+   * group: half the time for the most used words, less for rarer ones.
+   */
+  private extraFor(sound: Sound, taken: string[]): string | null {
+    const options = sound.explicit.filter((e) => this.extras.has(e.word) && !taken.includes(e.word));
+    if (!options.length) return null;
+    const word = this.weighted(options.map((e) => ({ word: e.word, weight: this.extras.get(e.word)! })));
+    return this.random() < (0.5 * this.extras.get(word)!) / this.topWeight ? word : null;
+  }
+
+  /** One word from a weighted list. */
+  private weighted(list: Weighted[]): string {
+    const total = list.reduce((s, w) => s + w.weight, 0);
+    let r = this.random() * total;
+    for (const w of list) if ((r -= w.weight) <= 0) return w.word;
+    return list[list.length - 1]!.word;
+  }
+
+  /** A group led by an explicit word (the most used ones most often), filled with everyday rhymes. */
+  private explicitGroup(list: Weighted[]): string[] {
+    // The last lead is less likely to lead again, without ruling it out (one word can rule a style).
+    const lead = this.weighted(list.map((w) => (w.word === this.lastLead ? { ...w, weight: w.weight * 0.3 } : w)));
+    this.lastLead = lead;
+    const key = soundOf(this.index, lead, this.allowed)!;
     const pool = this.pools.get(key)!;
-    const words = [lead.word, ...this.pick(pool.clean, 5, new Set([lead.word]))];
-    const more = pool.explicit.filter((e) => e.word !== lead.word);
-    if (more.length && this.random() < 0.5) words.splice(2, 0, more[Math.floor(this.random() * more.length)]!.word);
+    const words = [lead, ...this.pick(pool.clean, 5, new Set([lead]))];
+    const extra = this.extraFor(pool, words);
+    if (extra) words.splice(2, 0, extra);
     this.remember(key, words);
     return words;
   }
@@ -285,7 +317,8 @@ export class PromptDeck {
       );
       const rest = this.pick(pool.clean, 5, new Set([lead, ...themed]));
       const words = [lead, ...themed, ...rest];
-      if (pool.explicit.length && this.random() < 0.5) words.splice(2, 0, pool.explicit[Math.floor(this.random() * pool.explicit.length)]!.word);
+      const extra = this.extraFor(pool, words);
+      if (extra) words.splice(2, 0, extra);
       this.remember(key, words);
       return words;
     }
