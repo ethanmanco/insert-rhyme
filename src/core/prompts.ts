@@ -31,7 +31,7 @@ export const POOL_SIZE = 40;
 const RECENT_SOUNDS = 150;
 const RECENT_WORDS = 240;
 /** Share of groups that start with a swear word (explicit on) or a slur (slurs on). */
-export const EXPLICIT_RATE = 0.35;
+export const EXPLICIT_RATE = 0.4;
 export const SLUR_RATE = 0.2;
 
 /** Short sounds that are words in a dictionary but not good prompts. */
