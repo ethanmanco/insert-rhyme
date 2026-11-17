@@ -1,6 +1,7 @@
 /**
  * The built-in beats: free-licensed recordings (CC0 or CC BY), each cut to
- * an exact loop of whole bars by scripts/cut-loop.py. The files live in
+ * an exact loop of whole bars by scripts/cut-loop.py, which also evens out
+ * their loudness so no sample passes full scale. The files live in
  * public/beats. Credits and licenses are listed here and in the README.
  */
 
@@ -58,9 +59,7 @@ export const BEATS: Beat[] = [
   beat("unwind", "Unwind", "Laid back", 95, { title: "Unwind", artist: "HoliznaCC0", license: "CC0 1.0", licenseUrl: CC0, url: `${FMA}holiznacc0/kick-it-laid-back-hiphop/unwind/` }),
   beat("jazz-for-the-soul", "Jazz For The Soul", "Jazzy", 120, { title: "Jazz For The Soul", artist: "Ketsa", license: "CC BY 4.0", licenseUrl: BY4, url: `${FMA}Ketsa/cc-by-free-to-use-for-anything/jazz-for-the-soul/` }),
   beat("gangstazz", "Gang$tazz", "G-funk", 90, { title: "Gang$tazz", artist: "Alexandr Zhelanov", license: "CC BY 4.0", licenseUrl: BY4, url: "https://opengameart.org/content/gangtazz" }),
-  beat("phonk-remix", "Phonk Remix", "Phonk", 92.03, { title: "Phonk Remix", artist: "HoliznaCC0", license: "CC0 1.0", licenseUrl: CC0, url: `${FMA}holiznacc0/phonk-aura-farming/phonk-remix/` }),
   beat("soul-trap", "Soul Trap", "Trap", 75, { title: "Soul Trap", artist: "Ketsa", license: "CC BY 4.0", licenseUrl: BY4, url: `${FMA}Ketsa/cc-by-free-to-use-for-anything/soul-trap/` }),
-  beat("trench-work", "Trench Work", "Drill", 110, { title: "Trench Work", artist: "Ketsa", license: "CC BY 4.0", licenseUrl: BY4, url: `${FMA}Ketsa/cc-by-free-to-use-for-anything/trench-work/` }),
   beat("will-make-you-happy", "Will Make You Happy", "Soulful", 80.5, { title: "Will Make You Happy", artist: "Ketsa", license: "CC BY 4.0", licenseUrl: BY4, url: `${FMA}Ketsa/cc-by-free-to-use-for-anything/will-make-you-happy/` }),
   beat("carnival-of-souls", "Carnival Of Souls", "Spooky", 80, { title: "Carnival Of Souls", artist: "HoliznaCC0", license: "CC0 1.0", licenseUrl: CC0, url: `${FMA}holiznacc0/beats-from-the-crypt/carnival-of-souls/` }),
   beat("my-deal", "My Deal", "Soulful", 80.5, { title: "My Deal", artist: "Ketsa", license: "CC BY 4.0", licenseUrl: BY4, url: `${FMA}Ketsa/cc-by-free-to-use-for-anything/my-deal/` }),
@@ -99,7 +98,6 @@ export const BEATS: Beat[] = [
   beat("dynamic", "Dynamic", "Trap", 80, { title: "Dynamic", artist: "1000 Handz", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freemusicarchive.org/music/1000-handz/cc-by-free-to-use-melodic-rap-instrumentals-vol-2/dynamic/" }, 16),
   beat("blame-game", "Blame Game", "Trap", 70, { title: "Free rap trap type beat \"blame game\" e", artist: "MOHMOHRAP", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freemusicarchive.org/music/mohmohrap/blame-game/free-rap-trap-type-beat-blame-game-e/" }, 16),
   beat("bag", "BAG", "Trap", 72.5, { title: "BAG - Hard Trap Beat", artist: "AudioByKB", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freesound.org/people/AudioWay/sounds/482328/" }, 16),
-  beat("kimura", "Kimura", "Trap", 82, { title: "Kimura", artist: "1000 Handz", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freemusicarchive.org/music/1000-handz/cc-by-free-to-use-melodic-rap-instrumentals/kimura/" }, 16),
   beat("venom", "Venom", "Trap", 70, { title: "Venom", artist: "1000 Handz", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freemusicarchive.org/music/1000-handz/cc-by-free-to-use-melodic-rap-instrumentals/venom-1/" }, 16),
   beat("bengal", "Bengal", "Trap", 80, { title: "Bengal", artist: "1000 Handz", license: "CC BY 4.0", licenseUrl: BY4, url: "https://freemusicarchive.org/music/1000-handz/cc-by-free-to-use-melodic-rap-instrumentals/bengal/" }, 16),
   beat("tei-pani", "Tei Pani", "Drill", 70, { title: "Tei Pani", artist: "kontraamusic", license: "CC0 1.0", licenseUrl: CC0, url: "https://freesound.org/people/kontraamusic/sounds/790935/" }, 16),
@@ -117,8 +115,11 @@ export const BEATS: Beat[] = [
   beat("goat", "Goat", "Drill", 71, { title: "Goat", artist: "kontraamusic", license: "CC0 1.0", licenseUrl: CC0, url: "https://freesound.org/people/kontraamusic/sounds/790938/" }, 16),
 ];
 
+/** The beat a new player starts on. */
+export const DEFAULT_BEAT = "dynamic";
+
 export function beatById(id: unknown): Beat {
-  return BEATS.find((b) => b.id === id) ?? BEATS[0]!;
+  return BEATS.find((b) => b.id === id) ?? BEATS.find((b) => b.id === DEFAULT_BEAT)!;
 }
 
 /** "Bap Boom by Ketsa (CC BY 4.0)" */

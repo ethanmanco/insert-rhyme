@@ -1,6 +1,7 @@
-import { existsSync, statSync } from "node:fs";
+import { existsSync, readdirSync, statSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { BEATS, beatById } from "../src/core/beats";
+import { BEATS, beatById, DEFAULT_BEAT } from "../src/core/beats";
+import { ownGain } from "../src/core/ownBeat";
 
 describe("built-in beats", () => {
   it("have unique ids", () => {
@@ -29,7 +30,29 @@ describe("built-in beats", () => {
     });
   }
 
-  it("falls back to the first beat for an unknown id", () => {
-    expect(beatById("nope")).toBe(BEATS[0]);
+  it("falls back to Dynamic, the default, for an unknown or removed id", () => {
+    expect(DEFAULT_BEAT).toBe("dynamic");
+    for (const id of ["nope", "phonk-remix", "trench-work", "kimura", undefined]) expect(beatById(id).id).toBe("dynamic");
+  });
+
+  it("ship no loop files that no beat uses", () => {
+    const files = readdirSync("public/beats").filter((f) => f.endsWith(".mp3"));
+    expect(files.sort()).toEqual(BEATS.map((b) => b.file).sort());
+  });
+
+});
+
+describe("own beat volume", () => {
+  const tone = (amp: number) => Float32Array.from({ length: 44100 }, (_, i) => amp * Math.sin((2 * Math.PI * 55 * i) / 44100));
+
+  it("turns a very loud song down to about the target", () => {
+    const g = ownGain([tone(0.99), tone(0.99)]);
+    // A full-scale sine is -3 dBFS RMS, so it comes down about 9 dB.
+    expect(20 * Math.log10(g)).toBeCloseTo(-9, 0);
+  });
+
+  it("leaves quiet songs and silence alone", () => {
+    expect(ownGain([tone(0.1)])).toBe(1);
+    expect(ownGain([new Float32Array(1000)])).toBe(1);
   });
 });

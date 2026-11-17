@@ -75,7 +75,7 @@ try {
       <span class="tag px">FREE. NO ADS. NO ACCOUNT.</span>
       <h1>INSERT<br><span>RHYME</span></h1>
       <p>Freestyle rap practice. Rap over a beat and see exactly where to land your rhymes.</p>
-      <ul><li>61 beats</li><li>rhyme prompts</li><li>58 themes</li></ul>
+      <ul><li>58 beats</li><li>rhyme prompts</li><li>58 themes</li></ul>
     </div>
     <div class="url">ethanmanco.github.io/insert-rhyme</div>
     <div class="phone px"><img class="px" src="data:image/png;base64,${shot}"></div>

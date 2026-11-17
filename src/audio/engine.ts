@@ -21,6 +21,8 @@ export interface Loop {
   start: number;
   /** Bars in one pass of the loop. */
   bars: number;
+  /** Volume (linear), to even out loud and quiet recordings. 1 when left out. */
+  gain?: number;
 }
 
 /** How far the speed can move from the recording's own tempo. */
@@ -48,6 +50,7 @@ export async function decode(data: ArrayBuffer): Promise<AudioBuffer> {
 interface Voice {
   source: AudioBufferSourceNode;
   gain: GainNode;
+  level: number;
 }
 
 export class Engine {
@@ -75,8 +78,12 @@ export class Engine {
     } catch {
       // Not supported here.
     }
-    const limiter = new Tone.Limiter(-1).toDestination();
-    this.master = new Tone.Gain(0.9).connect(limiter);
+    // A safety limiter for peaks: hard knee, and a release slow enough not to
+    // ride each bass cycle. (Tone's Limiter keeps a 30 dB soft knee, so it
+    // hardly limited at all.) The built-in loops are cut with headroom, so
+    // this only acts on loud songs from the player's own device.
+    const limiter = new Tone.Compressor({ threshold: -1, ratio: 20, knee: 0, attack: 0.002, release: 0.2 }).toDestination();
+    this.master = new Tone.Gain(1).connect(limiter);
     Tone.getTransport().bpm.value = this.bpm;
   }
 
@@ -132,13 +139,14 @@ export class Engine {
     const source = ctx.createBufferSource();
     source.buffer = loop.buffer;
     source.playbackRate.value = this.rate();
+    const level = loop.gain ?? 1;
     const gain = ctx.createGain();
     gain.gain.setValueAtTime(0, time);
-    gain.gain.linearRampToValueAtTime(1, time + FADE);
+    gain.gain.linearRampToValueAtTime(level, time + FADE);
     source.connect(gain);
     Tone.connect(gain, this.master);
     source.start(time, loop.start);
-    const voice = { source, gain };
+    const voice = { source, gain, level };
     source.onended = () => {
       gain.disconnect();
       this.voices = this.voices.filter((v) => v !== voice);
@@ -148,7 +156,7 @@ export class Engine {
 
   private fadeOut(v: Voice, time: number) {
     v.gain.gain.cancelScheduledValues(time);
-    v.gain.gain.setValueAtTime(1, time);
+    v.gain.gain.setValueAtTime(v.level, time);
     v.gain.gain.linearRampToValueAtTime(0, time + FADE);
     try {
       v.source.stop(time + FADE * 2);

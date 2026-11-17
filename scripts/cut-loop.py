@@ -6,17 +6,25 @@ picks the downbeat as the beat where the kick is strongest, then cuts
 real audio is kept before bar 1 (pre-roll) so the app can fade loop seams.
 The app reads the tempo, the pre-roll and the bar count from the output.
 
+Every loop is evened out in loudness on the way (see `level_gain`): loud
+masters are turned down so no sample goes past full scale, which some phones
+clip on decoding (loud trap 808s crackled), and switching beats never jumps
+in volume.
+
 Needs ffmpeg and numpy.
   python scripts/cut-loop.py <input> <output.mp3> [--bpm 90] [--from 30] [--bars 16] [--shift 0]
 --bpm is a starting guess (default: search 70 to 160); --shift moves bar 1 by whole beats.
 """
-import argparse, json, subprocess
+import argparse, json, re, subprocess
 import numpy as np
 
 SR = 22050
 HOP = 64
 PREROLL = 0.25
 POSTROLL = 0.15
+TARGET_LUFS = -12.0
+# Headroom for the MP3 encoder, which adds a little overshoot on loud bass.
+PEAK_LIMIT = -1.5
 
 def decode(path, sr=SR):
     raw = subprocess.run(["ffmpeg", "-v", "quiet", "-i", path, "-ac", "1", "-ar", str(sr), "-f", "f32le", "-"], capture_output=True, check=True).stdout
@@ -35,6 +43,22 @@ def bands(x):
     snare = rise[:, (freqs > 1500) & (freqs < 5000)].sum(axis=1)
     full = np.maximum(0, full - np.convolve(full, np.ones(32) / 32, mode="same"))
     return full, low, snare
+
+def level_gain(path, start, length):
+    """Gain in dB that brings this stretch of audio to TARGET_LUFS, as far as its true peak allows."""
+    out = subprocess.run(["ffmpeg", "-hide_banner", "-nostats", "-ss", f"{start:.6f}", "-t", f"{length:.6f}", "-i", path,
+                          "-af", "ebur128=peak=true", "-f", "null", "-"], capture_output=True, text=True).stderr
+    summary = out[out.rindex("Summary:"):]
+    lufs = float(re.search(r"I:\s+(-?[\d.]+) LUFS", summary).group(1))
+    peak = float(re.search(r"Peak:\s+(-?[\d.]+) dBFS", summary).group(1))
+    return round(min(TARGET_LUFS - lufs, PEAK_LIMIT - peak), 2)
+
+def write_loop(path, output, cut_from, total):
+    """Cut `total` seconds from `cut_from` into a 160 kbps MP3, evened out in loudness. Returns the gain used."""
+    gain = level_gain(path, cut_from, total)
+    subprocess.run(["ffmpeg", "-v", "quiet", "-y", "-i", path, "-ss", f"{cut_from:.6f}", "-t", f"{total:.6f}",
+                    "-af", f"volume={gain}dB", "-ac", "2", "-ar", "44100", "-c:a", "libmp3lame", "-b:a", "160k", output], check=True)
+    return gain
 
 def grid_score(env, period, phase, fps):
     t = np.arange(phase, len(env) / fps - 0.05, period)
@@ -85,9 +109,9 @@ def main():
     if bar1 + length + POSTROLL > duration:
         raise SystemExit(f"Not enough audio for {a.bars} bars after {start_from:.1f}s")
     cut_from = bar1 - PREROLL
-    subprocess.run(["ffmpeg", "-v", "quiet", "-y", "-i", a.input, "-ss", f"{cut_from:.6f}", "-t", f"{PREROLL + length + POSTROLL:.6f}",
-                    "-ac", "2", "-ar", "44100", "-c:a", "libmp3lame", "-b:a", "160k", a.output], check=True)
-    info = {"bpm": bpm, "start": PREROLL, "bars": a.bars, "cutAt": round(cut_from, 3), "downbeatShift": down, "kickByBeat": [round(float(t), 2) for t in totals], "snareByBeat": [round(float(t), 2) for t in snares], "score": [round(float(t), 2) for t in score]}
+    gain = write_loop(a.input, a.output, cut_from, PREROLL + length + POSTROLL)
+    info = {"bpm": bpm, "gainDb": gain, "start": PREROLL, "bars": a.bars, "cutAt": round(cut_from, 3), "downbeatShift": down, "kickByBeat": [round(float(t), 2) for t in totals], "snareByBeat": [round(float(t), 2) for t in snares], "score": [round(float(t), 2) for t in score]}
     print(json.dumps(info))
 
-main()
+if __name__ == "__main__":
+    main()

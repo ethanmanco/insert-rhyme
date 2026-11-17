@@ -81,3 +81,23 @@ export function syncFromTaps(g: Grid, taps: number[], loopBeats: number): Grid |
   const k = Math.round((g.start - phase) / period);
   return { bpm, start: Math.max(0, phase + k * period) };
 }
+
+/** Loudness (RMS, dBFS) that own beats are brought down to, about where loud built-in trap loops end up. */
+export const OWN_TARGET_DB = -12;
+
+/**
+ * Volume for a beat from the player's device. Songs mastered very loud are
+ * turned down, so they stay clear of the limiter (which would distort their
+ * bass); quiet ones are left as they are.
+ */
+export function ownGain(channels: Float32Array[]): number {
+  let sum = 0;
+  let count = 0;
+  for (const ch of channels) {
+    for (let i = 0; i < ch.length; i += 4) sum += ch[i]! * ch[i]!;
+    count += Math.ceil(ch.length / 4);
+  }
+  if (!count || !sum) return 1;
+  const rmsDb = 10 * Math.log10(sum / count);
+  return Math.min(1, 10 ** ((OWN_TARGET_DB - rmsDb) / 20));
+}

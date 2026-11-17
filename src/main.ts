@@ -4,7 +4,7 @@ import "./styles/app.css";
 import { barsIn, decode, Engine, MAX_RATE, MIN_RATE, useRelaxedAudioTiming, type Loop } from "./audio/engine";
 import { canRecord, Recorder, type Take } from "./audio/recorder";
 import { beatById, ENCODER_DELAY, POSTROLL } from "./core/beats";
-import { doubleTempo, findGrid, halfTempo, monoOpening, shiftBeats, syncFromTaps, type Grid } from "./core/ownBeat";
+import { doubleTempo, findGrid, halfTempo, monoOpening, ownGain, shiftBeats, syncFromTaps, type Grid } from "./core/ownBeat";
 import { categoryWords, CATEGORIES } from "./core/categories";
 import { PromptDeck, type Memory } from "./core/prompts";
 import { allowedTiers, RhymeIndex, type Tier } from "./core/rhymes";
@@ -37,7 +37,7 @@ let sessionStart: number | null = null;
 const loops = new Map<string, Loop>();
 let loadingBeat = false;
 /** A beat from the player's own device: kept in memory only, never uploaded. */
-let own: { name: string; buffer: AudioBuffer; grid: Grid } | null = null;
+let own: { name: string; buffer: AudioBuffer; grid: Grid; gain: number } | null = null;
 
 async function loadBeat(id: string): Promise<Loop | null> {
   const beat = beatById(id);
@@ -64,7 +64,7 @@ async function loadBeat(id: string): Promise<Loop | null> {
 }
 
 const ownLoop = (): Loop | null =>
-  own && { buffer: own.buffer, bpm: own.grid.bpm, start: own.grid.start, bars: barsIn(own.buffer.duration, own.grid.bpm, own.grid.start) };
+  own && { buffer: own.buffer, bpm: own.grid.bpm, start: own.grid.start, bars: barsIn(own.buffer.duration, own.grid.bpm, own.grid.start), gain: own.gain };
 
 /** The tempo the current recording plays at its own speed. */
 const nativeBpm = () => (settings.mode === "own" ? (own?.grid.bpm ?? 90) : beatById(settings.beat).bpm);
@@ -562,7 +562,7 @@ fileInput.addEventListener("change", async () => {
     const channels = Array.from({ length: buffer.numberOfChannels }, (_, i) => buffer.getChannelData(i));
     const grid = findGrid(monoOpening(channels, buffer.sampleRate), buffer.sampleRate);
     stop();
-    own = { name: file.name.replace(/\.[^.]+$/, ""), buffer, grid };
+    own = { name: file.name.replace(/\.[^.]+$/, ""), buffer, grid, gain: ownGain(channels) };
     settings.bpm = Math.round(grid.bpm);
     engine.setBpm(settings.bpm);
     engine.setLoop(ownLoop());
