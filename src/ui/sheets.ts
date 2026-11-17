@@ -27,6 +27,15 @@ function sheet(title: string, id: string): { dialog: HTMLDialogElement; body: HT
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 
+const REPO = "https://github.com/ethanmanco/insert-rhyme";
+
+/** A 9 by 9 pixel star, drawn in the text color. */
+const STAR_ICON = (() => {
+  const rows = ["....#....", "....#....", "...###...", "#########", ".#######.", "..#####..", "..##.##..", ".##...##.", ".#.....#."];
+  const rects = rows.flatMap((row, y) => [...row].map((c, x) => (c === "#" ? `<rect x="${x}" y="${y}" width="1" height="1"/>` : "")));
+  return `<svg class="star-icon" viewBox="0 0 9 9" width="27" height="27" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor">${rects.join("")}</svg>`;
+})();
+
 /* ---------- Options ---------- */
 
 export interface OptionsSheet {
@@ -115,8 +124,13 @@ export function optionsSheet(get: () => Settings, stats: () => Stats, change: (p
         ${toggle("explicit", "EXPLICIT WORDS", "Swear words and crude words in prompts and rhymes.", s.explicit)}
         ${toggle("slurs", "SLURS", "Hate words too. A separate switch, off by default.", s.slurs)}
       </fieldset>
+      <fieldset class="group">
+        <legend>LIKE INSERT RHYME?</legend>
+        <a class="btn star px" href="${REPO}" target="_blank" rel="noopener">${STAR_ICON}<span>STAR IT ON GITHUB</span></a>
+        <p class="choice-hint center">It's free and has no ads. A star helps other people find it.</p>
+      </fieldset>
       <p class="choice-hint center">Beat: ${esc(beatById(s.beat).credit.title)} by ${esc(beatById(s.beat).credit.artist)}, <a href="${beatById(s.beat).credit.url}">${beatById(s.beat).credit.license}</a>, cut to a loop.</p>
-      <p class="choice-hint center">Everything stays on this device. Words: CMU Pronouncing Dictionary and SCOWL. <a href="https://github.com/ethanmanco/insert-rhyme">Source and credits</a></p>`;
+      <p class="choice-hint center">Everything stays on this device. Words: CMU Pronouncing Dictionary and SCOWL. <a href="${REPO}">Source and credits</a></p>`;
   }
 
   body.addEventListener("change", (e) => {

@@ -550,6 +550,17 @@ a.btn {
   color: inherit;
 }
 
+.sheet a.btn.star {
+  gap: 12px;
+  background: var(--hl-a);
+  outline-color: var(--hl-a);
+  color: var(--on-a);
+}
+
+.sheet a.btn.star:focus-visible {
+  outline: 4px dashed var(--on-a);
+}
+
 .group {
   border: 0;
   margin: 0;
