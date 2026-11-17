@@ -8,7 +8,7 @@ import { doubleTempo, findGrid, halfTempo, monoOpening, shiftBeats, syncFromTaps
 import { categoryWords, CATEGORIES } from "./core/categories";
 import { PromptDeck, type Memory } from "./core/prompts";
 import { allowedTiers, RhymeIndex, type Tier } from "./core/rhymes";
-import { SCHEMES } from "./core/schemes";
+import { layoutName } from "./core/schemes";
 import { addSession, cleanStats, currentStreak, dayKey, type Stats } from "./core/stats";
 import { TapTempo } from "./core/tapTempo";
 import { MAX_BPM, MIN_BPM } from "./core/timing";
@@ -142,7 +142,7 @@ chips.innerHTML = `
   <button class="chip px" type="button" data-chip="theme"></button>`;
 
 const stage = new Stage({
-  scheme: settings.scheme,
+  layout: { scheme: settings.scheme, pace: settings.pace },
   announce,
   onWord: (word) => helper.open(word),
   label(t) {
@@ -253,8 +253,8 @@ function showChips() {
   if (settings.mode === "tap") set("beat", "TAP TEMPO", "Tap tempo");
   else if (settings.mode === "own") set("beat", "YOUR BEAT", "Your own beat");
   else set("beat", beat.name.toUpperCase(), `Beat: ${beat.name}`);
-  const scheme = SCHEMES.find((s) => s.id === settings.scheme)!;
-  set("scheme", scheme.name, `Rhyme scheme: ${scheme.name}`);
+  const layout = layoutName(settings);
+  set("scheme", layout, `Rhyme scheme: ${layout}`);
   const words = DIFFICULTIES.find((d) => d.id === settings.difficulty)!;
   set("words", words.name, `Words: ${words.name.toLowerCase()}`);
   const theme = CATEGORIES.find((c) => c.id === settings.category);
@@ -378,7 +378,7 @@ function change(patch: Partial<Settings>) {
     void useBeat();
   }
   showTempo();
-  if (patch.scheme) stage.setScheme(settings.scheme);
+  if (patch.scheme || patch.pace) stage.setLayout({ scheme: settings.scheme, pace: settings.pace });
   if (patch.ball !== undefined) stage.setBallOn(settings.ball);
   if (patch.announce !== undefined) stage.announceOn = settings.announce;
   if (patch.difficulty) stage.refresh();

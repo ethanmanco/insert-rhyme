@@ -1,4 +1,4 @@
-import { barPlan, type BarPlan, type SchemeId, type Target } from "../core/schemes";
+import { barPlan, type BarPlan, type Layout, type Target } from "../core/schemes";
 import { ballPoint, beatPosition, BEATS_PER_BAR, snap, type BeatPosition } from "../core/timing";
 
 /** How many bars show below the current one. */
@@ -17,7 +17,7 @@ export interface Label {
 }
 
 export interface StageOptions {
-  scheme: SchemeId;
+  layout: Layout;
   label: (target: Target) => Label;
   /** Screen reader news. */
   announce: (text: string) => void;
@@ -76,8 +76,8 @@ export class Stage {
     this.root.classList.toggle("no-ball", !on);
   }
 
-  setScheme(scheme: SchemeId): void {
-    this.opts.scheme = scheme;
+  setLayout(layout: Layout): void {
+    this.opts.layout = layout;
     this.refresh();
   }
 
@@ -131,13 +131,13 @@ export class Stage {
   private showBar(bar: number, animate: boolean, quiet = false) {
     this.shownBar = bar;
     this.litBeat = -1;
-    const plan = barPlan(this.opts.scheme, bar);
+    const plan = barPlan(this.opts.layout, bar);
     this.caption.textContent = plan.intro ? "COUNT IN" : plan.targets.length ? `LINE ${plan.line + 1}` : `LINE ${plan.line + 1}: FREE`;
     this.blocks = this.fillRow(this.current, plan, true);
     this.next.replaceChildren();
     for (let i = 1; i <= AHEAD; i++) {
       const row = el("div", "row");
-      this.fillRow(row, barPlan(this.opts.scheme, bar + i), false);
+      this.fillRow(row, barPlan(this.opts.layout, bar + i), false);
       this.next.append(row);
     }
     if (animate) {

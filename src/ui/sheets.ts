@@ -1,7 +1,7 @@
 import { BEATS, beatById } from "../core/beats";
 import { CATEGORIES } from "../core/categories";
 import type { RhymeIndex, Tier } from "../core/rhymes";
-import { SCHEMES } from "../core/schemes";
+import { PACES, SCHEMES } from "../core/schemes";
 import { currentStreak, dayKey, type Stats } from "../core/stats";
 import { DIFFICULTIES, type Settings } from "../settings";
 
@@ -114,7 +114,8 @@ export function optionsSheet(get: () => Settings, stats: () => Stats, change: (p
           </label>`,
         ).join("")}</div>
       </fieldset>
-      ${radios("scheme", "RHYME SCHEME", SCHEMES.map((x) => ({ id: x.id, name: x.name, hint: x.hint })), s.scheme)}
+      ${radios("scheme", "RHYME SCHEME", SCHEMES, s.scheme)}
+      ${radios("pace", "RHYME PACE", PACES, s.pace)}
       ${radios("difficulty", "WORDS", DIFFICULTIES, s.difficulty)}
       ${themes(s.category)}
       <fieldset class="group">

@@ -1,30 +1,69 @@
 import { BEATS_PER_BAR } from "./timing";
 
 /**
- * Rhyme schemes as layouts: for any bar, which beats are targets (where a
- * rhyme should land) and which rhyme group each one belongs to. One bar is
- * one line of the verse, except in half-time, where a line takes two bars.
+ * Rhyme layouts: for any bar, which beats are targets (where a rhyme should
+ * land) and which rhyme group each one belongs to.
+ *
+ * A layout is two choices. The scheme is the pattern of a four-rhyme verse
+ * (AABB, ABAB and so on). The pace says where those rhymes land: at the end
+ * of every line, at the end of every second line with a free line between,
+ * or twice per line in double-time.
  */
 
-export type SchemeId = "aabb" | "abab" | "aaaa" | "skip" | "half" | "double";
+export type SchemeId = "aabb" | "abab" | "aaaa" | "abba" | "aaxa";
+export type PaceId = "every" | "skip" | "double";
+
+export interface Layout {
+  scheme: SchemeId;
+  pace: PaceId;
+}
 
 export interface SchemeInfo {
   id: SchemeId;
   name: string;
+  /** The verse pattern, one letter per rhyme spot: X is a spot with no rhyme. */
+  pattern: string;
   /** How the pattern reads, for the picker. */
   hint: string;
 }
 
+export interface PaceInfo {
+  id: PaceId;
+  name: string;
+  /** A short tag for the chip; empty for the normal pace. */
+  tag: string;
+  hint: string;
+}
+
 export const SCHEMES: SchemeInfo[] = [
-  { id: "aabb", name: "AABB", hint: "Couplets: two lines rhyme, then the next two." },
-  { id: "abab", name: "ABAB", hint: "Every other line rhymes, with two sounds woven together." },
-  { id: "aaaa", name: "AAAA", hint: "Four lines in a row on the same sound." },
-  { id: "skip", name: "SKIP-LINE", hint: "Only every second line rhymes. The others are free." },
-  { id: "half", name: "HALF-TIME", hint: "Slow it down: one rhyme every two bars." },
-  { id: "double", name: "DOUBLE-TIME", hint: "Two rhymes in every bar, on beats 2 and 4." },
+  { id: "aabb", name: "AABB", pattern: "AABB", hint: "Couplets: two rhymes on one sound, then two on the next." },
+  { id: "abab", name: "ABAB", pattern: "ABAB", hint: "Two sounds woven together, taking turns." },
+  { id: "aaaa", name: "AAAA", pattern: "AAAA", hint: "Four rhymes in a row on the same sound." },
+  { id: "abba", name: "ABBA", pattern: "ABBA", hint: "A couplet wrapped inside another sound." },
+  { id: "aaxa", name: "AAXA", pattern: "AAXA", hint: "Three rhymes on one sound, with a free spot before the last." },
+];
+
+export const PACES: PaceInfo[] = [
+  { id: "every", name: "EVERY LINE", tag: "", hint: "A rhyme at the end of every line." },
+  { id: "skip", name: "SKIP A LINE", tag: "SKIP", hint: "A free line, then a rhyming line. Only every second line rhymes." },
+  { id: "double", name: "DOUBLE-TIME", tag: "2X", hint: "Two rhymes in every line, on beats 2 and 4." },
 ];
 
 export const isScheme = (id: unknown): id is SchemeId => SCHEMES.some((s) => s.id === id);
+export const isPace = (id: unknown): id is PaceId => PACES.some((p) => p.id === id);
+
+/** Read a saved layout, including ones saved before the pace was its own choice. */
+export function readLayout(scheme: unknown, pace: unknown): Layout {
+  if (scheme === "skip" || scheme === "half") return { scheme: "aabb", pace: "skip" };
+  if (scheme === "double") return { scheme: "aaaa", pace: "double" };
+  return { scheme: isScheme(scheme) ? scheme : "aabb", pace: isPace(pace) ? pace : "every" };
+}
+
+/** A layout's short name, for the chip: "AABB", "ABAB SKIP", "AAAA 2X". */
+export function layoutName(l: Layout): string {
+  const tag = PACES.find((p) => p.id === l.pace)!.tag;
+  return `${SCHEMES.find((s) => s.id === l.scheme)!.name}${tag ? ` ${tag}` : ""}`;
+}
 
 /** Bars of count-in before the first line, so you can catch the beat. */
 export const INTRO_BARS = 1;
@@ -41,7 +80,7 @@ export interface Target {
   group: number;
   /** Which word of its group this is: 0 for the first. */
   slot: number;
-  /** The group's letter inside its stretch of the scheme (A, B, ...). */
+  /** The group's letter inside its verse (A or B). */
   letter: string;
 }
 
@@ -54,61 +93,34 @@ export interface BarPlan {
   targets: Target[];
 }
 
-const letter = (i: number) => String.fromCharCode(65 + i);
-const end = (group: number, slot: number, l: number): Target => ({ beat: LINE_END_BEAT, group, slot, letter: letter(l) });
-
-/** The targets of one bar, `n` bars after the count-in. */
-function targetsFor(scheme: SchemeId, n: number): { line: number; targets: Target[] } {
-  const verse = Math.floor(n / 4);
-  const pos = n % 4;
-  switch (scheme) {
-    case "aabb": {
-      // Lines 1-2 share group A, lines 3-4 group B.
-      const half = Math.floor(pos / 2);
-      return { line: n, targets: [end(verse * 2 + half, pos % 2, half)] };
-    }
-    case "abab": {
-      // Lines 1 and 3 share group A, lines 2 and 4 group B.
-      const which = pos % 2;
-      return { line: n, targets: [end(verse * 2 + which, Math.floor(pos / 2), which)] };
-    }
-    case "aaaa":
-      return { line: n, targets: [end(verse, pos, 0)] };
-    case "skip":
-      // Lines 2 and 4 rhyme with each other; lines 1 and 3 are free.
-      return { line: n, targets: pos % 2 === 1 ? [end(verse, Math.floor(pos / 2), 0)] : [] };
-    case "half": {
-      // Each line takes two bars and ends on the second one. Lines pair up AABB.
-      const line = Math.floor(n / 2);
-      if (n % 2 === 0) return { line, targets: [] };
-      const hv = Math.floor(line / 4);
-      const half = Math.floor((line % 4) / 2);
-      return { line, targets: [end(hv * 2 + half, line % 2, half)] };
-    }
-    case "double": {
-      // Beats 2 and 4 of a pair of lines share a group: four rhymes, then a new sound.
-      const pair = Math.floor(n / 2);
-      const first = (n % 2) * 2;
-      const l = pair % 2;
-      return {
-        line: n,
-        targets: [
-          { beat: MID_BEAT, group: pair, slot: first, letter: letter(l) },
-          { beat: LINE_END_BEAT, group: pair, slot: first + 1, letter: letter(l) },
-        ],
-      };
-    }
-  }
+/** The target for rhyme spot `k` of the session (four spots per verse), or none for a free spot. */
+function spot(pattern: string, k: number, beat: number): Target | null {
+  const verse = Math.floor(k / 4);
+  const pos = k % 4;
+  const letter = pattern[pos]!;
+  if (letter === "X") return null;
+  const slot = [...pattern.slice(0, pos)].filter((c) => c === letter).length;
+  return { beat, group: verse * 2 + (letter.charCodeAt(0) - 65), slot, letter };
 }
 
-/** Lay out one bar of a scheme. */
-export function barPlan(scheme: SchemeId, bar: number): BarPlan {
+/** The targets of line `n` (0-based, after the count-in). */
+function targetsFor(layout: Layout, n: number): Target[] {
+  const { pattern } = SCHEMES.find((s) => s.id === layout.scheme)!;
+  const spots: [number, number][] =
+    layout.pace === "every" ? [[n, LINE_END_BEAT]]
+    : layout.pace === "skip" ? (n % 2 === 1 ? [[(n - 1) / 2, LINE_END_BEAT]] : [])
+    : [[n * 2, MID_BEAT], [n * 2 + 1, LINE_END_BEAT]];
+  return spots.map(([k, beat]) => spot(pattern, k, beat)).filter((t): t is Target => t !== null);
+}
+
+/** Lay out one bar. Every bar after the count-in is one line of the verse. */
+export function barPlan(layout: Layout, bar: number): BarPlan {
   const n = bar - INTRO_BARS;
   if (n < 0) return { bar, intro: true, line: -1, targets: [] };
-  return { bar, intro: false, ...targetsFor(scheme, n) };
+  return { bar, intro: false, line: n, targets: targetsFor(layout, n) };
 }
 
 /** A few bars at once: the current one and the ones coming up. */
-export function upcomingBars(scheme: SchemeId, fromBar: number, count: number): BarPlan[] {
-  return Array.from({ length: count }, (_, i) => barPlan(scheme, fromBar + i));
+export function upcomingBars(layout: Layout, fromBar: number, count: number): BarPlan[] {
+  return Array.from({ length: count }, (_, i) => barPlan(layout, fromBar + i));
 }

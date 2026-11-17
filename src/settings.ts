@@ -1,6 +1,6 @@
 import { beatById } from "./core/beats";
 import { isCategory } from "./core/categories";
-import { isScheme, type SchemeId } from "./core/schemes";
+import { readLayout, type PaceId, type SchemeId } from "./core/schemes";
 import { clampBpm } from "./core/timing";
 import { load, save } from "./storage";
 
@@ -13,6 +13,8 @@ export interface Settings {
   beat: string;
   bpm: number;
   scheme: SchemeId;
+  /** Where the scheme's rhymes land: every line, every second line, or twice a line. */
+  pace: PaceId;
   difficulty: Difficulty;
   /** A word category id, or "any". */
   category: string;
@@ -35,11 +37,13 @@ export function loadSettings(reducedMotion: boolean): Settings {
   const raw = load<Record<string, unknown>>("settings", {});
   const beat = beatById(raw.beat);
   const bool = (v: unknown, d: boolean) => (typeof v === "boolean" ? v : d);
+  const layout = readLayout(raw.scheme, raw.pace);
   return {
     mode: raw.mode === "tap" || raw.mode === "own" ? raw.mode : "beat",
     beat: beat.id,
     bpm: clampBpm(raw.bpm, beat.bpm),
-    scheme: isScheme(raw.scheme) ? raw.scheme : "aabb",
+    scheme: layout.scheme,
+    pace: layout.pace,
     difficulty: DIFFICULTIES.some((d) => d.id === raw.difficulty) ? (raw.difficulty as Difficulty) : "all",
     category: isCategory(raw.category) ? String(raw.category) : "any",
     explicit: bool(raw.explicit, false),

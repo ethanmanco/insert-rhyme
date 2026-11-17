@@ -1,64 +1,127 @@
 import { describe, expect, it } from "vitest";
-import { barPlan, INTRO_BARS, LINE_END_BEAT, MID_BEAT, SCHEMES, upcomingBars, type BarPlan, type SchemeId } from "../src/core/schemes";
+import {
+  barPlan,
+  INTRO_BARS,
+  layoutName,
+  LINE_END_BEAT,
+  MID_BEAT,
+  PACES,
+  readLayout,
+  SCHEMES,
+  upcomingBars,
+  type BarPlan,
+  type Layout,
+  type PaceId,
+  type SchemeId,
+} from "../src/core/schemes";
 
-/** One letter per target in order, "-" for a bar with none: "AABB", "-A-A" and so on. */
+/** One letter per target in order, "-" for a bar with none: "A A B B", "- A - A" and so on. */
 const shape = (plans: BarPlan[]) => plans.map((p) => (p.targets.length ? p.targets.map((t) => t.letter).join("") : "-")).join(" ");
-const lines = (scheme: SchemeId, bars: number) => upcomingBars(scheme, INTRO_BARS, bars);
+const lines = (scheme: SchemeId, pace: PaceId, bars: number) => upcomingBars({ scheme, pace }, INTRO_BARS, bars);
+const groups = (plans: BarPlan[]) => plans.flatMap((p) => p.targets.map((t) => t.group));
 
-describe("every scheme", () => {
-  for (const { id } of SCHEMES) {
-    it(`${id} starts with a count-in bar with no targets`, () => {
-      const plan = barPlan(id, 0);
+const ALL: Layout[] = SCHEMES.flatMap((s) => PACES.map((p) => ({ scheme: s.id, pace: p.id })));
+
+describe("every layout", () => {
+  for (const layout of ALL) {
+    const name = layoutName(layout);
+    it(`${name} starts with a count-in bar with no targets`, () => {
+      const plan = barPlan(layout, 0);
       expect(plan.intro).toBe(true);
       expect(plan.targets).toEqual([]);
     });
 
-    it(`${id} fills each group's slots in order, with no gaps or repeats`, () => {
+    it(`${name} fills each group's slots in order, and every group gets at least two rhymes`, () => {
       const slots = new Map<number, number[]>();
-      for (const plan of lines(id, 32)) for (const t of plan.targets) slots.set(t.group, [...(slots.get(t.group) ?? []), t.slot]);
-      for (const list of slots.values()) expect(list).toEqual(list.map((_, i) => i));
+      for (const plan of upcomingBars(layout, INTRO_BARS, 32)) for (const t of plan.targets) slots.set(t.group, [...(slots.get(t.group) ?? []), t.slot]);
+      for (const list of slots.values()) {
+        expect(list).toEqual(list.map((_, i) => i));
+        expect(list.length).toBeGreaterThanOrEqual(2);
+      }
     });
 
-    it(`${id} only puts targets on real beats`, () => {
-      for (const plan of lines(id, 16)) for (const t of plan.targets) expect([MID_BEAT, LINE_END_BEAT]).toContain(t.beat);
+    it(`${name} only puts targets on real beats`, () => {
+      for (const plan of upcomingBars(layout, INTRO_BARS, 16)) for (const t of plan.targets) expect([MID_BEAT, LINE_END_BEAT]).toContain(t.beat);
     });
   }
+
+  it("all look different from each other", () => {
+    const looks = ALL.map((l) => `${shape(upcomingBars(l, INTRO_BARS, 16))} ${groups(upcomingBars(l, INTRO_BARS, 16)).join(",")}`);
+    expect(new Set(looks).size).toBe(ALL.length);
+  });
 });
 
-describe("layouts", () => {
+describe("every line", () => {
   it("AABB: couplets", () => {
-    expect(shape(lines("aabb", 8))).toBe("A A B B A A B B");
-    expect(lines("aabb", 4).map((p) => p.targets[0]!.group)).toEqual([0, 0, 1, 1]);
+    expect(shape(lines("aabb", "every", 8))).toBe("A A B B A A B B");
+    expect(groups(lines("aabb", "every", 4))).toEqual([0, 0, 1, 1]);
   });
 
   it("ABAB: alternating lines", () => {
-    expect(shape(lines("abab", 8))).toBe("A B A B A B A B");
-    expect(lines("abab", 4).map((p) => p.targets[0]!.group)).toEqual([0, 1, 0, 1]);
+    expect(shape(lines("abab", "every", 8))).toBe("A B A B A B A B");
+    expect(groups(lines("abab", "every", 4))).toEqual([0, 1, 0, 1]);
   });
 
   it("AAAA: one sound for four lines", () => {
-    expect(shape(lines("aaaa", 4))).toBe("A A A A");
-    expect(new Set(lines("aaaa", 4).map((p) => p.targets[0]!.group)).size).toBe(1);
-    expect(lines("aaaa", 8)[4]!.targets[0]!.group).toBe(1);
+    expect(shape(lines("aaaa", "every", 4))).toBe("A A A A");
+    const g = groups(lines("aaaa", "every", 8));
+    expect(new Set(g.slice(0, 4)).size).toBe(1);
+    expect(g[4]).not.toBe(g[0]);
   });
 
-  it("skip-line: only every other line rhymes", () => {
-    expect(shape(lines("skip", 8))).toBe("- A - A - A - A");
-    const groups = lines("skip", 8).flatMap((p) => p.targets.map((t) => t.group));
-    expect(groups).toEqual([0, 0, 1, 1]);
+  it("ABBA: a couplet inside another sound", () => {
+    expect(shape(lines("abba", "every", 4))).toBe("A B B A");
+    expect(groups(lines("abba", "every", 4))).toEqual([0, 1, 1, 0]);
   });
 
-  it("half-time: a rhyme every two bars", () => {
-    const plans = lines("half", 16);
-    expect(shape(plans)).toBe("- A - A - B - B - A - A - B - B");
-    expect(plans.map((p) => p.line)).toEqual([0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7]);
+  it("AAXA: line 3 is free", () => {
+    expect(shape(lines("aaxa", "every", 8))).toBe("A A - A A A - A");
+  });
+});
+
+describe("skip a line", () => {
+  it("puts a free line before every rhyming line, keeping the scheme", () => {
+    expect(shape(lines("aabb", "skip", 8))).toBe("- A - A - B - B");
+    expect(shape(lines("abab", "skip", 8))).toBe("- A - B - A - B");
+    expect(shape(lines("aaaa", "skip", 8))).toBe("- A - A - A - A");
+    expect(shape(lines("abba", "skip", 8))).toBe("- A - B - B - A");
+    expect(groups(lines("abab", "skip", 8))).toEqual([0, 1, 0, 1]);
+    expect(new Set(groups(lines("aaaa", "skip", 8))).size).toBe(1);
   });
 
-  it("double-time: two rhymes per bar, on beats 2 and 4", () => {
-    const plans = lines("double", 4);
-    expect(shape(plans)).toBe("AA AA BB BB");
-    for (const p of plans) expect(p.targets.map((t) => t.beat)).toEqual([MID_BEAT, LINE_END_BEAT]);
-    expect(plans[0]!.targets.map((t) => t.group)).toEqual([0, 0]);
-    expect(plans[1]!.targets.map((t) => t.slot)).toEqual([2, 3]);
+  it("keeps one line per bar", () => {
+    expect(lines("aabb", "skip", 4).map((p) => p.line)).toEqual([0, 1, 2, 3]);
+  });
+});
+
+describe("double-time", () => {
+  it("puts two rhymes in each bar, on beats 2 and 4, following the scheme", () => {
+    expect(shape(lines("aabb", "double", 4))).toBe("AA BB AA BB");
+    expect(shape(lines("abab", "double", 2))).toBe("AB AB");
+    expect(shape(lines("aaaa", "double", 2))).toBe("AA AA");
+    expect(shape(lines("abba", "double", 2))).toBe("AB BA");
+    for (const p of lines("aabb", "double", 4)) expect(p.targets.map((t) => t.beat)).toEqual([MID_BEAT, LINE_END_BEAT]);
+  });
+
+  it("drops the free spot of AAXA", () => {
+    expect(shape(lines("aaxa", "double", 2))).toBe("AA A");
+    expect(lines("aaxa", "double", 2)[1]!.targets.map((t) => t.beat)).toEqual([LINE_END_BEAT]);
+  });
+});
+
+describe("saved layouts", () => {
+  it("read old settings from before the pace choice", () => {
+    expect(readLayout("skip", undefined)).toEqual({ scheme: "aabb", pace: "skip" });
+    expect(readLayout("half", undefined)).toEqual({ scheme: "aabb", pace: "skip" });
+    expect(readLayout("double", undefined)).toEqual({ scheme: "aaaa", pace: "double" });
+    expect(readLayout("abab", undefined)).toEqual({ scheme: "abab", pace: "every" });
+    expect(readLayout("nope", "nope")).toEqual({ scheme: "aabb", pace: "every" });
+    expect(readLayout("abba", "skip")).toEqual({ scheme: "abba", pace: "skip" });
+  });
+
+  it("name themselves for the chip", () => {
+    expect(layoutName({ scheme: "aabb", pace: "every" })).toBe("AABB");
+    expect(layoutName({ scheme: "abab", pace: "skip" })).toBe("ABAB SKIP");
+    expect(layoutName({ scheme: "aaaa", pace: "double" })).toBe("AAAA 2X");
   });
 });

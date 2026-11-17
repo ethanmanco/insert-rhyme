@@ -12,7 +12,7 @@ Free 8-bit freestyle rap practice. Pick a beat, watch the ball bounce across eac
 - **Use your own beat:** pick any song or beat file on your phone. The app finds its tempo and first bar by itself, and you can fix it with half, double, bar shift or tap to sync. The file never leaves your device.
 - **Word themes:** 25 rap styles (crunk, Houston slab, Memphis, Chicago drill, UK drill, Brooklyn drill, UK grime, Bay Area hyphy, New Orleans bounce, Detroit, Philly, Miami bass, Midwest chopper, battle rap, conscious, horrorcore, emo rap, rage, afroswing, Jersey club and more) and 33 topics (food, cars, money, family, hustle, pirates, Halloween and more). The first word of each rhyme comes from the theme.
 - **A bar view that shows exactly when to rhyme.** Each bar is a row of four blocks, one per beat. The ball lands on each block right on the beat, the target block where your rhyme should land is highlighted, and the next three bars wait underneath so you can plan.
-- **6 rhyme schemes:** AABB, ABAB, AAAA, skip-line (only every other line rhymes), half-time (a rhyme every two bars) and double-time (two rhymes per bar).
+- **5 rhyme schemes at 3 paces:** AABB, ABAB, AAAA, ABBA and AAXA (line 3 free), each at every line, skip a line (a free line before each rhyming line) or double-time (two rhymes per line, on beats 2 and 4). That's 15 layouts.
 - **Word prompts with three levels:** every rhyme word shown, only the first word of each rhyme shown (you find the rest), or no words (free practice with the scheme only).
 - **Rhyme helper:** tap any word for its perfect and near rhymes, or type your own.
 - **Tap tempo:** rapping over music from somewhere else? Tap along and the bars follow, with no built-in beat.

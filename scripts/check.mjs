@@ -132,6 +132,28 @@ try {
   check(blocks.every((r) => r.split("|").filter((x) => x).length === 2), "double-time rows should have two targets each");
   check(blocks.join(" ").includes("????"), "first-word difficulty should hide later words");
   await shot(page, "07-double-first");
+  const schemeChip = await page.evaluate(() => document.querySelector("[data-chip='scheme']").textContent);
+  check(schemeChip === "AABB 2X", `the scheme chip should say AABB 2X, got ${schemeChip}`);
+
+  // ABAB with a skipped line: every other bar is free, and the rhyming bars alternate A and B.
+  await page.click("[data-tool='options']");
+  await page.waitForSelector("dialog[open] input[value='skip']");
+  await page.click("dialog[open] input[value='abab']");
+  await page.click("dialog[open] input[value='skip']");
+  await page.click("dialog[open] input[value='none']");
+  await page.keyboard.press("Escape");
+  await sleep(300);
+  const skipRows = await page.evaluate(() => [...document.querySelectorAll(".row.current, .next .row")].map((r) => [...r.querySelectorAll(".target")].map((b) => b.textContent).join("")));
+  console.log("ABAB SKIP, no words:", JSON.stringify(skipRows));
+  const rhyming = skipRows.filter((r) => r);
+  check(rhyming.length === 2 && skipRows.length === 4 && rhyming[0] !== rhyming[1], "ABAB SKIP should show two rhyming bars of four, A then B");
+  await shot(page, "07b-abab-skip");
+  await page.click("[data-tool='options']");
+  await page.waitForSelector("dialog[open] input[value='every']");
+  await page.click("dialog[open] input[value='aabb']");
+  await page.click("dialog[open] input[value='every']");
+  await page.click("dialog[open] input[value='first']");
+  await page.keyboard.press("Escape");
 
   // Explicit words: switch them on and check a good share of prompt groups use them.
   await page.click("[data-tool='options']");
