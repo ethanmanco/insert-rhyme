@@ -54,6 +54,16 @@ export class RhymeIndex {
     return this.words.get(word.toLowerCase());
   }
 
+  /** Every perfect rhyme sound and the words that end in it. */
+  sounds(): IterableIterator<[string, Entry[]]> {
+    return this.byPerfect.entries();
+  }
+
+  /** Every word in one tier. */
+  tierWords(tier: Tier): Entry[] {
+    return [...this.words.values()].filter((e) => e.tier === tier);
+  }
+
   /** Words that share the perfect rhyme sound of `pron`, for building prompts. */
   family(pron: Phones): Entry[] {
     return this.byPerfect.get(perfectKey(pron)) ?? [];

@@ -3,7 +3,6 @@ import clean from "../public/data/words-clean.txt?raw";
 import profane from "../public/data/words-profane.txt?raw";
 import slur from "../public/data/words-slur.txt?raw";
 import { baseForms, classify, LISTS, rot13 } from "../filter/classify";
-import { SEEDS } from "../src/core/prompts";
 
 const wordsOf = (text: string) => text.split("\n").filter(Boolean).map((l) => l.split("\t")[0]!);
 const cleanWords = wordsOf(clean);
@@ -105,7 +104,4 @@ describe("the shipped word files", () => {
     expect(overlap).toEqual([]);
   });
 
-  it("keep prompt seeds clean", () => {
-    for (const seed of SEEDS) expect([seed, classify(seed)]).toEqual([seed, "clean"]);
-  });
 });

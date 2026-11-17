@@ -6,7 +6,7 @@ import { canRecord, Recorder, type Take } from "./audio/recorder";
 import { beatById, ENCODER_DELAY, POSTROLL } from "./core/beats";
 import { doubleTempo, findGrid, halfTempo, monoOpening, shiftBeats, syncFromTaps, type Grid } from "./core/ownBeat";
 import { categoryWords, CATEGORIES } from "./core/categories";
-import { PromptDeck } from "./core/prompts";
+import { PromptDeck, type Memory } from "./core/prompts";
 import { allowedTiers, RhymeIndex, type Tier } from "./core/rhymes";
 import { SCHEMES } from "./core/schemes";
 import { addSession, cleanStats, currentStreak, dayKey, type Stats } from "./core/stats";
@@ -100,7 +100,14 @@ async function refreshWords(): Promise<void> {
   const want = [...allowed()].filter((t) => !index?.loaded.has(t));
   for (const tier of want) await loadTier(tier);
   const category = CATEGORIES.find((c) => c.id === settings.category);
-  if (index) deck = new PromptDeck(index, allowed(), Date.now(), category ? categoryWords(category, settings.explicit) : null);
+  if (deck) save("recent", deck.memory());
+  if (index)
+    deck = new PromptDeck(index, allowed(), {
+      theme: category ? categoryWords(category, settings.explicit) : null,
+      explicit: settings.explicit,
+      slurs: settings.slurs,
+      memory: load<Memory>("recent", { sounds: [], words: [] }),
+    });
   stage.refresh();
   helper.refresh();
 }
@@ -411,6 +418,8 @@ function beginSession() {
 }
 
 function endSession() {
+  // Remember recent prompt words, so the next visit starts somewhere new.
+  if (deck) save("recent", deck.memory());
   if (sessionStart === null) return;
   const seconds = (performance.now() - sessionStart) / 1000;
   sessionStart = null;

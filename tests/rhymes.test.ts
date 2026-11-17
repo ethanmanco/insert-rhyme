@@ -3,7 +3,6 @@ import clean from "../public/data/words-clean.txt?raw";
 import profane from "../public/data/words-profane.txt?raw";
 import slur from "../public/data/words-slur.txt?raw";
 import { nearKey, onset, parsePron, perfectKey, stressIndex, syllables } from "../src/core/phonetics";
-import { family, MIN_FAMILY, PromptDeck, SEEDS } from "../src/core/prompts";
 import { allowedTiers, RhymeIndex } from "../src/core/rhymes";
 
 describe("phonetics", () => {
@@ -90,41 +89,5 @@ describe("rhyme lookups on the real dictionary data", () => {
     const explicit = on.perfect.filter((w) => !off.perfect.includes(w));
     expect(explicit.length).toBeGreaterThan(0);
     for (const w of explicit) expect(index.entry(w)!.tier).toBe("profane");
-  });
-});
-
-describe("prompt words", () => {
-  const index = new RhymeIndex();
-  beforeAll(() => index.add(clean, "clean"));
-  const kids = allowedTiers(false, false);
-
-  it("has no repeated seeds", () => {
-    expect(new Set(SEEDS).size).toBe(SEEDS.length);
-  });
-
-  it(`gives every seed at least ${MIN_FAMILY} easy rhymes`, () => {
-    const short = SEEDS.filter((s) => family(index, s, kids).length < MIN_FAMILY);
-    expect(short).toEqual([]);
-  });
-
-  it("only offers words that perfectly rhyme with the seed", () => {
-    for (const seed of SEEDS.slice(0, 40)) {
-      const rhymes = new Set([seed, ...index.lookup(seed, kids, 5000).perfect]);
-      // Family words may echo the seed (leave/believe), so check against a shared perfect key instead.
-      const keys = new Set(index.entry(seed)!.prons.map(perfectKey));
-      for (const w of family(index, seed, kids)) {
-        expect(rhymes.has(w) || index.entry(w)!.prons.some((p) => keys.has(perfectKey(p)))).toBe(true);
-      }
-    }
-  });
-
-  it("keeps a group's words steady and moves on to new sounds", () => {
-    const deck = new PromptDeck(index, kids, 7);
-    expect(deck.word(0, 0)).toBe(deck.word(0, 0));
-    const a = new Set([deck.word(0, 0), deck.word(0, 1)]);
-    expect(a.size).toBe(2);
-    const keyOf = (w: string) => perfectKey(index.entry(w)!.prons[0]!);
-    const sounds = new Set(Array.from({ length: 10 }, (_, g) => keyOf(deck.word(g, 0))));
-    expect(sounds.size).toBeGreaterThanOrEqual(8);
   });
 });

@@ -45,21 +45,18 @@ describe("word categories", () => {
 describe("a themed deck", () => {
   it("starts every group with a theme word, followed by words that rhyme with it", () => {
     const food = CATEGORIES.find((c) => c.id === "food")!;
-    const deck = new PromptDeck(index, kids, 3, categoryWords(food, false));
+    const deck = new PromptDeck(index, kids, { seed: 3, theme: categoryWords(food, false) });
     for (let g = 0; g < 20; g++) {
-      const first = deck.word(g, 0);
-      expect(food.words).toContain(first);
-      const key = perfectKey(index.entry(first)!.prons[0]!);
-      for (let slot = 1; slot < 4; slot++) {
-        const w = deck.word(g, slot);
-        expect(index.entry(w)!.prons.some((p) => perfectKey(p) === key)).toBe(true);
-      }
+      const words = [0, 1, 2, 3].map((slot) => deck.word(g, slot));
+      expect(food.words).toContain(words[0]);
+      const sets = words.map((w) => new Set(index.entry(w)!.prons.map(perfectKey)));
+      expect([words, [...sets[0]!].some((k) => sets.every((s) => s.has(k)))]).toEqual([words, true]);
     }
   });
 
   it("moves through the theme instead of repeating one word", () => {
     const cars = CATEGORIES.find((c) => c.id === "cars")!;
-    const deck = new PromptDeck(index, kids, 9, cars.words);
+    const deck = new PromptDeck(index, kids, { seed: 9, theme: cars.words });
     const firsts = new Set(Array.from({ length: 12 }, (_, g) => deck.word(g, 0)));
     expect(firsts.size).toBeGreaterThanOrEqual(10);
   });
