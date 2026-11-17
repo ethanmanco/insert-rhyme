@@ -8,7 +8,9 @@ Free 8-bit freestyle rap practice. Pick a beat, watch the ball bounce across eac
 
 ## What it does
 
-- **7 beats, all made in code:** Dusty boom bap, Night trap, Rainy lo-fi, Bounce house, Dark alley, Sunset funk and Cold drill. Tempo from 70 to 160 BPM.
+- **Real recorded beats**, all free-licensed (CC0 or CC BY): boom bap, laid back, jazzy, G-funk, phonk, trap and drill. Each is cut to an exact 16-bar loop. The tempo slider works like a turntable: speed and pitch move together, from 60% to 160% (slow it right down for a screwed Houston feel).
+- **Use your own beat:** pick any song or beat file on your phone. The app finds its tempo and first bar by itself, and you can fix it with half, double, bar shift or tap to sync. The file never leaves your device.
+- **Word themes:** 9 rap styles (crunk, Houston slab, Memphis, Chicago drill, UK grime, West Coast, New York boom bap, Atlanta trap, old school) and 17 topics (food, cars, money, sports and more). The first word of each rhyme comes from the theme.
 - **A bar view that shows exactly when to rhyme.** Each bar is a row of four blocks, one per beat. The ball lands on each block right on the beat, the target block where your rhyme should land is highlighted, and the next three bars wait underneath so you can plan.
 - **6 rhyme schemes:** AABB, ABAB, AAAA, skip-line (only every other line rhymes), half-time (a rhyme every two bars) and double-time (two rhymes per bar).
 - **Word prompts with three levels:** every rhyme word shown, only the first word of each rhyme shown (you find the rest), or no words (free practice with the scheme only).
@@ -22,7 +24,7 @@ Works in portrait on a phone, with big controls. Keyboard: Space plays and stops
 
 ## How it stays on the beat
 
-The ball never runs on its own timer. Every frame, the app asks the audio clock where the music is (minus the delay before sound reaches your ears) and draws the ball at exactly that spot, so it cannot drift away from the beat, even after an hour. A headless browser check (`scripts/check.mjs`) plays the beat and confirms, frame by frame, that the lit block is always the beat the audio clock is on.
+Each loop is restarted exactly on its bar line from the audio clock, so a recording and the bar count can never drift apart, even after a tempo change. The ball never runs on its own timer either. Every frame, the app asks the audio clock where the music is (minus the delay before sound reaches your ears) and draws the ball at exactly that spot, so it cannot drift away from the beat, even after an hour. A headless browser check (`scripts/check.mjs`) plays the beat and confirms, frame by frame, that the lit block is always the beat the audio clock is on.
 
 ## How the rhyme matching works
 
@@ -48,7 +50,11 @@ The tests check every listed word and its forms, a set of innocent look-alikes, 
 - **SCOWL** (Spell Checker Oriented Word Lists) 2020.12.07, Copyright 2000-2018 by Kevin Atkinson, under an MIT-like license. Used for how common each word is. Full notice: [licenses/scowl.txt](licenses/scowl.txt), also shipped next to the data.
 - **List of Dirty, Naughty, Obscene, and Otherwise Bad Words** (English), (c) 2012-2020 Shutterstock, Inc., [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Its single-word entries seed the filter, stored encoded in `filter/lists.ts`; phrases are left out.
 - **Fonts:** Press Start 2P and VT323, both under the SIL Open Font License ([licenses](licenses)).
-- **Sounds:** the drum and synth engine comes from [Steplab](https://github.com/ethanmanco/steplab), my browser beat maker. Every sound is made in code, with no audio samples.
+- **Beats** (each cut to a 16-bar loop; the CC BY ones are changed only by that cut):
+  - [Bap Boom](https://freemusicarchive.org/music/Ketsa/the-unveiling/bap-boom/), [Jazz For The Soul](https://freemusicarchive.org/music/Ketsa/cc-by-free-to-use-for-anything/jazz-for-the-soul/), [Soul Trap](https://freemusicarchive.org/music/Ketsa/cc-by-free-to-use-for-anything/soul-trap/) and [Trench Work](https://freemusicarchive.org/music/Ketsa/cc-by-free-to-use-for-anything/trench-work/) by Ketsa ([Ketsa.uk](https://ketsa.uk)), [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+  - [Unwind](https://freemusicarchive.org/music/holiznacc0/kick-it-laid-back-hiphop/unwind/) and [Phonk Remix](https://freemusicarchive.org/music/holiznacc0/phonk-aura-farming/phonk-remix/) by HoliznaCC0, [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)
+  - [Gang$tazz](https://opengameart.org/content/gangtazz) by Alexandr Zhelanov, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+- **Tempo finding** for your own beats and the loop tool (`scripts/cut-loop.py`) are this project's own; the earlier code-made beats used [Steplab](https://github.com/ethanmanco/steplab)'s engine.
 - One pronunciation is fixed by hand: "mic" rhymes with "like".
 
 ## Future ideas
@@ -56,7 +62,7 @@ The tests check every listed word and its forms, a set of innocent look-alikes, 
 - Video recording
 - Speech recognition to check whether you actually hit the rhymes
 - Sharing takes and sessions
-- More beats
+- More beats, including grime and Houston chopped and screwed (no free-licensed ones turned up yet)
 - Accounts, to keep your streak across devices
 
 ## Development
