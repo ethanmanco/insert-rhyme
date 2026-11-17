@@ -1,0 +1,430 @@
+:root {
+  --paper: #f3ecd8;
+  --rule: #c9d4e6;
+  --ink: #23233a;
+  --muted: #555a7a;
+  --block: #fffaf0;
+  --dim: #ebe3cb;
+  --dim-edge: #9aa0bb;
+  --hl-a: #ffe045;
+  --hl-b: #ff8fbf;
+  --on-hl: #23233a;
+  --rec: #d8344f;
+  --on-ink: #f3ecd8;
+  /* The big button: a dark console key with yellow lettering. */
+  --key: #23233a;
+  --on-key: #ffe045;
+  --pixel: "Press Start 2P", ui-monospace, monospace;
+  --type: "VT323", ui-monospace, monospace;
+  color-scheme: light;
+}
+
+/* Carbon paper: the same book after dark. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #1b1b29;
+    --rule: #2a2c42;
+    --ink: #f1e9d2;
+    --muted: #a6abc6;
+    --block: #262638;
+    --dim: #20202f;
+    --dim-edge: #4a4e6c;
+    --on-ink: #1b1b29;
+    --key: #ffe045;
+    --on-key: #23233a;
+    color-scheme: dark;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background-color: var(--paper);
+  /* Ruled notebook lines, two pixels thick so they stay crisp. */
+  background-image: repeating-linear-gradient(var(--paper) 0 30px, var(--rule) 30px 32px);
+  color: var(--ink);
+  font-family: var(--type);
+  font-size: 22px;
+  line-height: 1.2;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: none;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Pixel corners: the four corner pixels are cut away, like an old console box. */
+.px {
+  clip-path: polygon(
+    0 4px, 4px 4px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px,
+    100% calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%,
+    4px 100%, 4px calc(100% - 4px), 0 calc(100% - 4px)
+  );
+}
+
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: max(12px, env(safe-area-inset-top)) 16px max(12px, env(safe-area-inset-bottom));
+  gap: 12px;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.logo {
+  font-family: var(--pixel);
+  font-size: 13px;
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+.chips {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  font-size: 20px;
+  padding: 0 8px;
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+  background: var(--block);
+}
+
+.chip.solid {
+  background: var(--ink);
+  color: var(--on-ink);
+}
+
+/* ---------- The bars ---------- */
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.caption {
+  margin: 0;
+  font-size: 20px;
+  color: var(--muted);
+  min-height: 24px;
+}
+
+.lane {
+  position: relative;
+  height: 56px;
+}
+
+.ball {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 20px;
+  height: 20px;
+  background: var(--ink);
+  /* A round ball drawn in square pixels. */
+  clip-path: polygon(
+    4px 0, 16px 0, 16px 4px, 20px 4px, 20px 16px, 16px 16px, 16px 20px,
+    4px 20px, 4px 16px, 0 16px, 0 4px, 4px 4px
+  );
+  will-change: transform;
+}
+
+.ball::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  width: 4px;
+  height: 4px;
+  background: var(--paper);
+}
+
+.no-ball .ball {
+  display: none;
+}
+
+.no-ball .lane {
+  height: 8px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.block {
+  height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--block);
+  outline: 4px solid var(--ink);
+  outline-offset: -4px;
+  font-size: 30px;
+  overflow: hidden;
+  text-align: center;
+  padding: 0 4px;
+}
+
+.block .num {
+  font-size: 22px;
+  color: var(--muted);
+}
+
+.block.target.a {
+  background: var(--hl-a);
+  color: var(--on-hl);
+}
+
+.block.target.b {
+  background: var(--hl-b);
+  color: var(--on-hl);
+}
+
+/* The beat you are on lights up. */
+.block.lit {
+  background: var(--ink);
+  color: var(--on-ink);
+}
+
+.block.lit .num {
+  color: var(--on-ink);
+}
+
+.block.target.lit {
+  outline-width: 8px;
+  outline-offset: -8px;
+  color: var(--on-hl);
+}
+
+.block.target.a.lit {
+  background: var(--hl-a);
+}
+
+.block.target.b.lit {
+  background: var(--hl-b);
+}
+
+.next {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.next .block {
+  height: 44px;
+  font-size: 24px;
+  outline-width: 3px;
+  outline-offset: -3px;
+}
+
+.next .block:not(.target) {
+  background: var(--dim);
+  outline-color: var(--dim-edge);
+}
+
+.shift {
+  animation: shift 150ms steps(3) both;
+}
+
+@keyframes shift {
+  from {
+    transform: translateY(52px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+/* ---------- Controls ---------- */
+
+.tempo {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) 56px;
+  gap: 8px;
+  align-items: center;
+  margin-top: auto;
+}
+
+.tempo output {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-family: var(--pixel);
+  font-size: 12px;
+}
+
+.btn {
+  min-height: 56px;
+  border: 0;
+  background: var(--block);
+  outline: 4px solid var(--ink);
+  outline-offset: -4px;
+  font-family: var(--pixel);
+  font-size: 12px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.btn:active {
+  transform: translateY(2px);
+}
+
+.btn:focus-visible,
+input[type="range"]:focus-visible {
+  outline: 4px dashed var(--muted);
+  outline-offset: 2px;
+}
+
+.btn.main {
+  background: var(--key);
+  color: var(--on-key);
+  outline-color: var(--key);
+  font-size: 16px;
+  min-height: 64px;
+  width: 100%;
+}
+
+input[type="range"] {
+  appearance: none;
+  width: 100%;
+  height: 56px;
+  background: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 8px;
+  background: var(--ink);
+}
+
+input[type="range"]::-moz-range-track {
+  height: 8px;
+  background: var(--ink);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 24px;
+  height: 32px;
+  margin-top: -12px;
+  background: var(--hl-a);
+  border: 4px solid var(--ink);
+  border-radius: 0;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 24px;
+  background: var(--hl-a);
+  border: 4px solid var(--ink);
+  border-radius: 0;
+}
+
+.toggles {
+  display: flex;
+  gap: 8px;
+}
+
+.toggle {
+  flex: 1;
+  font-size: 10px;
+  min-height: 44px;
+}
+
+.toggle[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--on-ink);
+}
+
+.hint {
+  margin: 0;
+  font-size: 18px;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ---------- Start screen ---------- */
+
+.start {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 24px 16px;
+  text-align: center;
+  background: var(--paper);
+  background-image: repeating-linear-gradient(var(--paper) 0 30px, var(--rule) 30px 32px);
+}
+
+.start h1 {
+  font-family: var(--pixel);
+  font-size: clamp(22px, 8vw, 40px);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.start p {
+  margin: 0;
+  max-width: 22em;
+}
+
+.start .btn.main {
+  max-width: 320px;
+  animation: blink 1s steps(2) infinite;
+}
+
+@keyframes blink {
+  50% {
+    color: var(--key);
+  }
+}
+
+.start[hidden] {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shift,
+  .start .btn.main {
+    animation: none;
+  }
+}
