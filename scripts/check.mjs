@@ -155,6 +155,40 @@ try {
   await page.click("dialog[open] input[value='first']");
   await page.keyboard.press("Escape");
 
+  // Tapping a chip opens Options at that chip's section, even after scrolling somewhere else.
+  await page.click("[data-tool='options']");
+  await page.evaluate(() => (document.querySelector("dialog[open] .sheet-body").scrollTop = 99999));
+  await page.keyboard.press("Escape");
+  for (const [chip, section] of [["theme", "theme"], ["scheme", "scheme"], ["words", "words"], ["beat", "beat"]]) {
+    await page.click(`[data-chip='${chip}']`);
+    await sleep(150);
+    const spot = await page.evaluate((section) => {
+      const body = document.querySelector("dialog[open] .sheet-body").getBoundingClientRect();
+      const part = document.querySelector(`dialog[open] [data-section='${section}']`).getBoundingClientRect();
+      const chosen = document.querySelector(`dialog[open] [data-section='${section}'] input:checked`)?.closest("label")?.getBoundingClientRect();
+      return { partTop: part.top - body.top, chosenIn: !chosen || (chosen.top >= body.top && chosen.bottom <= body.bottom) };
+    }, section);
+    check(spot.chosenIn && spot.partTop < 400, `the ${chip} chip should open Options at ${section}: ${JSON.stringify(spot)}`);
+    if (chip === "theme") await shot(page, "06c-theme-chip");
+    await page.keyboard.press("Escape");
+  }
+
+  // Random scheme and pace: the bar title says which scheme is in play.
+  await page.click("[data-chip='scheme']");
+  await page.click("dialog[open] input[name='scheme'][value='mix']");
+  await page.click("dialog[open] input[name='pace'][value='mix']");
+  await page.keyboard.press("Escape");
+  await sleep(300);
+  const mixChip = await page.evaluate(() => document.querySelector("[data-chip='scheme']").textContent);
+  const caption = await page.evaluate(() => document.querySelector(".caption").textContent);
+  console.log("random:", mixChip, "/", caption);
+  check(mixChip === "RANDOM MIXED", `the scheme chip should say RANDOM MIXED, got ${mixChip}`);
+  check(/ - (AABB|ABAB|AAAA|ABBA|AAXA)/.test(caption), `the bar title should name the scheme in play, got ${caption}`);
+  await page.click("[data-chip='scheme']");
+  await page.click("dialog[open] input[name='scheme'][value='aabb']");
+  await page.click("dialog[open] input[name='pace'][value='every']");
+  await page.keyboard.press("Escape");
+
   // Explicit words: switch them on and check a good share of prompt groups use them.
   await page.click("[data-tool='options']");
   await page.click("dialog[open] .switch[data-key='explicit']");

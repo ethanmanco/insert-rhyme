@@ -1,4 +1,4 @@
-import { barPlan, type BarPlan, type Layout, type Target } from "../core/schemes";
+import { barPlan, layoutName, type BarPlan, type Layout, type Target } from "../core/schemes";
 import { ballPoint, beatPosition, BEATS_PER_BAR, snap, type BeatPosition } from "../core/timing";
 
 /** How many bars show below the current one. */
@@ -132,7 +132,11 @@ export class Stage {
     this.shownBar = bar;
     this.litBeat = -1;
     const plan = barPlan(this.opts.layout, bar);
-    this.caption.textContent = plan.intro ? "COUNT IN" : plan.targets.length ? `LINE ${plan.line + 1}` : `LINE ${plan.line + 1}: FREE`;
+    const line = plan.intro ? "COUNT IN" : plan.targets.length ? `LINE ${plan.line + 1}` : `LINE ${plan.line + 1}: FREE`;
+    // With a random scheme or pace, say which one is in play.
+    const { scheme, pace } = this.opts.layout;
+    const now = scheme === "mix" || pace === "mix" ? layoutName({ scheme: plan.scheme, pace: plan.pace }) : "";
+    this.caption.textContent = now ? `${line} - ${now}` : line;
     this.blocks = this.fillRow(this.current, plan, true);
     this.next.replaceChildren();
     for (let i = 1; i <= AHEAD; i++) {

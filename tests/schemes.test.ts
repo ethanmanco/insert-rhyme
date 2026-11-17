@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   barPlan,
+  BLOCK,
+  paceAt,
+  schemeAt,
+  SEGMENT,
   INTRO_BARS,
   layoutName,
   LINE_END_BEAT,
@@ -20,11 +24,12 @@ const shape = (plans: BarPlan[]) => plans.map((p) => (p.targets.length ? p.targe
 const lines = (scheme: SchemeId, pace: PaceId, bars: number) => upcomingBars({ scheme, pace }, INTRO_BARS, bars);
 const groups = (plans: BarPlan[]) => plans.flatMap((p) => p.targets.map((t) => t.group));
 
-const ALL: Layout[] = SCHEMES.flatMap((s) => PACES.map((p) => ({ scheme: s.id, pace: p.id })));
+const ALL: Layout[] = SCHEMES.flatMap((s) => PACES.flatMap((p) => [1, 2, 3].map((seed) => ({ scheme: s.id, pace: p.id, seed }))));
+const FIXED = ALL.filter((l) => l.scheme !== "mix" && l.pace !== "mix" && l.seed === 1);
 
 describe("every layout", () => {
   for (const layout of ALL) {
-    const name = layoutName(layout);
+    const name = `${layoutName(layout)} (seed ${layout.seed})`;
     it(`${name} starts with a count-in bar with no targets`, () => {
       const plan = barPlan(layout, 0);
       expect(plan.intro).toBe(true);
@@ -33,7 +38,7 @@ describe("every layout", () => {
 
     it(`${name} fills each group's slots in order, and every group gets at least two rhymes`, () => {
       const slots = new Map<number, number[]>();
-      for (const plan of upcomingBars(layout, INTRO_BARS, 32)) for (const t of plan.targets) slots.set(t.group, [...(slots.get(t.group) ?? []), t.slot]);
+      for (const plan of upcomingBars(layout, INTRO_BARS, 96)) for (const t of plan.targets) slots.set(t.group, [...(slots.get(t.group) ?? []), t.slot]);
       for (const list of slots.values()) {
         expect(list).toEqual(list.map((_, i) => i));
         expect(list.length).toBeGreaterThanOrEqual(2);
@@ -45,9 +50,9 @@ describe("every layout", () => {
     });
   }
 
-  it("all look different from each other", () => {
-    const looks = ALL.map((l) => `${shape(upcomingBars(l, INTRO_BARS, 16))} ${groups(upcomingBars(l, INTRO_BARS, 16)).join(",")}`);
-    expect(new Set(looks).size).toBe(ALL.length);
+  it("all fixed layouts look different from each other", () => {
+    const looks = FIXED.map((l) => `${shape(upcomingBars(l, INTRO_BARS, 16))} ${groups(upcomingBars(l, INTRO_BARS, 16)).join(",")}`);
+    expect(new Set(looks).size).toBe(FIXED.length);
   });
 });
 
@@ -109,6 +114,61 @@ describe("double-time", () => {
   });
 });
 
+describe("random scheme", () => {
+  const mix = (seed: number): Layout => ({ scheme: "mix", pace: "every", seed });
+
+  it(`keeps one scheme for ${BLOCK} bars, then switches to a different one`, () => {
+    for (const seed of [1, 2, 3, 4, 5]) {
+      for (let b = 0; b < 20; b++) {
+        const first = schemeAt(mix(seed), b * BLOCK);
+        for (let n = 1; n < BLOCK; n++) expect(schemeAt(mix(seed), b * BLOCK + n)).toBe(first);
+        expect(schemeAt(mix(seed), (b + 1) * BLOCK)).not.toBe(first);
+      }
+    }
+  });
+
+  it("uses every scheme over a long session, and differs between visits", () => {
+    const seen = new Set(Array.from({ length: 30 }, (_, b) => schemeAt(mix(7), b * BLOCK)));
+    expect(seen.size).toBe(SCHEMES.length - 1);
+    const runs = [11, 12, 13, 14].map((seed) => Array.from({ length: 6 }, (_, b) => schemeAt(mix(seed), b * BLOCK)).join());
+    expect(new Set(runs).size).toBeGreaterThan(1);
+  });
+
+  it("lays out bars from the scheme in play, and says which it is", () => {
+    for (let bar = INTRO_BARS; bar < INTRO_BARS + 64; bar++) {
+      const plan = barPlan(mix(3), bar);
+      expect(plan.scheme).toBe(schemeAt(mix(3), bar - INTRO_BARS));
+      expect(plan.targets.map((t) => t.group)).toEqual(barPlan({ scheme: plan.scheme, pace: "every" }, bar).targets.map((t) => t.group));
+    }
+  });
+});
+
+describe("random pace", () => {
+  const mix = (seed: number): Layout => ({ scheme: "aabb", pace: "mix", seed });
+
+  it(`starts on every line and only changes every ${SEGMENT} bars`, () => {
+    for (const seed of [1, 2, 3]) {
+      expect(paceAt(mix(seed), 0)).toBe("every");
+      for (let n = 0; n < 200; n++) if (n % SEGMENT) expect(paceAt(mix(seed), n)).toBe(paceAt(mix(seed), n - 1));
+    }
+  });
+
+  it("switches between every line and skip a line, never double-time", () => {
+    const paces = Array.from({ length: 40 }, (_, s) => paceAt(mix(5), s * SEGMENT));
+    expect(new Set(paces)).toEqual(new Set(["every", "skip"]));
+    const flips = paces.filter((p, i) => i > 0 && p !== paces[i - 1]).length;
+    expect(flips).toBeGreaterThan(15);
+  });
+
+  it("starts every stretch on a fresh verse, so no rhyme is left hanging", () => {
+    const plans = upcomingBars(mix(9), INTRO_BARS, 160);
+    const open = new Map<number, number>();
+    for (const p of plans) for (const t of p.targets) open.set(t.group, Math.floor(p.line / SEGMENT));
+    // A group's rhymes all fall inside one stretch.
+    for (const p of plans) for (const t of p.targets) expect(Math.floor(p.line / SEGMENT)).toBe(open.get(t.group));
+  });
+});
+
 describe("saved layouts", () => {
   it("read old settings from before the pace choice", () => {
     expect(readLayout("skip", undefined)).toEqual({ scheme: "aabb", pace: "skip" });
@@ -123,5 +183,7 @@ describe("saved layouts", () => {
     expect(layoutName({ scheme: "aabb", pace: "every" })).toBe("AABB");
     expect(layoutName({ scheme: "abab", pace: "skip" })).toBe("ABAB SKIP");
     expect(layoutName({ scheme: "aaaa", pace: "double" })).toBe("AAAA 2X");
+    expect(layoutName({ scheme: "mix", pace: "mix" })).toBe("RANDOM MIXED");
+    expect(readLayout("mix", "mix")).toEqual({ scheme: "mix", pace: "mix" });
   });
 });
