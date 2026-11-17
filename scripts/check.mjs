@@ -67,7 +67,10 @@ try {
   check(peak > -30, `the beat is silent or very quiet: ${peak} dB`);
 
   // The lit block must always be the beat the audio clock is on.
-  await page.evaluate(() => window.__ir.engine.setBpm(160));
+  // MP3 timing: does this browser keep the encoder's lead-in? (The app corrects for it.)
+  const decoded = await page.evaluate(() => [...window.__ir.loops.entries()].map(([id, l]) => ({ id, seconds: l.buffer.duration, start: l.start })));
+  console.log("decoded loops:", JSON.stringify(decoded));
+  await page.evaluate(() => window.__ir.engine.setBpm(130));
   const samples = await page.evaluate(async () => {
     const rows = [];
     const end = performance.now() + 5000;
@@ -148,9 +151,23 @@ try {
   check(tapState.running && Math.abs(tapState.bpm - 100) <= 3, `tap tempo should run near 100 BPM, got ${tapState.bpm}`);
   await shot(page, "08-tap");
 
-  await page.emulateMediaFeatures([{ name: "prefers-color-scheme", value: "dark" }]);
-  await sleep(200);
-  await shot(page, "09-dark");
+  // Your own beat: load a file from disk and let the app find its tempo.
+  const ownFile = process.env.OWN_BEAT;
+  if (ownFile) {
+    await page.keyboard.press("Space");
+    await page.click("[data-tool='options']");
+    await page.click("dialog[open] input[value='own']");
+    await page.keyboard.press("Escape");
+    const input = await page.$(".ownrow input[type=file]");
+    await input.uploadFile(ownFile);
+    await page.waitForFunction(() => window.__ir.own(), { timeout: 30000 });
+    const ownInfo = await page.evaluate(() => ({ bpm: window.__ir.own().grid.bpm, start: window.__ir.own().grid.start, text: document.querySelector(".own-name").textContent }));
+    console.log("own beat:", JSON.stringify(ownInfo));
+    await page.click(".dock .play");
+    await sleep(1500);
+    check(await page.evaluate(() => window.__ir.engine.playing), "own beat did not play");
+    await shot(page, "09-own-beat");
+  }
 } finally {
   await browser.close();
   server.close();

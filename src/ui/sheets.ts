@@ -1,4 +1,4 @@
-import { BEATS } from "../core/beats";
+import { BEATS, beatById } from "../core/beats";
 import { CATEGORIES } from "../core/categories";
 import type { RhymeIndex, Tier } from "../core/rhymes";
 import { SCHEMES } from "../core/schemes";
@@ -91,14 +91,15 @@ export function optionsSheet(get: () => Settings, stats: () => Stats, change: (p
         "MUSIC",
         [
           { id: "beat", name: "BUILT-IN BEAT", hint: "Rap over one of the beats below." },
-          { id: "tap", name: "TAP TEMPO", hint: "Playing your own music? Tap along and the bars follow." },
+          { id: "own", name: "YOUR OWN BEAT", hint: "Pick a song or beat file on this device. It never leaves it." },
+          { id: "tap", name: "TAP TEMPO", hint: "Music playing somewhere else? Tap along and the bars follow." },
         ],
         s.mode,
       )}
       ${radios(
         "beat",
         "BEAT",
-        BEATS.map((b) => ({ id: b.id, name: b.name.toUpperCase(), hint: `${b.bpm} BPM` })),
+        BEATS.map((b) => ({ id: b.id, name: b.name.toUpperCase(), hint: `${b.style}, ${b.bpm} BPM. By ${b.credit.artist}.` })),
         s.beat,
       )}
       ${radios("scheme", "RHYME SCHEME", SCHEMES.map((x) => ({ id: x.id, name: x.name, hint: x.hint })), s.scheme)}
@@ -111,6 +112,7 @@ export function optionsSheet(get: () => Settings, stats: () => Stats, change: (p
         ${toggle("explicit", "EXPLICIT WORDS", "Swear words and crude words in prompts and rhymes.", s.explicit)}
         ${toggle("slurs", "SLURS", "Hate words too. A separate switch, off by default.", s.slurs)}
       </fieldset>
+      <p class="choice-hint center">Beat: ${esc(beatById(s.beat).credit.title)} by ${esc(beatById(s.beat).credit.artist)}, <a href="${beatById(s.beat).credit.url}">${beatById(s.beat).credit.license}</a>, cut to a loop.</p>
       <p class="choice-hint center">Everything stays on this device. Words: CMU Pronouncing Dictionary and SCOWL. <a href="https://github.com/ethanmanco/insert-rhyme">Source and credits</a></p>`;
   }
 

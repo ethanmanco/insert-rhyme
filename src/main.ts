@@ -1,16 +1,17 @@
 import "@fontsource/press-start-2p/400.css";
 import "@fontsource/vt323/400.css";
 import "./styles/app.css";
-import { Engine, useRelaxedAudioTiming } from "./audio/engine";
+import { barsIn, decode, Engine, MAX_RATE, MIN_RATE, useRelaxedAudioTiming, type Loop } from "./audio/engine";
 import { canRecord, Recorder, type Take } from "./audio/recorder";
-import { beatById } from "./core/beats";
+import { beatById, ENCODER_DELAY, POSTROLL } from "./core/beats";
+import { doubleTempo, findGrid, halfTempo, monoOpening, shiftBeats, syncFromTaps, type Grid } from "./core/ownBeat";
 import { categoryWords, CATEGORIES } from "./core/categories";
 import { PromptDeck } from "./core/prompts";
 import { allowedTiers, RhymeIndex, type Tier } from "./core/rhymes";
 import { SCHEMES } from "./core/schemes";
 import { addSession, cleanStats, currentStreak, dayKey, type Stats } from "./core/stats";
 import { TapTempo } from "./core/tapTempo";
-import { clampBpm, MAX_BPM, MIN_BPM } from "./core/timing";
+import { MAX_BPM, MIN_BPM } from "./core/timing";
 import { DIFFICULTIES, loadSettings, saveSettings, type Settings } from "./settings";
 import { load, save } from "./storage";
 import { helperSheet, micExplainer, optionsSheet } from "./ui/sheets";
@@ -24,12 +25,57 @@ const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matc
 let settings = loadSettings(reducedMotion);
 let stats: Stats = cleanStats(load("stats", null));
 
-const engine = new Engine(beatById(settings.beat), settings.bpm);
+const engine = new Engine(settings.bpm);
 const tap = new TapTempo();
 const recorder = new Recorder();
 let take: Take | null = null;
 /** When the current stretch of practice started (performance.now ms), or null. */
 let sessionStart: number | null = null;
+
+/* ---------- Beats ---------- */
+
+const loops = new Map<string, Loop>();
+let loadingBeat = false;
+/** A beat from the player's own device: kept in memory only, never uploaded. */
+let own: { name: string; buffer: AudioBuffer; grid: Grid } | null = null;
+
+async function loadBeat(id: string): Promise<Loop | null> {
+  const beat = beatById(id);
+  const cached = loops.get(beat.id);
+  if (cached) return cached;
+  loadingBeat = true;
+  showPlaying();
+  try {
+    const res = await fetch(`${import.meta.env.BASE_URL}beats/${beat.file}`);
+    if (!res.ok) throw new Error(String(res.status));
+    const buffer = await decode(await res.arrayBuffer());
+    const expected = beat.start + (beat.bars * 240) / beat.bpm + POSTROLL;
+    const lead = buffer.duration - expected > 0.02 ? ENCODER_DELAY : 0;
+    const loop: Loop = { buffer, bpm: beat.bpm, start: beat.start + lead, bars: beat.bars };
+    loops.set(beat.id, loop);
+    return loop;
+  } catch {
+    hint.textContent = "The beat could not load. Check your connection and try again.";
+    return null;
+  } finally {
+    loadingBeat = false;
+    showPlaying();
+  }
+}
+
+const ownLoop = (): Loop | null =>
+  own && { buffer: own.buffer, bpm: own.grid.bpm, start: own.grid.start, bars: barsIn(own.buffer.duration, own.grid.bpm, own.grid.start) };
+
+/** The tempo the current recording plays at its own speed. */
+const nativeBpm = () => (settings.mode === "own" ? (own?.grid.bpm ?? 90) : beatById(settings.beat).bpm);
+
+/** Put the chosen beat in the engine (loading it if needed). */
+async function useBeat(): Promise<void> {
+  if (settings.mode === "tap") return engine.setLoop(null);
+  if (settings.mode === "own") return engine.setLoop(ownLoop());
+  const loop = await loadBeat(settings.beat);
+  if (settings.mode === "beat") engine.setLoop(loop);
+}
 
 /* ---------- Words ---------- */
 
@@ -111,6 +157,23 @@ tempo.innerHTML = `
 const slider = tempo.querySelector("input")!;
 const readout = tempo.querySelector("output")!;
 
+const ownRow = document.createElement("section");
+ownRow.className = "ownrow";
+ownRow.setAttribute("aria-label", "Your own beat");
+ownRow.innerHTML = `
+  <label class="btn px file">CHOOSE A BEAT FILE<input type="file" accept="audio/*" /></label>
+  <p class="own-name" aria-live="polite">Pick any song or beat on this device. It stays here.</p>
+  <div class="own-fix">
+    <button class="btn px" type="button" data-own="half" aria-label="Half the tempo">HALF</button>
+    <button class="btn px" type="button" data-own="double" aria-label="Double the tempo">DOUBLE</button>
+    <button class="btn px" type="button" data-own="back" aria-label="Move bar 1 one beat earlier">BAR -1</button>
+    <button class="btn px" type="button" data-own="fwd" aria-label="Move bar 1 one beat later">BAR +1</button>
+  </div>
+  <button class="btn px sync" type="button" data-own="sync">TAP TO SYNC</button>`;
+const fileInput = ownRow.querySelector<HTMLInputElement>("input[type=file]")!;
+const ownName = ownRow.querySelector<HTMLParagraphElement>(".own-name")!;
+const syncBtn = ownRow.querySelector<HTMLButtonElement>(".sync")!;
+
 const tapRow = document.createElement("section");
 tapRow.className = "taprow";
 tapRow.setAttribute("aria-label", "Tap tempo");
@@ -142,7 +205,7 @@ takePanel.hidden = true;
 const hint = document.createElement("p");
 hint.className = "hint";
 
-app.append(top, chips, stage.root, tempo, tapRow, tools, dock, takePanel, hint, live);
+app.append(top, chips, stage.root, tempo, ownRow, tapRow, tools, dock, takePanel, hint, live);
 
 /* ---------- Sheets ---------- */
 
@@ -180,7 +243,9 @@ function showChips() {
     b.textContent = text;
     b.setAttribute("aria-label", `${label}. Open options.`);
   };
-  set("beat", settings.mode === "tap" ? "TAP TEMPO" : beat.name.toUpperCase(), settings.mode === "tap" ? "Tap tempo" : `Beat: ${beat.name}`);
+  if (settings.mode === "tap") set("beat", "TAP TEMPO", "Tap tempo");
+  else if (settings.mode === "own") set("beat", "YOUR BEAT", "Your own beat");
+  else set("beat", beat.name.toUpperCase(), `Beat: ${beat.name}`);
   const scheme = SCHEMES.find((s) => s.id === settings.scheme)!;
   set("scheme", scheme.name, `Rhyme scheme: ${scheme.name}`);
   const words = DIFFICULTIES.find((d) => d.id === settings.difficulty)!;
@@ -192,16 +257,39 @@ function showChips() {
   streakChip.setAttribute("aria-label", `${streak} day streak. Open options and stats.`);
 }
 
+/** The tempo range for the current beat: turntable speed from 60% to 160%, inside 70 to 160 BPM where it can be. */
+function tempoRange(): [number, number] {
+  const n = nativeBpm();
+  const lo = Math.max(Math.min(MIN_BPM, Math.round(n)), Math.ceil(n * MIN_RATE));
+  const hi = Math.min(Math.max(MAX_BPM, Math.round(n)), Math.floor(n * MAX_RATE));
+  return [lo, hi];
+}
+
 function showTempo() {
+  const [lo, hi] = tempoRange();
+  slider.min = String(lo);
+  slider.max = String(hi);
   slider.value = String(settings.bpm);
-  readout.textContent = `${settings.bpm} BPM`;
+  const speed = Math.round((settings.bpm / nativeBpm()) * 100);
+  readout.textContent = speed === 100 ? `${settings.bpm} BPM` : `${settings.bpm} BPM (${speed}% SPEED)`;
+}
+
+function showOwn() {
+  if (!own) {
+    ownName.textContent = "Pick any song or beat on this device. It stays here.";
+  } else {
+    ownName.textContent = `${own.name}: ${Math.round(own.grid.bpm * 10) / 10} BPM. If the bars feel off, try HALF, DOUBLE, BAR -1 or +1, or TAP TO SYNC.`;
+  }
+  ownRow.querySelectorAll<HTMLButtonElement>(".own-fix button, .sync").forEach((b) => (b.disabled = !own));
 }
 
 function showMode() {
   const tapMode = settings.mode === "tap";
   tempo.hidden = tapMode;
   tapRow.hidden = !tapMode;
+  ownRow.hidden = settings.mode !== "own";
   showTap();
+  showOwn();
   hint.textContent = tapMode
     ? "Start your music, then tap along on the beat. The bars follow."
     : isTouch()
@@ -220,6 +308,9 @@ function showPlaying() {
   if (settings.mode === "tap") {
     playBtn.textContent = playing ? "STOP" : "TAP TO START";
     playBtn.setAttribute("aria-label", playing ? "Stop" : "Tap along to start");
+  } else if (loadingBeat) {
+    playBtn.textContent = "LOADING...";
+    playBtn.setAttribute("aria-label", "Loading the beat");
   } else {
     playBtn.textContent = playing ? "STOP" : "PLAY";
     playBtn.setAttribute("aria-label", playing ? "Stop" : "Play");
@@ -266,17 +357,20 @@ function showTake(message?: string) {
 function change(patch: Partial<Settings>) {
   const before = settings;
   settings = { ...settings, ...patch };
-  if (patch.beat && patch.beat !== before.beat) {
-    const beat = beatById(patch.beat);
-    settings.bpm = beat.bpm;
-    engine.setBeat(beat);
-    engine.setBpm(settings.bpm);
-    showTempo();
-  }
   if (patch.mode && patch.mode !== before.mode) {
     stop();
+    if (settings.mode === "own" && own) settings.bpm = Math.round(own.grid.bpm);
+    if (settings.mode === "beat") settings.bpm = beatById(settings.beat).bpm;
+    engine.setBpm(settings.bpm);
     showMode();
+    void useBeat();
   }
+  if (patch.beat && patch.beat !== before.beat) {
+    settings.bpm = beatById(patch.beat).bpm;
+    engine.setBpm(settings.bpm);
+    void useBeat();
+  }
+  showTempo();
   if (patch.scheme) stage.setScheme(settings.scheme);
   if (patch.ball !== undefined) stage.setBallOn(settings.ball);
   if (patch.announce !== undefined) stage.announceOn = settings.announce;
@@ -288,7 +382,8 @@ function change(patch: Partial<Settings>) {
 }
 
 function setBpm(value: unknown) {
-  settings.bpm = clampBpm(value, settings.bpm);
+  const [lo, hi] = tempoRange();
+  settings.bpm = Math.min(hi, Math.max(lo, Math.round(Number(value)) || settings.bpm));
   engine.setBpm(settings.bpm);
   saveSettings(settings);
   showTempo();
@@ -328,6 +423,12 @@ function endSession() {
 async function play() {
   if (settings.mode === "tap") return;
   await engine.start();
+  if (settings.mode === "own" && !own) {
+    fileInput.click();
+    return;
+  }
+  if (!engine.hasLoop) await useBeat();
+  if (!engine.hasLoop) return;
   engine.play();
   beginSession();
   announce("Count in.");
@@ -390,14 +491,14 @@ async function toggleRecord() {
     take = null;
     showTake();
   }
-  if (!isPlaying() && settings.mode === "beat") await play();
-  recorder.start(settings.mode === "beat" ? engine.mix : null);
+  if (!isPlaying() && settings.mode !== "tap") await play();
+  recorder.start(settings.mode !== "tap" ? engine.mix : null);
   announce("Recording.");
   showRecording();
 }
 
 async function finishTake() {
-  const result = await recorder.stop(settings.mode === "beat" ? engine.mix : null);
+  const result = await recorder.stop(settings.mode !== "tap" ? engine.mix : null);
   recorder.close();
   take = result;
   showRecording();
@@ -417,7 +518,7 @@ function frame() {
 
 start.querySelector("button")!.addEventListener("click", async () => {
   start.hidden = true;
-  if (settings.mode === "beat") await play();
+  if (settings.mode !== "tap") await play();
   (settings.mode === "tap" ? tapBtn : playBtn).focus();
 });
 
@@ -432,6 +533,77 @@ tapBtn.addEventListener("keydown", (e) => {
   if (e.key === "Enter") tapOnce(e.timeStamp);
 });
 slider.addEventListener("input", () => setBpm(slider.value));
+
+/* ---------- Your own beat ---------- */
+
+fileInput.addEventListener("change", async () => {
+  const file = fileInput.files?.[0];
+  fileInput.value = "";
+  if (!file) return;
+  ownName.textContent = `Reading ${file.name}...`;
+  try {
+    await engine.start();
+    const buffer = await decode(await file.arrayBuffer());
+    // Let the message paint before the analysis keeps the page busy.
+    await new Promise((r) => setTimeout(r, 30));
+    const channels = Array.from({ length: buffer.numberOfChannels }, (_, i) => buffer.getChannelData(i));
+    const grid = findGrid(monoOpening(channels, buffer.sampleRate), buffer.sampleRate);
+    stop();
+    own = { name: file.name.replace(/\.[^.]+$/, ""), buffer, grid };
+    settings.bpm = Math.round(grid.bpm);
+    engine.setBpm(settings.bpm);
+    engine.setLoop(ownLoop());
+    showTempo();
+    showOwn();
+    announce(`Loaded ${own.name} at about ${Math.round(grid.bpm)} BPM.`);
+  } catch {
+    ownName.textContent = "That file could not be read. Try an MP3, M4A or WAV.";
+  }
+});
+
+/** Change the grid and start the beat again from bar 1 so the bars match. */
+function regrid(grid: Grid) {
+  if (!own) return;
+  own.grid = grid;
+  settings.bpm = Math.max(1, Math.round(grid.bpm));
+  engine.setBpm(settings.bpm);
+  engine.setLoop(ownLoop());
+  showTempo();
+  showOwn();
+}
+
+let syncTaps: number[] | null = null;
+ownRow.addEventListener("click", (e) => {
+  const act = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-own]")?.dataset.own;
+  if (!own || !act || act === "sync") return;
+  if (act === "half") regrid(halfTempo(own.grid));
+  if (act === "double") regrid(doubleTempo(own.grid));
+  if (act === "back") regrid(shiftBeats(own.grid, -1));
+  if (act === "fwd") regrid(shiftBeats(own.grid, 1));
+});
+// Tap to sync: tap the button on every beat while the song plays.
+syncBtn.addEventListener("pointerdown", async (e) => {
+  e.preventDefault();
+  if (!own) return;
+  if (!engine.playing) await play();
+  const at = engine.heardBeats();
+  if (syncTaps === null) syncTaps = [];
+  if (at !== null && at >= 0) syncTaps.push(at);
+  const need = 8;
+  syncBtn.textContent = `TAP ON THE BEAT ${Math.min(syncTaps.length, need)}/${need}`;
+  if (syncTaps.length >= need) {
+    const loop = ownLoop();
+    const fixed = loop && syncFromTaps(own.grid, syncTaps, loop.bars * 4);
+    syncTaps = null;
+    syncBtn.textContent = "TAP TO SYNC";
+    if (fixed) {
+      regrid(fixed);
+      announce(`Synced to ${Math.round(fixed.bpm)} BPM.`);
+    } else {
+      ownName.textContent = "Those taps were too uneven. Try again, tapping on every beat.";
+    }
+  }
+});
 tempo.querySelectorAll<HTMLButtonElement>("[data-step]").forEach((b) =>
   b.addEventListener("click", () => setBpm(settings.bpm + Number(b.dataset.step))),
 );
@@ -470,10 +642,10 @@ document.addEventListener("keydown", (e) => {
   } else if (e.key === "r" || e.key === "R") {
     start.hidden = true;
     void toggleRecord();
-  } else if (settings.mode === "beat" && e.target !== slider && (e.key === "ArrowUp" || e.key === "ArrowRight")) {
+  } else if (settings.mode !== "tap" && e.target !== slider && (e.key === "ArrowUp" || e.key === "ArrowRight")) {
     e.preventDefault();
     setBpm(settings.bpm + (e.shiftKey ? 5 : 1));
-  } else if (settings.mode === "beat" && e.target !== slider && (e.key === "ArrowDown" || e.key === "ArrowLeft")) {
+  } else if (settings.mode !== "tap" && e.target !== slider && (e.key === "ArrowDown" || e.key === "ArrowLeft")) {
     e.preventDefault();
     setBpm(settings.bpm - (e.shiftKey ? 5 : 1));
   }
@@ -489,7 +661,7 @@ document.addEventListener("visibilitychange", () => {
 window.addEventListener("pagehide", () => endSession());
 
 // ?debug exposes internals to the browser check script (scripts/check.mjs).
-if (new URLSearchParams(location.search).has("debug")) Object.assign(window, { __ir: { engine, stage, tap, settings: () => settings } });
+if (new URLSearchParams(location.search).has("debug")) Object.assign(window, { __ir: { engine, stage, tap, loops, settings: () => settings, own: () => own } });
 
 stage.setBallOn(settings.ball);
 stage.announceOn = settings.announce;

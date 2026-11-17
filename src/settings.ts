@@ -6,7 +6,7 @@ import { load, save } from "./storage";
 
 /** How much of each rhyme group's words the blocks show. */
 export type Difficulty = "all" | "first" | "none";
-export type Mode = "beat" | "tap";
+export type Mode = "beat" | "own" | "tap";
 
 export interface Settings {
   mode: Mode;
@@ -36,7 +36,7 @@ export function loadSettings(reducedMotion: boolean): Settings {
   const beat = beatById(raw.beat);
   const bool = (v: unknown, d: boolean) => (typeof v === "boolean" ? v : d);
   return {
-    mode: raw.mode === "tap" ? "tap" : "beat",
+    mode: raw.mode === "tap" || raw.mode === "own" ? raw.mode : "beat",
     beat: beat.id,
     bpm: clampBpm(raw.bpm, beat.bpm),
     scheme: isScheme(raw.scheme) ? raw.scheme : "aabb",
