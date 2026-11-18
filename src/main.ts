@@ -6,6 +6,7 @@ import { canRecord, Recorder, type Take } from "./audio/recorder";
 import { beatById, ENCODER_DELAY, POSTROLL } from "./core/beats";
 import { doubleTempo, findGrid, halfTempo, monoOpening, ownGain, shiftBeats, syncFromTaps, type Grid } from "./core/ownBeat";
 import { categoryWords, CATEGORIES } from "./core/categories";
+import { isNWord } from "./core/explicit";
 import { PromptDeck, type Memory } from "./core/prompts";
 import { allowedTiers, RhymeIndex, type Tier } from "./core/rhymes";
 import { layoutName } from "./core/schemes";
@@ -82,6 +83,8 @@ async function useBeat(): Promise<void> {
 let index: RhymeIndex | null = null;
 let deck: PromptDeck | null = null;
 const allowed = () => allowedTiers(settings.explicit, settings.slurs);
+/** With slurs on and "I'm white" on, the n-word is left out everywhere. */
+const hiddenWords = () => (settings.slurs && settings.white ? isNWord : undefined);
 
 async function loadTier(tier: Tier): Promise<void> {
   try {
@@ -107,6 +110,7 @@ async function refreshWords(): Promise<void> {
       style: category?.id ?? null,
       explicit: settings.explicit,
       slurs: settings.slurs,
+      hidden: hiddenWords(),
       memory: load<Memory>("recent", { sounds: [], words: [] }),
     });
   stage.refresh();
@@ -229,6 +233,7 @@ const helper = helperSheet(
   () => index,
   allowed,
   () => settings.explicit,
+  hiddenWords,
 );
 const explainMic = micExplainer();
 
@@ -386,7 +391,7 @@ function change(patch: Partial<Settings>) {
   if (patch.ball !== undefined) stage.setBallOn(settings.ball);
   if (patch.announce !== undefined) stage.announceOn = settings.announce;
   if (patch.difficulty) stage.refresh();
-  if (patch.explicit !== undefined || patch.slurs !== undefined || patch.category) void refreshWords();
+  if (patch.explicit !== undefined || patch.slurs !== undefined || patch.white !== undefined || patch.category) void refreshWords();
   saveSettings(settings);
   showChips();
   showPlaying();

@@ -3,7 +3,7 @@ import clean from "../public/data/words-clean.txt?raw";
 import profane from "../public/data/words-profane.txt?raw";
 import slur from "../public/data/words-slur.txt?raw";
 import { classify } from "../filter/classify";
-import { CORE_CURSES, cursesFor, EXPLICIT_PROMPTS, RAP_SLURS, STYLES_WITH_CURSES } from "../src/core/explicit";
+import { CORE_CURSES, cursesFor, EXPLICIT_PROMPTS, isNWord, RAP_SLURS, STYLES_WITH_CURSES } from "../src/core/explicit";
 import { slantKey } from "../src/core/phonetics";
 import { dealableSounds, MIN_FAMILY, PromptDeck, soundOf, soundPools } from "../src/core/prompts";
 import { allowedTiers, RhymeIndex } from "../src/core/rhymes";
@@ -149,6 +149,24 @@ describe("explicit words and slurs in prompts", () => {
     const counts = new Map<string, number>();
     for (const w of led) counts.set(w, (counts.get(w) ?? 0) + 1);
     expect([...counts].sort((a, b) => b[1] - a[1])[0]![0]).toBe("ass");
+  });
+
+  it("leaves the n-word out with I'm white on, and keeps other slurs as rare as before", () => {
+    const opts = { seed: 21, slurs: true, style: "trap" };
+    const on = new PromptDeck(index, allowedTiers(false, true), { ...opts, hidden: isNWord });
+    const off = new PromptDeck(index, allowedTiers(false, true), opts);
+    const onWords = deal(on, 600).flat();
+    const offWords = deal(off, 600).flat();
+    expect(offWords.some(isNWord)).toBe(true);
+    expect(onWords.some(isNWord)).toBe(false);
+    const slurs = (words: string[]) => words.filter((w) => index.entry(w)!.tier === "slur").length;
+    // Without the n-word, slurs are a small fraction of what they were.
+    expect(slurs(onWords)).toBeLessThan(slurs(offWords) * 0.4);
+    // The rhyme helper leaves it out too.
+    const bigger = index.lookup("bigger", allowedTiers(false, true), 500);
+    expect(bigger.perfect.some(isNWord)).toBe(true);
+    const hidden = index.lookup("bigger", allowedTiers(false, true), 500, isNWord);
+    expect([...hidden.perfect, ...hidden.slant, ...hidden.near].some(isNWord)).toBe(false);
   });
 
   it("uses the slurs rap uses, mostly the n-word, rhymed the way rappers say it", () => {

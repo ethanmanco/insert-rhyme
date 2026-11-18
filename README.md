@@ -46,7 +46,7 @@ The filter (`filter/`) is thorough because the pronunciation dictionary contains
 
 The tests check every listed word and its forms, a set of innocent look-alikes, and every single word in the shipped default file. The word lists are stored in ROT13 so the repository does not show them as plain text.
 
-With a switch on, prompts don't use everything the filter catches. They use the words regular rap uses, weighted by how often (`src/core/explicit.ts`). Each rap style has its own list, so UK drill and grime curse like UK rappers and Miami bass leans on party words, while topics and any words use everyday rap cursing. Slur prompts are only the slurs rap uses, mostly the n-word, which the dictionary lacks; it's added ending in "-a", and with "-er" said as "-a" it rhymes with bigger, trigger, killer, dinner and figure. The rhyme helper still knows every word in the switched-on files.
+With a switch on, prompts don't use everything the filter catches. They use the words regular rap uses, weighted by how often (`src/core/explicit.ts`). Each rap style has its own list, so UK drill and grime curse like UK rappers and Miami bass leans on party words, while topics and any words use everyday rap cursing. Slur prompts are only the slurs rap uses, mostly the n-word, which the dictionary lacks; it's added ending in "-a", and with "-er" said as "-a" it rhymes with bigger, trigger, killer, dinner and figure. The rhyme helper still knows every word in the switched-on files. With slurs on, an "I'm white" switch appears (off by default) that leaves the n-word out of prompts and the rhyme helper; the other slurs stay as rare as before.
 
 ## Credits and licenses
 

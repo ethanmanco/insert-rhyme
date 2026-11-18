@@ -63,6 +63,10 @@ const STYLE_CURSES: Record<string, Weighted[]> = {
 /** The slurs regular rap uses, most used first. */
 export const RAP_SLURS = decode("avttn:12 avttnf:9 snttbg:1 snt:1 ubzb:1 ergneq:1");
 
+/** Every form of the n-word in the slur file, which the "I'm white" switch leaves out. */
+const N_WORDS = new Set(rot13("avtt avttn avttnf avttre avttref").split(" "));
+export const isNWord = (word: string): boolean => N_WORDS.has(word);
+
 /** The curse words for a word theme (a rap style id), or the core list. */
 export function cursesFor(theme: string | null | undefined): Weighted[] {
   return (theme && STYLE_CURSES[theme]) || CORE_CURSES;

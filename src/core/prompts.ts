@@ -143,6 +143,8 @@ export interface DeckOptions {
   style?: string | null;
   explicit?: boolean;
   slurs?: boolean;
+  /** Words to leave out (the n-word with "I'm white" on). */
+  hidden?: (word: string) => boolean;
   memory?: Memory;
 }
 
@@ -160,6 +162,8 @@ export class PromptDeck {
   private recentWords: string[];
   private swears: Weighted[] = [];
   private slurs: Weighted[] = [];
+  /** Share of groups a slur leads: SLUR_RATE, less any left-out words' share. */
+  private slurRate = SLUR_RATE;
   /** Explicit words that may join a group: the ones on this deck's lists. */
   private extras = new Map<string, number>();
   /** The last explicit word that led a group, so it rarely leads twice running. */
@@ -189,9 +193,13 @@ export class PromptDeck {
       this.swears = list.filter(rhymable);
     }
     if (opts.slurs && allowed.has("slur")) {
-      const list = slursFor(opts.style).filter(known("slur"));
+      const list = slursFor(opts.style).filter((w) => known("slur")(w) && !opts.hidden?.(w.word));
       list.forEach((w) => this.extras.set(w.word, w.weight));
       this.slurs = list.filter(rhymable);
+      // Leaving a word out keeps the other slurs as rare as they were.
+      const total = (l: Weighted[]) => l.reduce((s, w) => s + w.weight, 0);
+      const all = slursFor(opts.style).filter(known("slur"));
+      this.slurRate = total(all) ? (SLUR_RATE * total(list)) / total(all) : 0;
     }
     this.topWeight = Math.max(1, ...this.extras.values());
   }
@@ -251,8 +259,8 @@ export class PromptDeck {
 
   private draw(): string[] {
     const r = this.random();
-    if (this.slurs.length && r < SLUR_RATE) return this.explicitGroup(this.slurs);
-    const swearShare = this.slurs.length ? SLUR_RATE + EXPLICIT_RATE : EXPLICIT_RATE;
+    if (this.slurs.length && r < this.slurRate) return this.explicitGroup(this.slurs);
+    const swearShare = this.slurs.length ? this.slurRate + EXPLICIT_RATE : EXPLICIT_RATE;
     if (this.swears.length && r < swearShare) return this.explicitGroup(this.swears);
     if (this.theme?.length) {
       const themed = this.themeGroup();

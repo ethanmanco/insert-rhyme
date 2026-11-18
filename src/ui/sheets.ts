@@ -139,6 +139,7 @@ export function optionsSheet(get: () => Settings, stats: () => Stats, change: (p
         ${toggle("announce", "SCREEN READER NEWS", "Say the next rhyme word when a new rhyme starts.", s.announce)}
         ${toggle("explicit", "EXPLICIT WORDS", "Swear words and crude words in prompts and rhymes.", s.explicit)}
         ${toggle("slurs", "SLURS", "Hate words too. A separate switch, off by default.", s.slurs)}
+        ${s.slurs ? toggle("white", "I'M WHITE", "Leaves the n-word out of prompts and rhymes.", s.white) : ""}
       </fieldset>
       <fieldset class="group">
         <legend>LIKE INSERT RHYME?</legend>
@@ -197,7 +198,12 @@ export interface HelperSheet {
   refresh(): void;
 }
 
-export function helperSheet(index: () => RhymeIndex | null, allowed: () => ReadonlySet<Tier>, explicitOn: () => boolean): HelperSheet {
+export function helperSheet(
+  index: () => RhymeIndex | null,
+  allowed: () => ReadonlySet<Tier>,
+  explicitOn: () => boolean,
+  hidden: () => ((word: string) => boolean) | undefined = () => undefined,
+): HelperSheet {
   const { dialog, body } = sheet("RHYMES", "rhymes");
   body.innerHTML = `
     <form class="search" role="search">
@@ -226,7 +232,7 @@ export function helperSheet(index: () => RhymeIndex | null, allowed: () => Reado
       results.innerHTML = `<p class="choice-hint">Loading the word list...</p>`;
       return;
     }
-    const r = ix.lookup(word, allowed());
+    const r = ix.lookup(word, allowed(), 60, hidden());
     if (!r.known) {
       const more = explicitOn() ? "" : " Some words only show with explicit words turned on in Options.";
       results.innerHTML = `<p class="choice-hint">No rhymes found for "${esc(word)}". Try another spelling or a more common word.${more}</p>`;

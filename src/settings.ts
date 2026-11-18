@@ -22,6 +22,8 @@ export interface Settings {
   explicit: boolean;
   /** Slurs, a separate toggle. Off by default. */
   slurs: boolean;
+  /** "I'm white": with slurs on, leaves the n-word out. Off by default, shown only with slurs on. */
+  white: boolean;
   ball: boolean;
   /** Screen reader news about the next rhyme. */
   announce: boolean;
@@ -48,6 +50,7 @@ export function loadSettings(reducedMotion: boolean): Settings {
     category: isCategory(raw.category) ? String(raw.category) : "any",
     explicit: bool(raw.explicit, false),
     slurs: bool(raw.slurs, false),
+    white: bool(raw.white, false),
     ball: bool(raw.ball, !reducedMotion),
     announce: bool(raw.announce, true),
   };

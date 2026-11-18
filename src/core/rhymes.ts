@@ -85,15 +85,16 @@ export class RhymeIndex {
 
   /**
    * Perfect, slant and near rhymes for a word, most common first, then
-   * closest in syllables. Only words in the allowed tiers are returned.
+   * closest in syllables. Only words in the allowed tiers are returned, and
+   * none that `hidden` rules out.
    */
-  lookup(raw: string, allowed: ReadonlySet<Tier>, limit = 60): Rhymes {
+  lookup(raw: string, allowed: ReadonlySet<Tier>, limit = 60, hidden?: (word: string) => boolean): Rhymes {
     const word = raw.trim().toLowerCase();
     const self = this.words.get(word);
     if (!self) return { known: false, perfect: [], slant: [], near: [] };
     const selfProns = new Set(self.prons.map((p) => p.join(" ")));
     const sylls = Math.min(...self.prons.map(syllables));
-    const ok = (e: Entry) => e.word !== word && allowed.has(e.tier) && !e.prons.some((p) => selfProns.has(p.join(" ")));
+    const ok = (e: Entry) => e.word !== word && allowed.has(e.tier) && !hidden?.(e.word) && !e.prons.some((p) => selfProns.has(p.join(" ")));
 
     const perfect = new Set<Entry>();
     // Same sound before the vowel too ("leave" and "believe") is an echo, not a rhyme.
