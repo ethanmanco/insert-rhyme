@@ -1,10 +1,12 @@
 import { cursesFor, EXPLICIT_PROMPTS, RAP_SLURS, slursFor, type Weighted } from "./explicit";
-import { perfectKey, syllables } from "./phonetics";
+import { slantKey, syllables } from "./phonetics";
 import type { Entry, RhymeIndex, Tier } from "./rhymes";
 
 /**
- * Prompt words. Every rhyme group in a verse gets a rhyme SOUND (like the
- * "-ight" in night), and its blocks get words with that sound.
+ * Prompt words. Every rhyme group in a verse gets a rhyme SOUND, and its
+ * blocks get words with that sound. Sounds are rap slant rhymes (see
+ * phonetics.ts): the same vowels and ending, so one group can hold dinner,
+ * killer, picture and bigger, the way rappers rhyme.
  *
  * Variety comes from three rules:
  * 1. Sounds are dealt like cards: shuffled, and none comes back until the
@@ -54,7 +56,7 @@ export function soundOf(index: RhymeIndex, word: string, allowed: ReadonlySet<Ti
   const e = index.entry(word);
   if (!e?.prons.length) return null;
   const pools = soundPools(index, allowed);
-  const keys = [...new Set(e.prons.map(perfectKey))];
+  const keys = [...new Set(e.prons.map(slantKey))];
   return keys.reduce((best, k) => ((pools.get(k)?.clean.length ?? 0) > (pools.get(best)?.clean.length ?? 0) ? k : best), keys[0]!);
 }
 

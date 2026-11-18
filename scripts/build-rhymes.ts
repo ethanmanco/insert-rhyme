@@ -77,12 +77,13 @@ const EXTRA_WORDS: Record<string, string> = {
   dior: "D IY0 AO1 R",
   bro: "B R OW1",
 };
-// Rap words the dictionary lacks, kept in their own tier by the filter. Rappers
-// say the n-word to rhyme with "bigger" and "trigger", so it gets that sound.
+// Rap words the dictionary lacks, kept in their own tier by the filter. The
+// n-word ends in "-a"; the rhyme keys say "-er" as "-a" too, so it still
+// rhymes with "bigger" and "trigger" (see src/core/phonetics.ts).
 // Stored in ROT13 like the filter's lists.
 const RAP_EXTRAS: Record<string, string> = {
-  avttn: "N IH1 G ER0",
-  avttnf: "N IH1 G ER0 Z",
+  avttn: "N IH1 G AH0",
+  avttnf: "N IH1 G AH0 Z",
   gubg: "TH AA1 T",
   gubgf: "TH AA1 T S",
 };

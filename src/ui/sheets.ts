@@ -70,10 +70,20 @@ export function optionsSheet(get: () => Settings, stats: () => Stats, change: (p
       <span class="choice-name">${esc(name)}</span>
     </label>`;
 
+  /** What the picked theme is about, and for a rap style, the artists it draws on. */
+  const themeNote = (id: string) => {
+    const c = CATEGORIES.find((x) => x.id === id);
+    if (!c) return "ANY WORDS: everyday words with lots of rhymes.";
+    const names = c.artists ?? [];
+    const list = names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : (names[0] ?? "");
+    return `${c.name}: ${c.hint}${list ? ` Words and swearing in the style of ${list}.` : ""}`;
+  };
+
   const themes = (value: string) => `
     <fieldset class="group" data-section="theme">
       <legend>WORD THEME</legend>
       <p class="choice-hint">With a theme, the first word of each rhyme comes from it. Drug and weapon words in the rap styles only show with explicit words on.</p>
+      <p class="choice-hint theme-note" aria-live="polite">${esc(themeNote(value))}</p>
       <div class="minis">${mini("any", "ANY WORDS", "Everyday words with lots of rhymes.", value)}</div>
       <p class="sub">RAP STYLES</p>
       <div class="minis">${CATEGORIES.filter((c) => c.kind === "style").map((c) => mini(c.id, c.name, c.hint, value)).join("")}</div>
@@ -143,6 +153,8 @@ export function optionsSheet(get: () => Settings, stats: () => Stats, change: (p
     const input = e.target as HTMLInputElement;
     if (input.type !== "radio") return;
     change({ [input.name]: input.value } as Partial<Settings>);
+    const note = body.querySelector(".theme-note");
+    if (input.name === "category" && note) note.textContent = themeNote(input.value);
   });
   body.addEventListener("click", (e) => {
     const button = (e.target as HTMLElement).closest<HTMLButtonElement>(".switch");
@@ -221,7 +233,9 @@ export function helperSheet(index: () => RhymeIndex | null, allowed: () => Reado
       return;
     }
     results.innerHTML =
-      list("PERFECT", r.perfect, "Same sound from the stressed vowel on.") + list("NEAR", r.near, "Same vowel sounds, different consonants.");
+      list("PERFECT", r.perfect, "Same sound from the stressed vowel on, the way rappers say it: -er and -a match.") +
+      list("SLANT", r.slant, "Same vowels and the same ending, like dinner, killer and picture. How most rap rhymes.") +
+      list("NEAR", r.near, "Same vowel sounds, different consonants.");
   }
 
   body.querySelector("form")!.addEventListener("submit", (e) => {

@@ -32,8 +32,8 @@ negro	55	N IY1 G R OW0
 negroes	90	N IY1 G R OW0 Z
 negros	90	N IY1 G R OW0 Z
 nigg	90	N IH1 G
-nigga	50	N IH1 G ER0
-niggas	50	N IH1 G ER0 Z
+nigga	50	N IH1 G AH0
+niggas	50	N IH1 G AH0 Z
 nigger	40	N IH1 G ER0
 niggers	40	N IH1 G ER0 Z
 polack	90	P OW1 L AE0 K

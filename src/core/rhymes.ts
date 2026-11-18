@@ -1,9 +1,10 @@
-import { nearKey, onset, parsePron, perfectKey, syllables, type Phones } from "./phonetics";
+import { nearKey, onset, parsePron, rapKey, rapPhones, slantKey, syllables, type Phones } from "./phonetics";
 
 /**
  * The rhyme finder. It loads the word files from public/data (see
- * scripts/build-rhymes.ts) and indexes every pronunciation by its perfect
- * and near rhyme keys, so a lookup is a couple of map reads.
+ * scripts/build-rhymes.ts) and indexes every pronunciation by its perfect,
+ * slant and near rhyme keys, so a lookup is a few map reads. Keys follow
+ * how rappers say words (see phonetics.ts): "-er" rhymes with "-a".
  */
 
 export type Tier = "clean" | "profane" | "slur";
@@ -19,13 +20,18 @@ export interface Entry {
 export interface Rhymes {
   /** False when the word is not in the loaded data. */
   known: boolean;
+  /** Same sounds from the stressed vowel on, the way rappers say them. */
   perfect: string[];
+  /** Same vowels and the same ending, other consonants in between. */
+  slant: string[];
+  /** Same vowels, any consonants. */
   near: string[];
 }
 
 export class RhymeIndex {
   private words = new Map<string, Entry>();
   private byPerfect = new Map<string, Entry[]>();
+  private bySlant = new Map<string, Entry[]>();
   private byNear = new Map<string, Entry[]>();
   readonly loaded = new Set<Tier>();
 
@@ -36,10 +42,18 @@ export class RhymeIndex {
     for (const line of text.split("\n")) {
       const [word, size, prons] = line.split("\t");
       if (!word || !size || !prons) continue;
-      const entry: Entry = { word, size: Number(size), tier, prons: prons.split("|").map(parsePron) };
+      // Extra readings with a different syllable count are mostly foreign ones
+      // ("fine" said fee-neh, which would rhyme with dinner): keep the main one's length.
+      const all = prons.split("|").map(parsePron);
+      const keep = all.filter((p) => syllables(p) === syllables(all[0]!));
+      const entry: Entry = { word, size: Number(size), tier, prons: keep };
       this.words.set(word, entry);
-      for (const map of [this.byPerfect, this.byNear]) {
-        const keyOf = map === this.byPerfect ? perfectKey : nearKey;
+      const keys: [Map<string, Entry[]>, (p: Phones) => string][] = [
+        [this.byPerfect, rapKey],
+        [this.bySlant, slantKey],
+        [this.byNear, (p) => nearKey(rapPhones(p))],
+      ];
+      for (const [map, keyOf] of keys) {
         for (const key of new Set(entry.prons.map(keyOf))) {
           if (!key) continue;
           const list = map.get(key);
@@ -54,9 +68,9 @@ export class RhymeIndex {
     return this.words.get(word.toLowerCase());
   }
 
-  /** Every perfect rhyme sound and the words that end in it. */
+  /** Every slant rhyme sound and the words that end in it: the sounds prompts are dealt from. */
   sounds(): IterableIterator<[string, Entry[]]> {
-    return this.byPerfect.entries();
+    return this.bySlant.entries();
   }
 
   /** Every word in one tier. */
@@ -66,34 +80,39 @@ export class RhymeIndex {
 
   /** Words that share the perfect rhyme sound of `pron`, for building prompts. */
   family(pron: Phones): Entry[] {
-    return this.byPerfect.get(perfectKey(pron)) ?? [];
+    return this.bySlant.get(slantKey(pron)) ?? [];
   }
 
   /**
-   * Perfect and near rhymes for a word, most common first, then closest in
-   * syllables. Only words in the allowed tiers are returned.
+   * Perfect, slant and near rhymes for a word, most common first, then
+   * closest in syllables. Only words in the allowed tiers are returned.
    */
   lookup(raw: string, allowed: ReadonlySet<Tier>, limit = 60): Rhymes {
     const word = raw.trim().toLowerCase();
     const self = this.words.get(word);
-    if (!self) return { known: false, perfect: [], near: [] };
+    if (!self) return { known: false, perfect: [], slant: [], near: [] };
     const selfProns = new Set(self.prons.map((p) => p.join(" ")));
     const sylls = Math.min(...self.prons.map(syllables));
     const ok = (e: Entry) => e.word !== word && allowed.has(e.tier) && !e.prons.some((p) => selfProns.has(p.join(" ")));
 
     const perfect = new Set<Entry>();
+    // Same sound before the vowel too ("leave" and "believe") is an echo, not a rhyme.
+    const echo = (e: Entry, keyOf: (p: Phones) => string, key: string, start: string) =>
+      e.prons.every((p) => keyOf(p) !== key || onset(p) === start);
     for (const pron of self.prons) {
-      const key = perfectKey(pron);
+      const key = rapKey(pron);
       const start = onset(pron);
-      for (const e of this.byPerfect.get(key) ?? []) {
-        if (!ok(e)) continue;
-        // Same sound before the vowel too ("leave" and "believe") is an echo, not a rhyme.
-        if (e.prons.some((p) => perfectKey(p) === key && onset(p) !== start)) perfect.add(e);
-      }
+      for (const e of this.byPerfect.get(key) ?? []) if (ok(e) && !echo(e, rapKey, key, start)) perfect.add(e);
+    }
+    const slant = new Set<Entry>();
+    for (const pron of self.prons) {
+      const key = slantKey(pron);
+      const start = onset(pron);
+      for (const e of this.bySlant.get(key) ?? []) if (ok(e) && !perfect.has(e) && !echo(e, slantKey, key, start)) slant.add(e);
     }
     const near = new Set<Entry>();
     for (const pron of self.prons) {
-      for (const e of this.byNear.get(nearKey(pron)) ?? []) if (ok(e) && !perfect.has(e)) near.add(e);
+      for (const e of this.byNear.get(nearKey(rapPhones(pron))) ?? []) if (ok(e) && !perfect.has(e) && !slant.has(e)) near.add(e);
     }
     const order = (list: Set<Entry>) =>
       [...list]
@@ -105,7 +124,7 @@ export class RhymeIndex {
         )
         .slice(0, limit)
         .map((e) => e.word);
-    return { known: true, perfect: order(perfect), near: order(near) };
+    return { known: true, perfect: order(perfect), slant: order(slant), near: order(near) };
   }
 }
 

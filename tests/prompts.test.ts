@@ -4,7 +4,7 @@ import profane from "../public/data/words-profane.txt?raw";
 import slur from "../public/data/words-slur.txt?raw";
 import { classify } from "../filter/classify";
 import { CORE_CURSES, cursesFor, EXPLICIT_PROMPTS, RAP_SLURS, STYLES_WITH_CURSES } from "../src/core/explicit";
-import { perfectKey } from "../src/core/phonetics";
+import { slantKey } from "../src/core/phonetics";
 import { dealableSounds, MIN_FAMILY, PromptDeck, soundOf, soundPools } from "../src/core/prompts";
 import { allowedTiers, RhymeIndex } from "../src/core/rhymes";
 
@@ -16,9 +16,9 @@ beforeAll(() => {
   index.add(slur, "slur");
 });
 
-/** True when all the words share at least one rhyme sound. */
+/** True when all the words share at least one rhyme sound (rap slant: same vowels and ending). */
 const shareSound = (words: string[]) => {
-  const sets = words.map((w) => new Set(index.entry(w)!.prons.map(perfectKey)));
+  const sets = words.map((w) => new Set(index.entry(w)!.prons.map(slantKey)));
   return [...sets[0]!].some((k) => sets.every((s) => s.has(k)));
 };
 
@@ -35,7 +35,7 @@ describe("the sound deck", () => {
     for (const key of sounds) expect(pools.get(key)!.clean.length).toBeGreaterThanOrEqual(MIN_FAMILY);
   });
 
-  it("gives every group four words that perfectly rhyme", () => {
+  it("gives every group four words that rhyme the rap way", () => {
     const deck = new PromptDeck(index, kids, { seed: 1 });
     for (const words of deal(deck, 40)) expect([words, shareSound(words)]).toEqual([words, true]);
   });
@@ -145,7 +145,7 @@ describe("explicit words and slurs in prompts", () => {
     expect(["twat", "prick", "wanker", "arse"].some((w) => ukWords.has(w))).toBe(true);
     expect(ukWords.has("thot")).toBe(false);
     const miami = new PromptDeck(index, allowedTiers(true, false), { seed: 14, explicit: true, style: "miami" });
-    const led = leads(miami, 300, "profane");
+    const led = leads(miami, 1500, "profane");
     const counts = new Map<string, number>();
     for (const w of led) counts.set(w, (counts.get(w) ?? 0) + 1);
     expect([...counts].sort((a, b) => b[1] - a[1])[0]![0]).toBe("ass");

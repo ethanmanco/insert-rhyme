@@ -870,3 +870,8 @@ a.btn {
   opacity: 0.45;
   cursor: default;
 }
+
+/* The picked word theme, and the artists a rap style draws on. */
+.theme-note {
+  color: var(--hl-a);
+}

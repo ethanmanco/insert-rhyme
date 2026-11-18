@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import clean from "../public/data/words-clean.txt?raw";
 import { classify } from "../filter/classify";
 import { categoryWords, CATEGORIES, isCategory } from "../src/core/categories";
-import { perfectKey } from "../src/core/phonetics";
+import { slantKey } from "../src/core/phonetics";
 import { family, MAX_LETTERS, PromptDeck } from "../src/core/prompts";
 import { allowedTiers, RhymeIndex } from "../src/core/rhymes";
 
@@ -49,7 +49,7 @@ describe("a themed deck", () => {
     for (let g = 0; g < 20; g++) {
       const words = [0, 1, 2, 3].map((slot) => deck.word(g, slot));
       expect(food.words).toContain(words[0]);
-      const sets = words.map((w) => new Set(index.entry(w)!.prons.map(perfectKey)));
+      const sets = words.map((w) => new Set(index.entry(w)!.prons.map(slantKey)));
       expect([words, [...sets[0]!].some((k) => sets.every((s) => s.has(k)))]).toEqual([words, true]);
     }
   });

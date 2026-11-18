@@ -10,11 +10,11 @@ Free 8-bit freestyle rap practice. Pick a beat, watch the ball bounce across eac
 
 - **Real recorded beats**, all free-licensed (CC0 or CC BY): boom bap, laid back, jazzy, uptempo, G-funk, gold school, bling era, trap, Chicago drill, UK drill and jungle (drum and bass, counted at half speed). Each is cut to an exact 16-bar loop and evened out in loudness, so switching beats never jumps in volume and loud 808s stay clean. The tempo slider works like a turntable: speed and pitch move together, from 60% to 160% (slow it right down for a screwed Houston feel).
 - **Use your own beat:** pick any song or beat file on your phone. The app finds its tempo and first bar by itself, and you can fix it with half, double, bar shift or tap to sync. The file never leaves your device.
-- **Word themes:** 25 rap styles (crunk, Houston slab, Memphis, Chicago drill, UK drill, Brooklyn drill, UK grime, Bay Area hyphy, New Orleans bounce, Detroit, Philly, Miami bass, Midwest chopper, battle rap, conscious, horrorcore, emo rap, rage, afroswing, Jersey club and more) and 33 topics (food, cars, money, family, hustle, pirates, Halloween and more). The first word of each rhyme comes from the theme.
+- **Word themes:** 29 rap styles (crunk, Houston slab, Memphis, Chicago drill, UK drill, Brooklyn drill, UK grime, Bay Area hyphy, New Orleans bounce, Baton Rouge, bling era, underground, melodic, Detroit, Philly, Miami bass, Midwest chopper, battle rap, conscious, horrorcore, emo rap, rage, afroswing, Jersey club and more) and 33 topics (food, cars, money, family, hustle, pirates, Halloween and more). The first word of each rhyme comes from the theme. Each rap style names the artists its words and swearing are modeled on (Chief Keef, Lil Durk and King Von for Chicago drill; MF DOOM and Madlib for underground; and so on).
 - **A bar view that shows exactly when to rhyme.** Each bar is a row of four blocks, one per beat. The ball lands on each block right on the beat, the target block where your rhyme should land is highlighted, and the next three bars wait underneath so you can plan.
 - **5 rhyme schemes at 3 paces:** AABB, ABAB, AAAA, ABBA and AAXA (line 3 free), each at every line, skip a line (a free line before each rhyming line) or double-time (two rhymes per line, on beats 2 and 4). That's 15 layouts. Both can also be random: a random scheme picks a new one every 4 bars (8 when skipping lines, since a verse takes that long), repeating one at most twice in a row, and a random pace flips between every line and skip a line every 8 bars. The bars ahead always show what's coming.
 - **Word prompts with three levels:** every rhyme word shown, only the first word of each rhyme shown (you find the rest), or no words (free practice with the scheme only).
-- **Rhyme helper:** tap any word for its perfect and near rhymes, or type your own.
+- **Rhyme helper:** tap any word for its perfect, slant and near rhymes, or type your own.
 - **Tap tempo:** rapping over music from somewhere else? Tap along and the bars follow, with no built-in beat.
 - **Recording:** record your verse over the beat, play it back, and download it. It stays on your device.
 - **Daily streak and stats:** sessions and minutes practiced, saved in your browser.
@@ -30,8 +30,10 @@ Each loop is restarted exactly on its bar line from the audio clock, so a record
 
 Rhymes are found by sound, not spelling, using pronunciations from the CMU Pronouncing Dictionary. "Night" is `N AY1 T`: phonemes, with a stress number on each vowel.
 
+- **Words are said the way rappers say them.** An unstressed "-er" is "-a" (bigger is "bigga", so it rhymes with killa and villa), and "-ing" is "-in'" (runnin', gunnin').
 - **Perfect rhymes** share the stressed vowel and everything after it, with a different sound just before it. Night, light and bite all end in `AY T`. "Knight" is left out (it sounds the same), and so is "believe" for "leave" (same sound before the vowel too, so it is an echo, not a rhyme).
-- **Near rhymes** share the vowel sounds from the stressed vowel on, while the consonants differ: night, ride and time all have `AY`.
+- **Slant rhymes** are how most rap rhymes: the same vowels and the same ending, with any consonants in between. Dinner, killer, picture and figure all match; so do money, country and hungry. Prompt groups are built from slant rhymes, so a group can mix perfect and slant rhymes the way a verse does.
+- **Near rhymes** share only the vowel sounds from the stressed vowel on: night, ride and time all have `AY`.
 - Results are sorted by how common the word is (using the SCOWL word lists), then by how close the syllable count is.
 
 Prompt words are dealt by rhyme sound, like cards: every sound in the dictionary with at least 8 everyday rhymes goes in a shuffled deck (a few hundred of them), and no sound comes back until the deck has been played through. Each group draws its words at random from up to 40 everyday words for its sound, leaning toward common words and skipping ones you saw recently, and the app remembers recent sounds and words between visits. Tests check that 150 groups in a row never repeat a sound and that almost every word in 60 groups is new.
@@ -44,7 +46,7 @@ The filter (`filter/`) is thorough because the pronunciation dictionary contains
 
 The tests check every listed word and its forms, a set of innocent look-alikes, and every single word in the shipped default file. The word lists are stored in ROT13 so the repository does not show them as plain text.
 
-With a switch on, prompts don't use everything the filter catches. They use the words regular rap uses, weighted by how often (`src/core/explicit.ts`). Each rap style has its own list, so UK drill and grime curse like UK rappers and Miami bass leans on party words, while topics and any words use everyday rap cursing. Slur prompts are only the slurs rap uses, mostly the n-word, which the dictionary lacks; it's added with the sound rappers give it, so it rhymes with bigger and trigger. The rhyme helper still knows every word in the switched-on files.
+With a switch on, prompts don't use everything the filter catches. They use the words regular rap uses, weighted by how often (`src/core/explicit.ts`). Each rap style has its own list, so UK drill and grime curse like UK rappers and Miami bass leans on party words, while topics and any words use everyday rap cursing. Slur prompts are only the slurs rap uses, mostly the n-word, which the dictionary lacks; it's added ending in "-a", and with "-er" said as "-a" it rhymes with bigger, trigger, killer, dinner and figure. The rhyme helper still knows every word in the switched-on files.
 
 ## Credits and licenses
 

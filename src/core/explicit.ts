@@ -54,6 +54,10 @@ const STYLE_CURSES: Record<string, Weighted[]> = {
   rage: decode("shpx:10 fuvg:9 ovgpu:7 nff:4 ubr:3 qnza:3 shpxvat:3 shpxrq:2"),
   afroswing: decode("shpx:8 fuvg:7 chffl:6 nff:5 ovgpu:4 ubr:3 qnza:2"),
   jersey: decode("nff:10 fuvg:6 ubr:6 chffl:6 ovgpu:5 shpx:4 gubg:4 qvpx:3"),
+  bling: decode("ovgpu:10 fuvg:8 shpx:7 ubr:6 nff:5 fxrrg:4 ubrf:4 ovgpurf:3 qnza:3 chffl:3"),
+  batonrouge: decode("fuvg:10 shpx:9 ovgpu:9 ubr:5 nff:4 qnza:3 chffl:3 ovgpurf:3 shpxvat:2"),
+  underground: decode("fuvg:10 shpx:8 qnza:6 ovgpu:5 nff:4 uryy:4 ohyyfuvg:3 onfgneq:2"),
+  melodic: decode("shpx:10 fuvg:9 ovgpu:7 qnza:4 nff:3 ubr:3 shpxvat:3 shpxrq:2"),
 };
 
 /** The slurs regular rap uses, most used first. */
