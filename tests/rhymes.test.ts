@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import clean from "../public/data/words-clean.txt?raw";
 import profane from "../public/data/words-profane.txt?raw";
 import slur from "../public/data/words-slur.txt?raw";
-import { nearKey, onset, parsePron, perfectKey, rapKey, rapPhones, slantKey, stressIndex, syllables } from "../src/core/phonetics";
+import { accentPhones, nearKey, onset, parsePron, perfectKey, rapKey, rapPhones, slantKey, stressIndex, syllables } from "../src/core/phonetics";
 import { allowedTiers, RhymeIndex } from "../src/core/rhymes";
 
 describe("phonetics", () => {
@@ -36,6 +36,25 @@ describe("phonetics", () => {
     expect(rapKey(parsePron("R AH1 N IH0 NG Z"))).toBe("AH N IH N Z");
     // A stressed "ing" stays.
     expect(rapKey(parsePron("K IH1 NG"))).toBe("IH NG");
+  });
+
+  it("says words with a scene's accent", () => {
+    const uk = (p: string) => accentPhones(parsePron(p), "uk").join(" ");
+    const south = (p: string) => accentPhones(parsePron(p), "south").join(" ");
+    // UK: no R after a vowel, unless a vowel follows.
+    expect(uk("K AA1 R")).toBe("K AA1");
+    expect(rapKey(parsePron("K AA1 R"), "uk")).toBe(rapKey(parsePron("S P AA1"), "uk"));
+    expect(rapKey(parsePron("G AA1 R M Z"), "uk")).toBe(rapKey(parsePron("P AA1 M Z"), "uk"));
+    expect(uk("K AE1 R IY0")).toBe("K AE1 R IY0");
+    expect(uk("S T AO1 R IY0")).toBe("S T AO1 R IY0");
+    expect(uk("SH UH1 R")).toBe("SH AO1");
+    // South: "e" before N or M is "i".
+    expect(south("B EH1 N Z")).toBe("B IH1 N Z");
+    expect(rapKey(parsePron("P EH1 N"), "south")).toBe(rapKey(parsePron("W IH1 N"), "south"));
+    expect(south("B EH1 D")).toBe("B EH1 D");
+    // Plain US rap keeps both.
+    expect(rapKey(parsePron("K AA1 R"))).not.toBe(rapKey(parsePron("S P AA1")));
+    expect(rapKey(parsePron("P EH1 N"))).not.toBe(rapKey(parsePron("W IH1 N")));
   });
 
   it("keys slant rhymes by their vowels and ending", () => {
@@ -98,6 +117,15 @@ describe("rhyme lookups on the real dictionary data", () => {
   it("rhymes -er words with -a words, the way rappers say them", () => {
     const r = index.lookup("killer", kids, 500);
     for (const w of ["villa", "gorilla", "vanilla"]) expect([...r.perfect, ...r.slant]).toContain(w);
+  });
+
+  it("finds rhymes with an accent: UK car and spa, Southern pen and win", () => {
+    expect(index.lookup("car", kids, 500, undefined, "uk").perfect).toContain("spa");
+    expect(index.lookup("car", kids, 500).perfect).not.toContain("spa");
+    expect(index.lookup("pen", kids, 500, undefined, "south").perfect).toContain("win");
+    expect(index.lookup("pen", kids, 500).perfect).not.toContain("win");
+    // The plain keys are unchanged after an accent is built.
+    expect(index.lookup("car", kids, 500).perfect).toContain("star");
   });
 
   it("keeps non-rhymes out of perfect rhymes", () => {

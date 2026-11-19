@@ -6,6 +6,7 @@ import { canRecord, Recorder, type Take } from "./audio/recorder";
 import { beatById, ENCODER_DELAY, POSTROLL } from "./core/beats";
 import { doubleTempo, findGrid, halfTempo, monoOpening, ownGain, shiftBeats, syncFromTaps, type Grid } from "./core/ownBeat";
 import { categoryWords, CATEGORIES } from "./core/categories";
+import { flavorWords } from "./core/rapWords";
 import { isNWord } from "./core/explicit";
 import { PromptDeck, type Memory } from "./core/prompts";
 import { allowedTiers, RhymeIndex, type Tier } from "./core/rhymes";
@@ -111,6 +112,8 @@ async function refreshWords(): Promise<void> {
       explicit: settings.explicit,
       slurs: settings.slurs,
       hidden: hiddenWords(),
+      flavor: flavorWords(category, settings.explicit),
+      accent: category?.accent ?? "us",
       memory: load<Memory>("recent", { sounds: [], words: [] }),
     });
   stage.refresh();
@@ -234,6 +237,7 @@ const helper = helperSheet(
   allowed,
   () => settings.explicit,
   hiddenWords,
+  () => CATEGORIES.find((c) => c.id === settings.category)?.accent ?? "us",
 );
 const explainMic = micExplainer();
 

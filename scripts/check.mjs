@@ -135,6 +135,29 @@ try {
   const schemeChip = await page.evaluate(() => document.querySelector("[data-chip='scheme']").textContent);
   check(schemeChip === "AABB 2X", `the scheme chip should say AABB 2X, got ${schemeChip}`);
 
+  // A UK style: the note says it rhymes the UK way, and the rhyme helper does too (car with spa).
+  await page.click("[data-tool='options']");
+  await page.waitForSelector("dialog[open] input[value='ukdrill']");
+  await page.click("dialog[open] input[value='ukdrill']");
+  const ukNote = await page.evaluate(() => document.querySelector("dialog[open] .theme-note").textContent);
+  check(ukNote.includes("UK way"), `the UK drill note should mention the UK way, got ${ukNote}`);
+  await page.keyboard.press("Escape");
+  await page.click("[data-tool='rhymes']");
+  await page.waitForSelector("dialog[open] #rhyme-word");
+  await page.$eval("dialog[open] #rhyme-word", (el) => (el.value = ""));
+  await page.type("dialog[open] #rhyme-word", "car");
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() => document.querySelector("dialog[open] #rhyme-word")?.value === "car" && document.querySelector("dialog[open] .words .word"), { timeout: 5000 });
+  const ukRhymes = await page.evaluate(() => [...document.querySelectorAll("dialog[open] .word")].map((b) => b.textContent));
+  console.log(`UK drill, rhymes for car: ${ukRhymes.slice(0, 12).join(" ")}`);
+  check(ukRhymes.includes("spa"), "with UK drill picked, car should rhyme with spa");
+  // The first Escape clears the search box; the second closes the sheet.
+  await page.keyboard.press("Escape");
+  if (await page.$("dialog[open]")) await page.keyboard.press("Escape");
+  await sleep(300);
+  const ukWords = await page.evaluate(() => [...document.querySelectorAll(".row.current .target, .next .row .target")].map((b) => b.textContent).filter((t) => t && t !== "????"));
+  console.log("UK drill prompts:", JSON.stringify(ukWords));
+
   // ABAB with a skipped line: every other bar is free, and the rhyming bars alternate A and B.
   await page.click("[data-tool='options']");
   await page.waitForSelector("dialog[open] input[value='skip']");

@@ -1,5 +1,5 @@
 import { cursesFor, EXPLICIT_PROMPTS, RAP_SLURS, slursFor, type Weighted } from "./explicit";
-import { slantKey, syllables } from "./phonetics";
+import { slantKey, syllables, type Accent } from "./phonetics";
 import type { Entry, RhymeIndex, Tier } from "./rhymes";
 
 /**
@@ -15,6 +15,11 @@ import type { Entry, RhymeIndex, Tier } from "./rhymes";
  *    draws a few at random, leaning toward common words and skipping words
  *    seen recently.
  * 3. The recent sounds and words are remembered between visits.
+ *
+ * With a rap style picked, a group is the style's words first: a style word
+ * leads, then other style words that rhyme with it, then rap words that
+ * rhyme (`flavor`), and only then everyday words, with rare everyday words
+ * held back. Sounds are heard with the style's accent (phonetics.ts).
  *
  * With explicit words on, a good share of groups starts with a swear word
  * (and swear words that rhyme get mixed into other groups); with slurs on,
@@ -52,11 +57,11 @@ const isCommonClean = (e: Entry) => e.tier === "clean" && e.size <= COMMON_SIZE 
  * The rhyme sound to use for a word. A word with two pronunciations ("cost"
  * as cawst or cost) takes the one with the most everyday rhymes.
  */
-export function soundOf(index: RhymeIndex, word: string, allowed: ReadonlySet<Tier> = new Set(["clean"])): string | null {
+export function soundOf(index: RhymeIndex, word: string, allowed: ReadonlySet<Tier> = new Set(["clean"]), accent: Accent = "us"): string | null {
   const e = index.entry(word);
   if (!e?.prons.length) return null;
-  const pools = soundPools(index, allowed);
-  const keys = [...new Set(e.prons.map(slantKey))];
+  const pools = soundPools(index, allowed, accent);
+  const keys = [...new Set(e.prons.map((p) => slantKey(p, accent)))];
   return keys.reduce((best, k) => ((pools.get(k)?.clean.length ?? 0) > (pools.get(best)?.clean.length ?? 0) ? k : best), keys[0]!);
 }
 
@@ -70,26 +75,28 @@ export interface Sound {
 
 const PROMPT_SWEARS = new Set(EXPLICIT_PROMPTS);
 const PROMPT_SLURS = new Set(RAP_SLURS.map((w) => w.word));
-const poolCache = new WeakMap<RhymeIndex, { sig: string; pools: Map<string, Sound> }>();
+const poolCache = new WeakMap<RhymeIndex, Map<string, Map<string, Sound>>>();
 
 /**
  * All sounds with their word pools, for the allowed tiers. Explicit pools
  * only take the swear words and slurs rap uses (explicit.ts), not every
- * word the filter catches. Cached until the tiers or the data change.
+ * word the filter catches. Cached for each set of tiers, data and accent.
  */
-export function soundPools(index: RhymeIndex, allowed: ReadonlySet<Tier>): Map<string, Sound> {
-  const sig = [...allowed].sort().join(",") + "|" + [...index.loaded].sort().join(",");
-  const cached = poolCache.get(index);
-  if (cached?.sig === sig) return cached.pools;
+export function soundPools(index: RhymeIndex, allowed: ReadonlySet<Tier>, accent: Accent = "us"): Map<string, Sound> {
+  const sig = [...allowed].sort().join(",") + "|" + [...index.loaded].sort().join(",") + "|" + accent;
+  let cache = poolCache.get(index);
+  if (!cache) poolCache.set(index, (cache = new Map()));
+  const cached = cache.get(sig);
+  if (cached) return cached;
   const pools = new Map<string, Sound>();
-  for (const [key, entries] of index.sounds()) {
+  for (const [key, entries] of index.sounds(accent)) {
     const clean = entries.filter(isCommonClean).sort((a, b) => a.size - b.size || (a.word < b.word ? -1 : 1)).slice(0, POOL_SIZE);
     const explicit = entries.filter(
       (e) => allowed.has(e.tier) && e.word.length <= MAX_LETTERS && ((e.tier === "profane" && PROMPT_SWEARS.has(e.word)) || (e.tier === "slur" && PROMPT_SLURS.has(e.word))),
     );
     if (clean.length || explicit.length) pools.set(key, { key, clean, explicit });
   }
-  poolCache.set(index, { sig, pools });
+  cache.set(sig, pools);
   return pools;
 }
 
@@ -99,10 +106,10 @@ export function dealableSounds(pools: Map<string, Sound>): string[] {
 }
 
 /** A word's rhyming prompt words: itself first, then its sound's everyday words (for theme checks). */
-export function family(index: RhymeIndex, word: string, allowed: ReadonlySet<Tier>): string[] {
-  const key = soundOf(index, word, allowed);
+export function family(index: RhymeIndex, word: string, allowed: ReadonlySet<Tier>, accent: Accent = "us"): string[] {
+  const key = soundOf(index, word, allowed, accent);
   if (!key) return [];
-  const pool = soundPools(index, allowed).get(key);
+  const pool = soundPools(index, allowed, accent).get(key);
   return [word, ...(pool?.clean ?? []).map((e) => e.word).filter((w) => w !== word)];
 }
 
@@ -126,8 +133,16 @@ export function shuffle<T>(list: T[], random: () => number): T[] {
   return out;
 }
 
-/** Common words are likelier, but rarer ones still come up. */
-const weight = (e: Entry) => (e.size <= 10 ? 8 : e.size <= 20 ? 4 : 1);
+/** Common words are likelier, but rarer ones still come up (rarely, in a rap style). */
+const weight = (e: Entry, rare: number) => (e.size <= 10 ? 8 : e.size <= 20 ? 4 : rare);
+
+/** Weight of a rare everyday word in a rap style's groups: they read like a dictionary, not a verse. */
+const STYLE_RARE = 0.15;
+/** Most style words, and most rap words, that join a group after its lead. */
+const STYLE_MATES = 3;
+const FLAVOR_MATES = 3;
+/** A theme sound used in this many recent groups is skipped while others are left. */
+const RECENT_THEME_SOUNDS = 8;
 
 /** Remembered between visits, so a reload does not bring back the same words. */
 export interface Memory {
@@ -145,6 +160,10 @@ export interface DeckOptions {
   slurs?: boolean;
   /** Words to leave out (the n-word with "I'm white" on). */
   hidden?: (word: string) => boolean;
+  /** Rap words that fill a style's groups before everyday words (rapWords.ts). */
+  flavor?: string[] | null;
+  /** How the style says its words, which decides what rhymes. */
+  accent?: Accent;
   memory?: Memory;
 }
 
@@ -170,6 +189,14 @@ export class PromptDeck {
   private lastLead = "";
   private topWeight = 1;
   private theme: string[] | null;
+  private accent: Accent;
+  /** Weight of rare everyday words. */
+  private rare = 1;
+  /** Theme and flavor words by rhyme sound, for filling groups. */
+  private themeBySound = new Map<string, string[]>();
+  private flavorBySound = new Map<string, string[]>();
+  /** How many other theme and flavor words share each theme word's sound: leads with mates come up more. */
+  private mateCount = new Map<string, number>();
 
   constructor(
     private index: RhymeIndex,
@@ -177,13 +204,33 @@ export class PromptDeck {
     opts: DeckOptions = {},
   ) {
     this.random = rng(opts.seed ?? Date.now());
-    this.pools = soundPools(index, allowed);
+    this.accent = opts.accent ?? "us";
+    this.pools = soundPools(index, allowed, this.accent);
     this.recentSounds = [...(opts.memory?.sounds ?? [])].slice(-RECENT_SOUNDS);
     this.recentWords = [...(opts.memory?.words ?? [])].slice(-RECENT_WORDS);
-    this.theme = opts.theme?.filter((w) => index.entry(w)) ?? null;
+    const usable = (w: string) => !!index.entry(w) && allowed.has(index.entry(w)!.tier) && !opts.hidden?.(w);
+    this.theme = opts.theme?.filter(usable) ?? null;
+    const flavor = (opts.flavor ?? []).filter((w) => usable(w) && w.length <= MAX_LETTERS);
+    if (flavor.length) this.rare = STYLE_RARE;
+    const bySound = (words: string[], into: Map<string, string[]>) => {
+      for (const w of new Set(words))
+        for (const key of new Set(index.entry(w)!.prons.map((p) => slantKey(p, this.accent)))) {
+          const list = into.get(key);
+          if (list) list.push(w);
+          else into.set(key, [w]);
+        }
+    };
+    bySound(this.theme ?? [], this.themeBySound);
+    bySound(flavor, this.flavorBySound);
+    for (const w of this.theme ?? []) {
+      const key = soundOf(index, w, allowed, this.accent) ?? "";
+      const mates = new Set([...(this.themeBySound.get(key) ?? []), ...(this.flavorBySound.get(key) ?? [])]);
+      mates.delete(w);
+      this.mateCount.set(w, mates.size);
+    }
     // Explicit prompts need at least three everyday rhymes to lead a group.
     const rhymable = (w: Weighted) => {
-      const key = soundOf(index, w.word, allowed);
+      const key = soundOf(index, w.word, allowed, this.accent);
       return !!key && (this.pools.get(key)?.clean.length ?? 0) >= 3 && w.word.length <= MAX_LETTERS;
     };
     const known = (tier: Tier) => (w: Weighted) => index.entry(w.word)?.tier === tier;
@@ -235,15 +282,39 @@ export class PromptDeck {
     if (candidates.length < count) candidates = pool.filter((e) => !exclude.has(e.word));
     const out: string[] = [];
     const left = [...candidates];
+    const w = (e: Entry) => weight(e, this.rare);
     while (out.length < count && left.length) {
-      const total = left.reduce((s, e) => s + weight(e), 0);
+      const total = left.reduce((s, e) => s + w(e), 0);
       let r = this.random() * total;
       let i = 0;
-      while (i < left.length - 1 && (r -= weight(left[i]!)) > 0) i++;
+      while (i < left.length - 1 && (r -= w(left[i]!)) > 0) i++;
       out.push(left[i]!.word);
       left.splice(i, 1);
     }
     return out;
+  }
+
+  /**
+   * Up to `max` words from `bySound` with this sound, in random order,
+   * leaving out `exclude` and (when it can) words seen recently.
+   */
+  private mates(bySound: Map<string, string[]>, key: string, exclude: Set<string>, max: number): string[] {
+    const recent = new Set(this.recentWords.slice(-RECENT_WORDS));
+    const all = (bySound.get(key) ?? []).filter((w) => !exclude.has(w));
+    const fresh = all.filter((w) => !recent.has(w));
+    // Recent words may come back, but only one, and only when nothing fresh rhymes.
+    const list = fresh.length ? fresh : all.slice(0, 1);
+    return shuffle(list, this.random).slice(0, max);
+  }
+
+  /** A group's words after its lead: style words, then rap words, then everyday words. */
+  private fill(lead: string, key: string, pool: Sound, everyday: number): string[] {
+    const taken = new Set([lead]);
+    const style = this.mates(this.themeBySound, key, taken, STYLE_MATES);
+    style.forEach((w) => taken.add(w));
+    const flavor = this.mates(this.flavorBySound, key, taken, FLAVOR_MATES);
+    flavor.forEach((w) => taken.add(w));
+    return [lead, ...style, ...flavor, ...this.pick(pool.clean, everyday, taken)];
   }
 
   /** The next sound from the shuffled deck, refilled (minus recent ones) when it runs out. */
@@ -267,7 +338,8 @@ export class PromptDeck {
       if (themed) return themed;
     }
     const sound = this.nextSound();
-    const words = this.pick(sound.clean, 6, new Set());
+    const [first] = this.pick(sound.clean, 1, new Set());
+    const words = this.fill(first!, sound.key, sound, 5);
     // With explicit words on, a matching swear or slur sometimes joins in.
     const extra = this.extraFor(sound, words);
     if (extra) words.splice(1 + Math.floor(this.random() * 2), 0, extra);
@@ -299,34 +371,38 @@ export class PromptDeck {
     // The last lead is less likely to lead again, without ruling it out (one word can rule a style).
     const lead = this.weighted(list.map((w) => (w.word === this.lastLead ? { ...w, weight: w.weight * 0.3 } : w)));
     this.lastLead = lead;
-    const key = soundOf(this.index, lead, this.allowed)!;
+    const key = soundOf(this.index, lead, this.allowed, this.accent)!;
     const pool = this.pools.get(key)!;
-    const words = [lead, ...this.pick(pool.clean, 5, new Set([lead]))];
+    const words = this.fill(lead, key, pool, 5);
     const extra = this.extraFor(pool, words);
     if (extra) words.splice(2, 0, extra);
     this.remember(key, words);
     return words;
   }
 
-  /** A group led by the next theme word, then other theme words that rhyme, then everyday rhymes. */
+  /**
+   * A group led by the next theme word, then other theme words that rhyme,
+   * then rap words that rhyme, then everyday rhymes. Theme words with more
+   * rhyming mates lead more often, so groups stay in the style.
+   */
   private themeGroup(): string[] | null {
     const theme = this.theme!;
     for (let tries = 0; tries < theme.length; tries++) {
       if (!this.themeQueue.length) {
         const recent = new Set(this.recentWords);
         const fresh = theme.filter((w) => !recent.has(w));
-        this.themeQueue = shuffle(fresh.length >= 5 ? fresh : theme, this.random);
+        // A weighted shuffle: the end of the queue leads first, and words with mates sort toward it.
+        const mates = (w: string) => 1 + Math.min(4, this.mateCount.get(w) ?? 0);
+        const keyed = (fresh.length >= 5 ? fresh : theme).map((w) => ({ w, k: this.random() ** (1 / mates(w)) }));
+        this.themeQueue = keyed.sort((a, b) => a.k - b.k).map((x) => x.w);
       }
       const lead = this.themeQueue.pop()!;
-      const key = soundOf(this.index, lead, this.allowed);
+      const key = soundOf(this.index, lead, this.allowed, this.accent);
       const pool = key ? this.pools.get(key) : undefined;
       if (!key || !pool || pool.clean.filter((e) => e.word !== lead).length < 3) continue;
-      const themed = shuffle(
-        theme.filter((w) => w !== lead && soundOf(this.index, w, this.allowed) === key),
-        this.random,
-      );
-      const rest = this.pick(pool.clean, 5, new Set([lead, ...themed]));
-      const words = [lead, ...themed, ...rest];
+      // A sound heard in the last few groups waits its turn (wine, whine and shine all lead the same group).
+      if (tries < theme.length / 2 && this.recentSounds.slice(-RECENT_THEME_SOUNDS).includes(key)) continue;
+      const words = this.fill(lead, key, pool, 5);
       const extra = this.extraFor(pool, words);
       if (extra) words.splice(2, 0, extra);
       this.remember(key, words);

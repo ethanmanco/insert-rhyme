@@ -1,7 +1,9 @@
 /**
  * Word categories: themes for the prompt words. With a category picked, the
  * first word of every rhyme group comes from that theme, and the rest of the
- * group are its everyday rhymes (other theme words first, when they rhyme).
+ * group are other theme words that rhyme, then (for rap styles) rap words
+ * that rhyme (rapWords.ts), then everyday rhymes. A style's `accent` changes
+ * what rhymes: UK styles drop the R, Southern styles say pen like pin.
  *
  * Styles lean on each scene's own vocabulary, and name the artists they
  * draw on (shown in Options). Words about drugs or weapons
@@ -9,6 +11,8 @@
  * Slang the dictionary does not know gets its pronunciation in
  * scripts/build-rhymes.ts (EXTRA_WORDS).
  */
+
+import type { Accent } from "./phonetics";
 
 export interface Category {
   id: string;
@@ -20,6 +24,8 @@ export interface Category {
   words: string[];
   /** Only used with explicit words on. */
   mature?: string[];
+  /** How the scene says its words, which decides what rhymes (phonetics.ts). Plain US rap when missing. */
+  accent?: Accent;
 }
 
 const w = (text: string) => text.split(/\s+/).filter(Boolean);
@@ -30,27 +36,31 @@ export const CATEGORIES: Category[] = [
     id: "crunk",
     name: "CRUNK",
     kind: "style",
+    accent: "south",
     hint: "Atlanta club energy: loud, hype, bounce.",
     artists: ["Lil Jon", "Lil Scrappy", "Gorilla Zoe", "Waka Flocka Flame", "Hurricane Chris", "Ying Yang Twins"],
-    words: w("crunk club crowd loud bounce jump floor wall sweat stomp shake wild hype yell chant shout chain grill bling crazy hands low snap bass speaker drop heat"),
+    words: w("crunk club crowd loud bounce jump floor wall sweat stomp shake wild hype yell chant shout chain grill bling crazy hands low snap bass speaker drop heat window throw dirty brawl buck crank shots bar party fist pit rowdy riot flock goon posse wreck holler roof lights rubber teeth thump boom rattle scream jumping knuckle bump slam tear pump"),
+    mature: w("brick"),
   },
   {
     id: "houston",
     name: "HOUSTON SLAB",
     kind: "style",
+    accent: "south",
     hint: "Slow, low and candy painted: screwed and chopped.",
     artists: ["UGK", "Pimp C", "Bun B", "Mike Jones", "Paul Wall", "DJ Screw"],
-    words: w("slab candy paint grill screw chop slow trunk pop wood wheel boat lane cruise bang ride poke tip bump drawl hold main chrome shine glide float"),
-    mature: w("drank lean cup"),
+    words: w("slab candy paint grill screw chop slow trunk pop wood wheel boat lane cruise bang ride poke tip bump drawl hold main chrome shine glide float texas coast swang screwed chopped slowed pace crawl caddy tires sign spokes grain mink fur diamond playa player mane trill freeway ward boots star mix fade blade"),
+    mature: w("drank lean cup syrup purple"),
   },
   {
     id: "memphis",
     name: "MEMPHIS",
     kind: "style",
+    accent: "south",
     hint: "Dark tapes, cowbells and late-night haze.",
     artists: ["Three 6 Mafia", "Juicy J", "Project Pat", "8Ball & MJG", "Young Dolph"],
-    words: w("buck tape dark smoke haunt ghost night bass gang walk mask fog creep grave tomb river bluff cold six blade fade chant hood crypt"),
-    mature: w("blunt gun"),
+    words: w("buck tape dark smoke haunt ghost night bass gang walk mask fog creep grave tomb river bluff cold six blade fade chant hood crypt triple devil haze hiss pimp gangsta soul blues hoodie skull rob tear slow haunted demon shadow sinner choir murder evil stomp fear"),
+    mature: w("blunt gun chopper molly"),
   },
   {
     id: "chicago",
@@ -58,16 +68,17 @@ export const CATEGORIES: Category[] = [
     kind: "style",
     hint: "Cold winds, the block and the grind.",
     artists: ["Chief Keef", "Lil Durk", "King Von", "G Herbo"],
-    words: w("drill block cold wind lake side gang ice chain slide trench real grind drip flex sauce bands glide city snow mask hood team pack spin"),
-    mature: w("opps glock smoke stick drum"),
+    words: w("drill block cold wind lake side gang ice chain slide trench real grind drip flex sauce bands glide city snow mask hood team pack spin sosa bang shore hoodie bando glo fake tough winter lurk demon foenem deuce tray packs"),
+    mature: w("opps glock smoke stick drum glizzy switch blick perc wock shooters clips"),
   },
   {
     id: "grime",
     name: "UK GRIME",
     kind: "style",
+    accent: "uk",
     hint: "London bars: ends, mandem and pirate radio.",
     artists: ["Skepta", "Wiley", "Dizzee Rascal", "Kano", "Stormzy"],
-    words: w("ends bars mic set clash garage east rain tea bruv dub gassed peak long bare ting grime chicken estate bus fam garms mate chips"),
+    words: w("ends bars mic set clash garage east rain tea bruv dub gassed peak long bare ting grime chicken estate bus fam garms mate chips london innit allow blud pirate riddim rinse plate tower lyric war dubs sixteen spit flow shut gully trainers"),
     mature: w("shank"),
   },
   {
@@ -76,7 +87,8 @@ export const CATEGORIES: Category[] = [
     kind: "style",
     hint: "Sunshine, lowriders and a laid-back bounce.",
     artists: ["Dr. Dre", "Snoop Dogg", "2Pac", "Eazy-E", "N.W.A", "Warren G", "Nate Dogg", "YG", "ScHoolboy Q"],
-    words: w("palm bounce cruise beach coast wave chill cali hop switch khaki ocean breeze funk roll lean gold"),
+    words: w("palm bounce cruise beach coast wave chill cali hop switch khaki ocean breeze funk roll lean gold compton trees dip chuck bandana blue juice ride sunset summer slow dub drop gangsta homies locs chucks cuz sunny golden state valley pier hills bump rag crease laid back deep fade set lift glide"),
+    mature: w("chronic gin"),
   },
   {
     id: "nyc",
@@ -84,16 +96,18 @@ export const CATEGORIES: Category[] = [
     kind: "style",
     hint: "Subways, bodegas and dusty breaks.",
     artists: ["Nas", "Jay-Z", "The Notorious B.I.G.", "Wu-Tang Clan", "Mobb Deep", "A Tribe Called Quest", "Busta Rhymes", "50 Cent", "A$AP Rocky", "A$AP Ferg", "A$AP Mob"],
-    words: w("block stoop crate break queens beat rhyme mic flow verse scratch wax train concrete hustle grind boom bap"),
+    words: w("block stoop crate break queens beat rhyme mic flow verse scratch wax train concrete hustle grind boom bap harlem shaolin projects crib subway bodega cypher dusty breaks vinyl sample timbs hoodie goose jacket gritty corner jungle apple borough dough cream ill son yo kid shook"),
+    mature: w("gat"),
   },
   {
     id: "trap",
     name: "ATLANTA TRAP",
     kind: "style",
+    accent: "south",
     hint: "Drip, ice and big money talk.",
     artists: ["Gucci Mane", "Jeezy", "T.I.", "2 Chainz", "Future", "Migos", "Young Thug", "21 Savage"],
-    words: w("trap drip ice bands flex sauce wrist whip stack racks chain rich vault coupe pull up slime spend splash cash bag shine gold lit motion count"),
-    mature: w("plug brick pack"),
+    words: w("trap drip ice bands flex sauce wrist whip stack racks chain rich vault coupe pull up slime spend splash cash bag shine gold lit motion count zone bando skrrt foreign lambo triple ape pounds jugg finesse rubber water wet froze freeze bust check fold blow gas pedal six east spot"),
+    mature: w("plug brick pack bale serve stove kitchen molly perc pot"),
   },
   {
     id: "oldschool",
@@ -101,7 +115,7 @@ export const CATEGORIES: Category[] = [
     kind: "style",
     hint: "Block parties, boomboxes and breakdance.",
     artists: ["Run-DMC", "Rakim", "Big Daddy Kane", "LL Cool J", "Grandmaster Flash"],
-    words: w("break dance sneaker crew block scratch spin cassette rock jam funk groove fresh fly dope beat shell toe"),
+    words: w("break dance sneaker crew block scratch spin cassette rock jam funk groove fresh fly dope beat shell toe graffiti tag subway adidas rope emcee park def rap rhyme lock pop boogie breaks battle kicks laces wax needle record tape deck bells blaster jams word bust move pump crowd party jump"),
   },
 
   // ---------- Topics ----------
@@ -231,16 +245,17 @@ export const CATEGORIES: Category[] = [
     kind: "style",
     hint: "Go dumb: ghost rides, scrapers and sideshows.",
     artists: ["E-40", "Mac Dre", "Keak da Sneak", "Too $hort"],
-    words: w("ghost ride scraper bay whip mob dumb shades yay town slaps rap thump bang swerve spin wild loud crowd dip"),
+    words: w("ghost ride scraper bay whip mob dumb shades yay town slaps rap thump bang swerve spin wild loud crowd dip donut tires smoke stupid frisco feather yee hella hyphy slap gas pedal dreads doors open dance east bump go"),
     mature: w("thizz"),
   },
   {
     id: "bounce",
     name: "NEW ORLEANS BOUNCE",
     kind: "style",
+    accent: "south",
     hint: "Second lines, brass and a call-and-response bounce.",
     artists: ["Lil Wayne", "Juvenile", "Big Freedia", "Mannie Fresh"],
-    words: w("bounce brass parade shake wobble drum crowd chant call jazz street beads spice heat swamp boat river line twerk wave beat"),
+    words: w("bounce brass parade shake wobble drum crowd chant call jazz street beads spice heat swamp boat river line twerk wave beat nola ward magnolia krewe second juvie wiggle stomp hot boy girl back drop jiggle horns trumpet tuba band float uptown levee storm flood water cash money sweat booty"),
   },
   {
     id: "detroit",
@@ -248,7 +263,7 @@ export const CATEGORIES: Category[] = [
     kind: "style",
     hint: "Motor City grit: steel, cold and the grind.",
     artists: ["Eminem", "Big Sean", "Tee Grizzley", "Babyface Ray"],
-    words: w("steel grind cold chrome plant shift line block mile freeze lake grit hustle shop beat raw tough flint bone work ice"),
+    words: w("steel grind cold chrome plant shift line block mile freeze lake grit hustle shop beat raw tough flint bone work ice motor motown engine auto rust gator cartier glasses scam flow zone eight winter bitter gritty buffs workers union gear piston snow metal wheels"),
   },
   {
     id: "philly",
@@ -256,7 +271,7 @@ export const CATEGORIES: Category[] = [
     kind: "style",
     hint: "Row homes, cheesesteaks and freestyle battles.",
     artists: ["Lil Uzi Vert", "Meek Mill", "Freeway", "Beanie Sigel"],
-    words: w("jawn steak bell broad block row stoop cheese rocky eagle wit bar battle street train ride grind proud loud"),
+    words: w("jawn steak bell broad block row stoop cheese rocky eagle wit bar battle street train ride grind proud loud dirt bike wheelie hoagie water cypher drawl birds fly chain gang dreams hungry young trolley corner home hood cold bars hustle"),
   },
   {
     id: "brooklyn",
@@ -264,25 +279,27 @@ export const CATEGORIES: Category[] = [
     kind: "style",
     hint: "Woo, sliding 808s and a dance to match.",
     artists: ["Bobby Shmurda", "Pop Smoke", "Fivio Foreign", "Sheff G"],
-    words: w("woo slide dance drip gang dior block train stoop brook bounce bag wave rich ice chain spin crew tough"),
+    words: w("woo slide dance drip gang dior block train stoop brook bounce bag wave rich ice chain spin crew tough canarsie shmoney sliding mask hood drill pop kings county projects hoodie mob flex money cold winter hollow pressure grind hit"),
     mature: w("opps glock smoke"),
   },
   {
     id: "ukdrill",
     name: "UK DRILL",
     kind: "style",
+    accent: "uk",
     hint: "Roads, mandem energy and sliding basses.",
     artists: ["Headie One", "Digga D", "Central Cee", "Unknown T", "K-Trap"],
-    words: w("roads ends bruv fam trap splash bars wave drip ting slide link block pack gang cold rain"),
+    words: w("roads ends bruv fam trap splash bars wave drip ting slide link block pack gang cold rain opp bando yute innit pattern pree moped tracks grub wavey dot ride estate tower badman bare peak allow ops bail case graft country lines mad sick bait chat drill hood mask spin back phone nights"),
     mature: w("opps shank"),
   },
   {
     id: "miami",
     name: "MIAMI BASS",
     kind: "style",
+    accent: "south",
     hint: "Booming 808s, beach heat and a big bounce.",
     artists: ["Rick Ross", "Kodak Black", "Bossman Dlow", "Trick Daddy", "Uncle Luke"],
-    words: w("bass booty beach heat sand palm wave boom shake drop sun tan boat ocean pink drive vice speaker trunk bounce"),
+    words: w("bass booty beach heat sand palm wave boom shake drop sun tan boat ocean pink drive vice speaker trunk bounce dade county carol city haiti glades gator swamp yacht rich boss jet ski bikini salsa bottle breeze hot shades sweat"),
   },
   {
     id: "chopper",
@@ -290,7 +307,7 @@ export const CATEGORIES: Category[] = [
     kind: "style",
     hint: "Rapid-fire flows: fast, twisty and tight.",
     artists: ["Twista", "Tech N9ne", "Bone Thugs-N-Harmony", "Busta Rhymes", "Eminem"],
-    words: w("chop fast quick spit tongue twist speed flash blink race tight rush rip zip snap burst blast whip"),
+    words: w("chop fast quick spit tongue twist speed flash blink race tight rush rip zip snap burst blast whip tech strange nine machine rapid double twister motor engine flow time lips teeth fire rattle track rhyme verse rhythm pace sprint dash spray"),
   },
   {
     id: "battle",
@@ -298,7 +315,7 @@ export const CATEGORIES: Category[] = [
     kind: "style",
     hint: "Punchlines, angles and a crowd that reacts.",
     artists: ["Eminem", "Loaded Lux", "Murda Mook", "Hollow Da Don"],
-    words: w("battle punch line bars crowd round scheme angle react roast flip shot burn clown joke weak pen pad mic win lose"),
+    words: w("battle punch line bars crowd round scheme angle react roast flip shot burn clown joke weak pen pad mic win lose rebuttal opponent bodied body judge choke third set stage vote jab hook ring bell loser winner trash talk lame corny fraud fake write ink"),
   },
   {
     id: "conscious",
@@ -306,7 +323,7 @@ export const CATEGORIES: Category[] = [
     kind: "style",
     hint: "Truth, roots and a message.",
     artists: ["Kendrick Lamar", "Common", "Nas", "Kanye West", "A Tribe Called Quest", "J. Cole", "Mos Def"],
-    words: w("truth mind soul free peace roots wise hope change power rise teach path light youth book struggle"),
+    words: w("truth mind soul free peace roots wise hope change power rise teach path light youth book struggle black king queen culture god spirit heal love justice people nation wisdom pride heart vision chains system future prayer school march speak learn grow seed tree earth greed poor kids elders lies dream"),
   },
   {
     id: "horror",
@@ -314,7 +331,7 @@ export const CATEGORIES: Category[] = [
     kind: "style",
     hint: "Ghosts, graves and things in the dark.",
     artists: ["$uicideboy$", "Three 6 Mafia", "Gravediggaz", "Brotha Lynch Hung"],
-    words: w("ghost grave skull bones night fear scream crypt witch demon creep dark fog moon howl chain haunt tomb rot"),
+    words: w("ghost grave skull bones night fear scream crypt witch demon creep dark fog moon howl chain haunt tomb rot coffin casket zombie devil sin reaper scythe shadow cult evil ghoul fiend dead sick twisted fangs claws beast monster slasher curse hex spell omen pale chill shiver terror dread grim gloom"),
     mature: w("blood knife"),
   },
   {
@@ -323,8 +340,8 @@ export const CATEGORIES: Category[] = [
     kind: "style",
     hint: "Heartbreak, rain and late-night feelings.",
     artists: ["Lil Peep", "Juice WRLD", "XXXTentacion", "Lil Uzi Vert"],
-    words: w("tears heart pain sad broke rain sleep dream ghost rose cold numb hurt cry fade gone alone lost scar black"),
-    mature: w("pills lean"),
+    words: w("tears heart pain sad broke rain sleep dream ghost rose cold numb hurt cry fade gone alone lost scar black fall star sky angel demon void empty hollow lonely sorrow regret razor bleed broken drown goodbye miss text phone blue love girl toxic heaven low high lose"),
+    mature: w("pills lean xan"),
   },
   {
     id: "rage",
@@ -332,15 +349,16 @@ export const CATEGORIES: Category[] = [
     kind: "style",
     hint: "Mosh pits, loud synths and chaos.",
     artists: ["Playboi Carti", "Lil Uzi Vert", "Lil Yachty", "Trippie Redd"],
-    words: w("rage pit punk vamp slime jump wild crowd loud red stage scream fire spin crash flip"),
+    words: w("rage pit punk vamp slime jump wild crowd loud red stage scream fire spin crash flip shake bass glitch noise leather spikes rock chains black dive riot static laser strobe lights fog shout smash trash hype fangs dark night space star"),
   },
   {
     id: "afroswing",
     name: "AFROSWING",
     kind: "style",
+    accent: "uk",
     hint: "Smooth vibes, sweet melodies and a whine.",
     artists: ["J Hus", "NSG", "Kojo Funds", "Not3s"],
-    words: w("vibe wine dance sweet honey sun waist move groove whine shine beach slow palm love"),
+    words: w("vibe wine dance sweet honey sun waist move groove whine shine beach slow palm love naija ghana spice rhythm drums afro bashment gyal baby sugar body party summer island smile heart money gold easy calm chill tune song sing riddim"),
   },
   {
     id: "jersey",
@@ -348,23 +366,25 @@ export const CATEGORIES: Category[] = [
     kind: "style",
     hint: "Fast kicks, bed squeaks and a club bounce.",
     artists: ["Bandmanrill", "Uniiqu3", "DJ Sliink"],
-    words: w("club kick bounce shore bed squeak dance slide stomp jump sweat fast beat crowd drop loop chop"),
+    words: w("club kick bounce shore bed squeak dance slide stomp jump sweat fast beat crowd drop loop chop newark vocal sample jersey speed quick hype floor party snare blend mix lights bass heat wild crazy hands feet"),
   },
   {
     id: "bling",
     name: "BLING ERA",
     kind: "style",
+    accent: "south",
     hint: "2000s shine: rims, grills, the club and the dance.",
     artists: ["Ludacris", "Nelly", "T-Pain", "Soulja Boy", "Rich Boy", "Pharrell Williams", "Outkast", "Young Buck"],
-    words: w("bling ice grill chain rims spin club shine glow frost whip gold dance fresh rich spark snap stunt flash bottle chrome glitz pose crowd"),
+    words: w("bling ice grill chain rims spin club shine glow frost whip gold dance fresh rich spark snap stunt flash bottle chrome glitz pose crowd platinum diamond jewel crown boss rock stomp grillz spinners dubs twenties white tee tall fitted jersey pink crank"),
   },
   {
     id: "batonrouge",
     name: "BATON ROUGE",
     kind: "style",
+    accent: "south",
     hint: "Louisiana street tales: trill, real and from the heart.",
     artists: ["Boosie Badazz", "Webbie", "YoungBoy Never Broke Again", "Trill Fam"],
-    words: w("trill bounce gator swamp river trouble hood real street ride pain loyal grind hustle mama pray heart scars cold block struggle boot fade"),
+    words: w("trill bounce gator swamp river trouble hood real street ride pain loyal grind hustle mama pray heart scars cold block struggle boot fade jail court judge lord tears cry die brother baby fight drama beef war red wipe down tough sad free"),
     mature: w("glock strap"),
   },
   {
@@ -373,7 +393,7 @@ export const CATEGORIES: Category[] = [
     kind: "style",
     hint: "Masked villains, dusty samples and twisty wordplay.",
     artists: ["MF DOOM", "Madlib", "Del the Funky Homosapien", "Madvillain"],
-    words: w("mask villain metal doom comic vinyl crate dusty sample loop cartoon space riddle scroll ink rhyme verse sly scheme rare dust beard stone"),
+    words: w("mask villain metal doom comic vinyl crate dusty sample loop cartoon space riddle scroll ink rhyme verse sly scheme rare dust beard stone abstract weird cosmic robot face planet lunar mars hero evil plot plan genius mad potion wizard magic spell tape record nerd clever witty twist pun puzzle shadow cloak cape"),
   },
   {
     id: "melodic",
@@ -381,7 +401,7 @@ export const CATEGORIES: Category[] = [
     kind: "style",
     hint: "Sung hooks, late nights and big feelings.",
     artists: ["Drake", "Wiz Khalifa", "Future", "Young Thug", "Kanye West"],
-    words: w("vibe late night text feel heart wave float sing high cloud love city lights miss call drive dream slow wine rain gold six side"),
+    words: w("vibe late night text feel heart wave float sing high cloud love city lights miss call drive dream slow wine rain gold six side toronto sunset ocean pool feelings lonely flight star sky moon baby girl pain phone fly jet plane low real glow shine rose song echo heaven forever remember"),
   },
 
   // ---------- More topics ----------

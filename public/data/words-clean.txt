@@ -532,6 +532,7 @@ adhering	20	AH0 D HH IH1 R IH0 NG
 adhesion	35	AE0 D HH IY1 ZH AH0 N
 adhesive	35	AE0 D HH IY1 S IH0 V|AH0 D HH IY1 S IH0 V
 adhesives	35	AE0 D HH IY1 S IH0 V Z|AH0 D HH IY1 S IH0 V Z
+adidas	50	AH0 D IY1 D AH0 S
 adieu	50	AH0 D UW1
 adipose	50	AE1 D AH0 P OW2 S
 adjacent	20	AH0 JH EY1 S AH0 N T
@@ -811,6 +812,7 @@ aforethought	50	AH0 F AO1 R TH AA2 T
 afoul	50	AH0 F AW1 L
 afraid	10	AH0 F R EY1 D
 afresh	35	AH0 F R EH1 SH
+afro	50	AE1 F R OW0
 aft	50	AE1 F T
 after	10	AE1 F T ER0
 afterburner	50	AE1 F T ER0 B ER2 N ER0
@@ -3033,6 +3035,7 @@ band	10	B AE1 N D
 bandage	35	B AE1 N D IH0 JH
 bandaged	35	B AE1 N D AH0 JH D
 bandages	35	B AE1 N D AH0 JH AH0 Z|B AE1 N D IH0 JH IH0 Z
+bandana	50	B AE0 N D AE1 N AH0
 banded	35	B AE1 N D IH0 D
 bandied	35	B AE1 N D IY0 D
 banding	35	B AE1 N D IH0 NG
@@ -3041,6 +3044,7 @@ banditry	50	B AE1 N D AH0 T R IY0
 bandits	35	B AE1 N D AH0 T S
 bandleader	55	B AE1 N D L IY0 D ER0
 bandleaders	55	B AE1 N D L IY0 D ER0 Z
+bando	50	B AE1 N D OW0
 bands	20	B AE1 N D Z
 bandstand	35	B AE1 N D S T AE2 N D
 bandwagon	20	B AE1 N D W AE2 G AH0 N
@@ -3238,6 +3242,7 @@ bashes	20	B AE1 SH IH0 Z
 bashful	35	B AE1 SH F AH0 L
 bashfulness	50	B AE1 SH F AH0 L N EH2 S
 bashing	20	B AE1 SH IH0 NG
+bashment	50	B AE1 SH M AH0 N T
 basic	10	B EY1 S IH0 K
 basically	10	B EY1 S IH0 K L IY0
 basics	20	B EY1 S IH0 K S
@@ -3660,6 +3665,7 @@ benign	35	B IH0 N AY1 N
 benignly	50	B AH0 N AY1 N L IY0
 bent	20	B EH1 N T
 bentonite	60	B EH1 N T AH0 N AY2 T
+benz	50	B EH1 N Z
 benzene	50	B EH0 N Z IY1 N|B EH1 N Z IY0 N
 benzine	60	B EH1 N Z IY0 N
 bequeath	35	B IH0 K W IY1 TH
@@ -4103,6 +4109,7 @@ blesses	20	B L EH1 S IH0 Z
 blessing	20	B L EH1 S IH0 NG
 blessings	35	B L EH1 S IH0 NG Z
 blew	20	B L UW1
+blick	50	B L IH1 K
 blight	35	B L AY1 T
 blighted	35	B L AY1 T IH0 D
 blimp	35	B L IH1 M P
@@ -4255,6 +4262,7 @@ blowtorches	35	B L OW1 T AO2 R CH AH0 Z
 blowup	40	B L OW1 AH2 P
 blowy	55	B L OW1 IY0
 blubber	35	B L AH1 B ER0
+blud	50	B L AH1 D
 bludgeon	35	B L AH1 JH AH0 N
 bludgeoned	35	B L AH1 JH AH0 N D
 bludgeoning	35	B L AH1 JH AH0 N IH0 NG
@@ -5015,6 +5023,7 @@ bronchitis	35	B R AA0 NG K AY1 T AH0 S
 bronco	35	B R AA1 NG K OW0
 broncos	35	B R AA1 NG K OW0 Z
 brontosaurus	50	B R AO2 N T AH0 S AO1 R AH0 S|B R AO2 N AH0 S AO1 R AH0 S
+bronx	50	B R AA1 NG K S
 bronze	35	B R AA1 N Z
 bronzed	35	B R AA1 N Z D
 bronzes	35	B R AA1 N Z AH0 Z|B R AA1 N Z IH0 Z
@@ -5510,6 +5519,7 @@ cadavers	40	K AH0 D AE1 V ER0 Z
 caddie	35	K AE1 D IY0
 caddied	35	K AE1 D IY0 D
 caddies	35	K AE1 D IY0 Z
+caddy	50	K AE1 D IY0
 caddying	35	K AE1 D IY0 IH0 NG
 cadence	35	K EY1 D AH0 N S
 cadences	35	K EY1 D AH0 N S IH0 Z
@@ -5662,6 +5672,7 @@ canal	35	K AH0 N AE1 L
 canals	35	K AH0 N AE1 L Z
 canard	50	K AH0 N AA1 R D
 canaries	35	K AH0 N EH1 R IY0 Z
+canarsie	50	K AH0 N AA1 R S IY0
 canary	35	K AH0 N EH1 R IY0
 canasta	50	K AH0 N AE1 S T AH0
 cancan	50	K AE1 N K AE2 N
@@ -5983,6 +5994,7 @@ cartel	35	K AA0 R T EH1 L
 cartels	35	K AA0 R T EH1 L Z
 carter	55	K AA1 R T ER0
 carters	55	K AA1 R T ER0 Z
+cartier	50	K AA2 R T IY0 EY1
 cartilage	35	K AA1 R T AH0 L AH0 JH|K AA1 R T AH0 L IH0 JH
 carting	35	K AA1 R T IH0 NG
 carton	35	K AA1 R T AH0 N
@@ -6835,6 +6847,7 @@ chuckle	35	CH AH1 K AH0 L
 chuckled	35	CH AH1 K AH0 L D
 chuckles	35	CH AH1 K AH0 L Z
 chuckling	35	CH AH1 K L IH0 NG
+chucks	20	CH AH1 K S
 chug	35	CH AH1 G
 chugged	35	CH AH1 G D
 chugging	35	CH AH1 G IH0 NG
@@ -7376,6 +7389,7 @@ coddled	50	K AA1 D AH0 L D
 coddling	50	K AA1 D AH0 L IH0 NG|K AA1 D L IH0 NG
 code	10	K OW1 D
 coded	10	K OW1 D IH0 D
+codeine	50	K OW1 D IY2 N
 coder	60	K OW1 D ER0
 codes	10	K OW1 D Z
 codification	50	K AA2 D AH0 F AH0 K EY1 SH AH0 N
@@ -7953,6 +7967,7 @@ compromise	10	K AA1 M P R AH0 M AY2 Z
 compromised	35	K AA1 M P R AH0 M AY2 Z D
 compromises	35	K AA1 M P R AH0 M AY2 Z IH0 Z
 compromising	35	K AA1 M P R AH0 M AY2 Z IH0 NG
+compton	50	K AA1 M P T AH0 N
 comptroller	50	K AH0 M T R OW1 L ER0|K AA1 M T R OW2 L ER0
 compulsion	20	K AH0 M P AH1 L SH AH0 N
 compulsions	35	K AH0 M P UH1 L SH AH0 N Z
@@ -9283,6 +9298,7 @@ craves	35	K R EY1 V Z
 craving	35	K R EY1 V IH0 NG
 cravings	35	K R EY1 V IH0 NG Z
 craw	50	K R AO1
+crawfish	50	K R AO1 F IH2 SH
 crawl	20	K R AO1 L
 crawled	20	K R AO1 L D
 crawler	55	K R AO1 L ER0
@@ -9373,6 +9389,7 @@ creoles	40	K R IY0 OW1 L Z
 creosote	50	K R IY1 AH0 S OW2 T
 crepe	35	K R EY1 P
 crepes	35	K R EY1 P S
+creps	50	K R EH1 P S
 crept	35	K R EH1 P T
 crescendo	35	K R IH0 SH EH1 N D OW0
 crescent	35	K R EH1 S AH0 N T
@@ -9819,6 +9836,7 @@ cuttings	35	K AH1 T IH0 NG Z
 cuttlefish	50	K AH1 T AH0 L F IH2 SH
 cutworm	60	K AH1 T W ER2 M
 cutworms	60	K AH1 T W ER2 M Z
+cuz	50	K AH1 Z
 cyan	55	S AY0 AE1 N
 cyanide	35	S AY1 AH0 N AY2 D|S AY1 N AY2 D
 cybersex	50	S AY1 B ER0 S EH2 K S
@@ -9849,6 +9867,7 @@ cynically	40	S IH1 N IH0 K AH0 L IY0|S IH1 N IH0 K L IY0
 cynicism	35	S IH1 N IH0 S IH2 Z AH0 M
 cynics	35	S IH1 N IH0 K S
 cynosure	50	S AY1 N AO0 S ER2
+cypher	50	S AY1 F ER0
 cypress	35	S AY1 P R AH0 S|S AY1 P R IH0 S
 cyst	35	S IH1 S T
 cystic	50	S IH1 S T IH0 K
@@ -9874,6 +9893,7 @@ dactyl	50	D AE1 K T IH0 L
 dad	35	D AE1 D
 daddies	35	D AE1 D IY0 Z
 daddy	35	D AE1 D IY0
+dade	50	D EY1 D
 dado	50	D EY1 D OW2
 dads	35	D AE1 D Z
 daemon	35	D IY1 M AH0 N|D EY1 M AH0 N
@@ -10014,6 +10034,7 @@ dauphin	50	D AW1 F IH0 N
 davenport	50	D AE1 V AH0 N P AO2 R T
 dawdle	35	D AO1 D AH0 L
 dawdling	35	D AO1 D L IH0 NG
+dawg	50	D AO1 G
 dawn	20	D AO1 N
 dawned	35	D AO1 N D
 dawning	35	D AO1 N IH0 NG
@@ -10317,6 +10338,7 @@ deepest	20	D IY1 P AH0 S T
 deeply	10	D IY1 P L IY0
 deer	35	D IH1 R
 deerskin	50	D IH1 R S K IH2 N
+def	50	D EH1 F
 deface	35	D IH0 F EY1 S
 defaced	35	D IH0 F EY1 S T
 defacing	35	D IH0 F EY1 S IH0 NG
@@ -12224,6 +12246,7 @@ donnybrook	60	D AA1 N IY0 B R UH2 K
 donor	35	D OW1 N ER0
 donors	35	D OW1 N ER0 Z
 dons	20	D AA1 N Z
+donut	50	D OW1 N AH2 T
 doodad	40	D UW1 D AE2 D
 doodads	40	D UW1 D AE2 D Z
 doodle	35	D UW1 D AH0 L
@@ -15757,6 +15780,7 @@ flasks	35	F L AE1 S K S
 flat	10	F L AE1 T
 flatbed	50	F L AE1 T B EH2 D
 flatboat	50	F L AE1 T B OW2 T
+flatbush	50	F L AE1 T B UH2 SH
 flatfish	50	F L AE1 T F IH2 SH
 flatfishes	50	F L AE1 T F IH2 SH IH0 Z
 flatland	60	F L AE1 T L AE2 N D
@@ -16030,6 +16054,7 @@ focuses	35	F OW1 K AH0 S IH0 Z|F OW1 K IH0 S IH0 Z
 focusing	35	F OW1 K AH0 S IH0 NG|F OW1 K IH0 S IH0 NG
 fodder	35	F AA1 D ER0
 foe	35	F OW1
+foenem	50	F OW1 N AH0 M
 foes	35	F OW1 Z
 fog	20	F AA1 G|F AO1 G
 foggiest	35	F AA1 G IY0 AH0 S T
@@ -16611,6 +16636,7 @@ frills	35	F R IH1 L Z
 frilly	35	F R IH1 L IY0
 fringe	20	F R IH1 N JH
 fringes	35	F R IH1 N JH IH0 Z
+frisco	50	F R IH1 S K OW0
 frisk	35	F R IH1 S K
 frisked	35	F R IH1 S K T
 frisky	35	F R IH1 S K IY0
@@ -17026,6 +17052,7 @@ gastritis	50	G AE0 S T R AY1 T AH0 S
 gastrointestinal	50	G AE2 S T R OW0 IH0 N T EH1 S T AH0 N AH0 L
 gastronomic	40	G AH0 S T R AA2 N AA1 M IH0 K
 gastronomy	50	G AE0 S T R AA1 N AH0 M IY0
+gat	50	G AE1 T
 gate	20	G EY1 T
 gateau	55	G AA0 T OW1
 gated	35	G EY1 T IH0 D
@@ -17252,6 +17279,7 @@ getting	10	G EH1 T IH0 NG|G IH1 T IH0 NG
 gewgaw	50	G Y UW1 G AA0
 geyser	35	G AY1 Z ER0
 geysers	35	G AY1 Z ER0 Z
+ghana	50	G AA1 N AH0
 ghastliness	50	G AE1 S T L IY0 N AH0 S
 ghastly	20	G AE1 S T L IY0
 ghee	55	G IY1
@@ -17434,6 +17462,8 @@ glitters	35	G L IH1 T ER0 Z
 glittery	50	G L IH1 T ER0 IY0
 glitz	40	G L IH1 T S
 glitzy	40	G L IH1 T S IY0
+glizzy	50	G L IH1 Z IY0
+glo	50	G L OW1
 gloaming	50	G L OW1 M IH0 NG
 gloat	35	G L OW1 T
 gloated	35	G L OW1 T IH0 D
@@ -17952,6 +17982,7 @@ grille	35	G R IH1 L
 grilled	35	G R IH1 L D
 grilling	35	G R IH1 L IH0 NG
 grills	35	G R IH1 L Z
+grillz	50	G R IH1 L Z
 grim	20	G R IH1 M
 grimace	35	G R IH1 M AH0 S
 grimaced	35	G R IH1 M AH0 S T
@@ -18113,6 +18144,7 @@ grunts	35	G R AH1 N T S
 guacamole	40	G W AA2 K AH0 M OW1 L IY0
 guanine	60	G W AA1 N IY2 N
 guano	50	G W AA1 N OW2
+guap	50	G W AA1 P
 guarani	60	G W AA2 R AH0 N IY1|G W AA2 R AA1 N IY0
 guarantee	10	G EH2 R AH0 N T IY1
 guaranteed	10	G EH2 R AH0 N T IY1 D
@@ -18137,6 +18169,7 @@ guardsmen	50	G AA1 R D Z M IH0 N
 guava	50	G W AA1 V AH0
 guavas	50	G W AA1 V AH0 Z
 gubernatorial	35	G UW0 B ER2 N AH0 T AO1 R IY2 AH0 L
+gucci	50	G UW1 CH IY0
 guerrilla	35	G ER0 IH1 L AH0
 guerrillas	35	G ER0 IH1 L AH0 Z
 guess	10	G EH1 S
@@ -18277,6 +18310,7 @@ guzzler	40	G AH1 Z L ER0
 guzzlers	40	G AH1 Z AH0 L ER0 Z|G AH1 Z L ER0 Z
 guzzles	35	G AH1 Z AH0 L Z
 guzzling	35	G AH1 Z AH0 L IH0 NG|G AH1 Z L IH0 NG
+gyal	50	G Y AA1 L
 gym	35	JH IH1 M
 gymnasium	35	JH IH0 M N EY1 Z IY0 AH0 M
 gymnasiums	35	JH IH0 M N EY1 Z IY0 AH0 M Z
@@ -18364,6 +18398,7 @@ hairs	20	HH EH1 R Z
 hairspray	55	HH EH1 R S P R EY2
 hairstyle	40	HH EH1 R S T AY2 L
 hairy	20	HH EH1 R IY0
+haiti	50	HH EY1 T IY0
 hajj	55	HH AE1 JH
 hake	50	HH EY1 K
 hakes	50	HH EY1 K S
@@ -18605,6 +18640,7 @@ haring	35	HH EH1 R IH0 NG
 hark	35	HH AA1 R K
 harking	35	HH AA1 R K IH0 NG
 harks	35	HH AA1 R K S
+harlem	50	HH AA1 R L AH0 M
 harlequin	50	HH AA1 R L AH0 K W AH0 N
 harlot	35	HH AA1 R L AH0 T
 harm	10	HH AA1 R M
@@ -18951,6 +18987,7 @@ helicopters	35	HH EH1 L IH0 K AA2 P T ER0 Z
 heliotrope	50	HH IY1 L IY0 AH0 T R OW2 P
 helium	35	HH IY1 L IY0 AH0 M
 helix	50	HH IY1 L IH0 K S
+hella	50	HH EH1 L AH0
 hellfire	60	HH EH1 L F AY2 R
 hello	10	HH AH0 L OW1|HH EH0 L OW1
 helluva	55	HH EH2 L UW1 V AH0
@@ -19409,6 +19446,8 @@ homey	35	HH OW1 M IY0
 homicidal	35	HH AA2 M AH0 S AY1 D AH0 L
 homicide	35	HH AA1 M AH0 S AY2 D
 homicides	35	HH AA1 M AH0 S AY2 D Z
+homie	50	HH OW1 M IY0
+homies	50	HH OW1 M IY0 Z
 homiletic	60	HH AA2 M AH0 L EH1 T IH0 K
 homilies	50	HH OW1 M AH0 L IY0 Z
 homily	50	HH AA1 M AH0 L IY0
@@ -19471,6 +19510,7 @@ hons	60	HH AA1 N Z
 hooch	50	HH UW1 CH
 hood	35	HH UH1 D
 hooded	35	HH UH1 D IH0 D
+hoodie	50	HH UH1 D IY0
 hoodlum	35	HH UH1 D L AH0 M
 hoodlums	35	HH UW1 D L AH0 M Z
 hoods	35	HH UH1 D Z
@@ -19925,6 +19965,7 @@ hyphenated	35	HH AY1 F AH0 N EY2 T IH0 D
 hyphenates	35	HH AY1 F AH0 N EY2 T S
 hyphenating	35	HH AY1 F AH0 N EY2 T IH0 NG
 hyphenation	35	HH AY2 F AH0 N EY1 SH AH0 N
+hyphy	50	HH AY1 F IY0
 hyping	40	HH AY1 P IH0 NG
 hypnosis	35	HH IH0 P N OW1 S AH0 S
 hypnotic	35	HH IH0 P N AA1 T IH0 K
@@ -21097,6 +21138,7 @@ inner	10	IH1 N ER0
 innermost	35	IH1 N ER0 M OW2 S T
 inning	35	IH1 N IH0 NG
 innings	35	IH1 N IH0 NG Z
+innit	50	IH1 N IH0 T
 innkeeper	35	IH1 N K IY2 P ER0
 innkeepers	35	IH1 N K IY2 P ER0 Z
 innocence	20	IH1 N AH0 S AH0 N S
@@ -22137,6 +22179,7 @@ jokingly	50	JH OW1 K IH0 NG L IY0
 jollier	35	JH AA1 L IY0 ER0
 jollies	35	JH AA1 L IY0 Z
 jolliest	35	JH AA1 L IY0 AH0 S T
+jollof	50	JH AA1 L AH0 F
 jolly	20	JH AA1 L IY0
 jollying	35	JH AA1 L IY0 IH0 NG
 jolt	35	JH OW1 L T
@@ -22196,6 +22239,7 @@ judicious	35	JH UW0 D IH1 SH AH0 S
 judiciously	35	JH UW0 D IH1 SH IH0 S L IY0
 judo	35	JH UW1 D OW2
 jug	35	JH AH1 G
+jugg	50	JH AH1 G
 juggernaut	35	JH AH1 G ER0 N AO2 T
 juggle	35	JH AH1 G AH0 L
 juggled	35	JH AH1 G AH0 L D
@@ -22282,6 +22326,7 @@ juts	35	JH AH1 T S
 jutting	35	JH AH1 T IH0 NG
 juvenile	20	JH UW1 V AH0 N AH0 L|JH UW1 V AH0 N AY2 L
 juveniles	35	JH UW1 V AH0 N AH0 L Z|JH UW1 V AH0 N AY2 L Z
+juvie	50	JH UW1 V IY0
 juxtapose	35	JH AH2 K S T AH0 P OW1 Z
 juxtaposed	35	JH AH2 K S T AH0 P OW1 Z D
 juxtaposes	35	JH AH2 K S T AH0 P OW1 Z IH0 Z
@@ -22567,6 +22612,7 @@ koshered	35	K OW1 SH ER0 D
 koshering	35	K OW1 SH ER0 IH0 NG
 koshers	35	K OW1 SH ER0 S
 kowtow	35	K AW1 T AW1|K OW1 T OW1
+krewe	50	K R UW1
 krill	55	K R IH1 L
 krone	50	K R OW1 N AH0
 kroner	50	K R OW1 N ER0
@@ -22575,6 +22621,7 @@ krypton	50	K R IH1 P T AA0 N
 kudos	35	K UW1 D OW0 S
 kudzu	50	K AH1 D Z UW0
 kumquat	50	K AH1 M K W AA0 T
+kush	50	K UH1 SH
 kvetch	55	K V EH1 CH
 la	50	L AA1
 lab	20	L AE1 B
@@ -22667,6 +22714,7 @@ lambastes	50	L AE2 M B AE1 S T S|L AE2 M B EY1 S T S|L AE2 M B AE1 S|L AE2 M B E
 lambasting	50	L AE0 M B EY1 S T IH0 NG
 lambda	35	L AE1 M D AH0
 lambing	35	L AE1 M IH0 NG
+lambo	50	L AE1 M B OW0
 lambs	35	L AE1 M Z
 lame	35	L EY1 M
 lamely	50	L EY1 M L IY0
@@ -23641,6 +23689,7 @@ loco	50	L OW1 K OW0
 locomotion	35	L OW2 K AH0 M OW1 SH AH0 N
 locomotive	35	L OW2 K AH0 M OW1 T IH0 V
 locomotives	35	L OW2 K AH0 M OW1 T IH0 V Z
+locs	50	L OW1 K S
 locus	50	L OW1 K AH0 S
 locust	35	L OW1 K AH0 S T
 locusts	35	L OW1 K AH0 S T S
@@ -23695,6 +23744,7 @@ lolling	35	L AA1 L IH0 NG
 lollipop	35	L AA1 L IY0 P AA2 P
 lollipops	35	L AA1 L IY0 P AA2 P S
 lolly	55	L AA1 L IY0
+london	50	L AH1 N D AH0 N
 lone	35	L OW1 N
 loneliness	35	L OW1 N L IY0 N AH0 S
 lonely	20	L OW1 N L IY0
@@ -24247,6 +24297,7 @@ mandated	35	M AE1 N D EY2 T IH0 D
 mandates	35	M AE1 N D EY2 T S
 mandating	35	M AE1 N D EY2 T IH0 NG
 mandatory	20	M AE1 N D AH0 T AO2 R IY0
+mandem	50	M AE1 N D EH0 M
 mandible	35	M AE1 N D AH0 B AH0 L|M AE1 N D IH0 B AH0 L
 mandibular	60	M AE2 N D IH1 B Y UW0 L ER0
 mandolin	35	M AE1 N D AH0 L IH2 N
@@ -24658,6 +24709,7 @@ maxims	35	M AE1 K S AH0 M Z
 maximum	10	M AE1 K S AH0 M AH0 M
 maxis	60	M AE1 K S IY0 Z
 may	10	M EY1
+maybach	50	M AY1 B AA2 K
 maybe	10	M EY1 B IY0
 mayday	40	M EY1 D EY0
 mayflower	50	M EY1 F L AW2 ER0
@@ -26019,6 +26071,7 @@ motorists	35	M OW1 T ER0 AH0 S T S|M OW1 T ER0 IH0 S T S
 motorize	35	M OW1 T ER0 AY2 Z
 motorized	35	M OW1 T ER0 AY2 Z D
 motors	20	M OW1 T ER0 Z
+motown	50	M OW1 T AW2 N
 mots	60	M AA1 T S
 mottled	40	M AA1 T AH0 L D
 mottling	40	M AA1 T AH0 L IH0 NG|M AA1 T L IH0 NG
@@ -26378,6 +26431,7 @@ nagged	35	N AE1 G D
 nagging	35	N AE1 G IH0 NG
 nags	35	N AE1 G Z
 nah	55	N AA1
+naija	50	N AY1 JH AH0
 nail	20	N EY1 L
 nailed	20	N EY1 L D
 nailing	20	N EY1 L IH0 NG
@@ -26700,6 +26754,7 @@ never	10	N EH1 V ER0
 nevermore	50	N EH1 V ER0 M AO2 R
 nevertheless	10	N EH2 V ER0 DH AH0 L EH1 S
 new	10	N UW1|N Y UW1
+newark	50	N UW1 ER0 K
 newbie	35	N UW1 B IY2
 newborn	35	N UW1 B AO0 R N
 newborns	35	N UW1 B AO2 R N Z
@@ -26880,6 +26935,7 @@ noisier	35	N OY1 Z IY0 ER0
 noisiest	35	N OY1 Z IY0 AH0 S T
 noisily	35	N OY1 Z AH0 L IY0
 noisy	10	N OY1 Z IY0
+nola	50	N OW1 L AH0
 nomad	35	N OW1 M AE2 D
 nomadic	35	N OW0 M AE1 D IH0 K
 nomads	35	N OW1 M AE2 D Z
@@ -27223,6 +27279,7 @@ nymphomaniac	40	N IH2 M F OW0 M EY1 N IY0 AE2 K
 nymphomaniacs	40	N IH2 M F OW0 M EY1 N IY0 AE2 K S
 nymphs	35	N IH1 M F S
 oak	35	OW1 K
+oakland	50	OW1 K L AH0 N D
 oaks	35	OW1 K S
 oar	20	AO1 R
 oared	35	AO1 R D
@@ -27641,6 +27698,7 @@ opinionated	35	AH0 P IH1 N Y AH0 N EY2 T IH0 D
 opinions	10	AH0 P IH1 N Y AH0 N Z
 opium	35	OW1 P IY0 AH0 M
 opossum	35	OW0 P AA1 S AH0 M
+opp	50	AA1 P
 opponent	20	AH0 P OW1 N AH0 N T
 opponents	20	AH0 P OW1 N AH0 N T S
 opportune	35	AA2 P ER0 T UW1 N
@@ -29247,6 +29305,7 @@ penetrated	35	P EH1 N AH0 T R EY2 T IH0 D
 penetrates	35	P EH1 N AH0 T R EY2 T S
 penetrating	35	P EH1 N AH0 T R EY2 T IH0 NG
 penetration	35	P EH2 N AH0 T R EY1 SH AH0 N
+peng	50	P EH1 NG
 penguin	20	P EH1 NG G W AH0 N
 penguins	35	P EH1 NG G W AH0 N Z
 penicillin	35	P EH2 N AH0 S IH1 L AH0 N
@@ -29301,6 +29360,7 @@ peptic	50	P EH1 P T IH0 K
 peptide	60	P EH1 P T AY2 D
 peptides	60	P EH1 P T AY2 D Z
 per	10	P ER1
+perc	50	P ER1 K
 perceive	20	P ER0 S IY1 V
 perceived	20	P ER0 S IY1 V D
 perceives	20	P ER0 S IY1 V Z
@@ -29694,6 +29754,7 @@ phonetics	35	F AH0 N EH1 T IH0 K S
 phonic	50	F AA1 N IH0 K
 phonics	35	F AA1 N IH0 K S
 phoning	20	F OW1 N IH0 NG
+phonk	50	F AA1 NG K
 phonograph	35	F OW1 N AH0 G R AE2 F
 phonographs	35	F OW1 N AH0 G R AE2 F S
 phonological	50	F OW2 N AH0 L AA1 JH IH0 K AH0 L
@@ -30123,6 +30184,7 @@ plausibility	35	P L AO2 Z IH0 B IH1 L IH0 T IY0
 plausible	20	P L AO1 Z AH0 B AH0 L
 plausibly	35	P L AO1 Z AH0 B L IY0
 play	10	P L EY1
+playa	50	P L EY1 AH0
 playback	35	P L EY1 B AE2 K
 playbook	60	P L EY1 B UH0 K
 played	10	P L EY1 D
@@ -30646,6 +30708,7 @@ postage	20	P OW1 S T AH0 JH|P OW1 S T IH0 JH
 postal	20	P OW1 S T AH0 L
 postcard	20	P OW1 S T K AA2 R D|P OW1 S K AA2 R D
 postcards	35	P OW1 S T K AA2 R D Z|P OW1 S K AA2 R D Z
+postcode	35	P OW1 S T K OW2 D
 postdate	40	P OW2 S T D EY1 T
 postdated	40	P OW2 S T D EY1 T IH0 D
 postdates	40	P OW2 S T D EY1 T S
@@ -30775,6 +30838,7 @@ practices	20	P R AE1 K T AH0 S AH0 Z|P R AE1 K T IH0 S IH0 Z
 practicing	20	P R AE1 K T AH0 S IH0 NG
 practitioner	35	P R AE0 K T IH1 SH AH0 N ER0|P R AE0 K T IH1 SH N ER0
 practitioners	35	P R AE0 K T IH1 SH AH0 N ER0 Z|P R AE0 K T IH1 SH N ER0 Z
+prada	50	P R AA1 D AH0
 praetor	60	P R IY1 T ER0
 praetorian	60	P R IY0 T AO1 R IY0 AH0 N
 pragmatic	20	P R AE0 G M AE1 T IH0 K
@@ -30921,6 +30985,7 @@ predominated	35	P R IH0 D AA1 M AH0 N EY2 T IH0 D
 predominately	55	P R IH2 D AA1 M AH0 N AH0 N T L IY2
 predominates	35	P R IH0 D AA1 M AH0 N EY2 T S
 predominating	35	P R IH0 D AA1 M AH0 N EY2 T IH0 NG
+pree	50	P R IY1
 preeminence	35	P R IY0 EH1 M AH0 N AH0 N S
 preeminent	35	P R IY0 EH1 M AH0 N AH0 N T
 preempt	35	P R IY1 EH2 M P T
@@ -34579,6 +34644,7 @@ ricotta	50	R IY0 K AA1 T AH0
 rid	10	R IH1 D
 riddance	35	R IH1 D AH0 N S
 ridden	20	R IH1 D AH0 N
+riddim	50	R IH1 D IH0 M
 ridding	10	R IH1 D IH0 NG
 riddle	35	R IH1 D AH0 L
 riddled	35	R IH1 D AH0 L D
@@ -34662,6 +34728,7 @@ ringleaders	35	R IH1 NG L IY2 D ER0 Z
 ringmaster	50	R IH1 NG M AE2 S T ER0
 rings	20	R IH1 NG Z
 ringside	40	R IH1 NG S AY2 D
+ringtone	50	R IH1 NG T OW2 N
 rink	35	R IH1 NG K
 rinks	35	R IH1 NG K S
 rinse	35	R IH1 N S
@@ -34819,6 +34886,7 @@ roiling	50	R OY1 L IH0 NG
 roister	50	R OY1 S T ER0
 role	10	R OW1 L
 roles	20	R OW1 L Z
+rolex	50	R OW1 L EH2 K S
 roll	10	R OW1 L
 rollback	50	R OW1 L B AE2 K
 rollbacks	50	R OW1 L B AE2 K S
@@ -36425,6 +36493,7 @@ shanties	35	SH AE1 N T IY0 Z
 shanty	35	SH AE1 N T IY0
 shantytown	40	SH AE1 N T IY0 T AW2 N
 shantytowns	40	SH AE1 N T IY0 T AW2 N Z
+shaolin	50	SH AW1 L IH0 N
 shape	10	SH EY1 P
 shaped	20	SH EY1 P T
 shapeless	50	SH EY1 P L AH0 S
@@ -36615,6 +36684,7 @@ shiver	35	SH IH1 V ER0
 shivered	35	SH IH1 V ER0 D
 shivering	35	SH IH1 V ER0 IH0 NG
 shivers	35	SH IH1 V ER0 Z
+shmoney	50	SH M AH1 N IY0
 shoals	35	SH OW1 L Z
 shock	20	SH AA1 K
 shocked	20	SH AA1 K T
@@ -37121,6 +37191,7 @@ skeins	35	S K EY1 N Z
 skeletal	50	S K EH1 L AH0 T AH0 L
 skeleton	20	S K EH1 L AH0 T AH0 N
 skeletons	35	S K EH1 L AH0 T AH0 N Z
+skeng	50	S K EH1 NG
 skeptic	35	S K EH1 P T IH0 K
 skeptical	20	S K EH1 P T AH0 K AH0 L|S K EH1 P T IH0 K AH0 L
 skeptically	40	S K EH1 P T IH0 K AH0 L IY0|S K EH1 P T IH0 K L IY0
@@ -37200,6 +37271,7 @@ skittle	55	S K IH1 T AH0 L
 skittles	55	S K IH1 T AH0 L Z
 skiver	55	S K AY1 V ER0
 skoal	60	S K OW1 L
+skrrt	50	S K ER1 T
 skulduggery	50	S K AH0 L D AH1 G ER0 IY2
 skulk	35	S K AH1 L K
 skulking	35	S K AH1 L K IH0 NG
@@ -37977,6 +38049,7 @@ sortie	50	S AO1 R T IY0
 sorties	50	S AO1 R T IY0 Z
 sorting	10	S AO1 R T IH0 NG
 sorts	10	S AO1 R T S
+sosa	50	S OW1 S AH0
 sot	50	S AO1 T
 sough	50	S AW1 F|S OW1
 sought	10	S AO1 T
@@ -40045,6 +40118,7 @@ suturing	50	S UW1 CH ER0 IH0 NG
 svelte	50	S V EH1 L T
 swab	35	S W AA1 B
 swabs	35	S W AA1 B Z
+swag	50	S W AE1 G
 swagger	35	S W AE1 G ER0
 swaggering	35	S W AE1 G ER0 IH0 NG
 swain	50	S W EY1 N
@@ -40060,6 +40134,7 @@ swamping	20	S W AA1 M P IH0 NG
 swamps	20	S W AA1 M P S|S W AO1 M P S
 swampy	35	S W AA1 M P IY0
 swan	35	S W AA1 N|S W AO1 N
+swang	50	S W AE1 NG
 swank	40	S W AE1 NG K
 swanky	50	S W AA1 NG K IY0
 swans	35	S W AA1 N Z|S W AO1 N Z
@@ -40283,6 +40358,7 @@ synopsis	35	S IH0 N AA1 P S IH0 S
 synoptic	60	S IH0 N AA1 P T IH0 K
 syntactic	20	S IH2 N T AE1 K T IH0 K
 syntax	10	S IH1 N T AE2 K S
+synth	50	S IH1 N TH
 syntheses	35	S IH1 N TH AH0 S IY2 S
 synthesis	20	S IH1 N TH AH0 S AH0 S
 synthesize	35	S IH1 N TH AH0 S AY2 Z
@@ -40648,6 +40724,7 @@ teaspoonful	40	T IY1 S P UW2 N F AH0 L
 teaspoons	35	T IY1 S P UW2 N Z
 teat	35	T IY1 T
 teats	35	T IY1 T S
+tech	50	T EH1 K
 techie	55	T EH1 K IY0
 techies	55	T EH1 K IY0 Z
 technical	10	T EH1 K N IH0 K AH0 L
@@ -40946,6 +41023,7 @@ tethers	35	T EH1 DH ER0 Z
 tetra	60	T EH1 T R AH0
 tetrahedral	60	T EH2 T R AH0 HH IY1 D R AH0 L
 tetrahedron	50	T EH2 T R AH0 HH IY1 D R AH0 N
+texas	50	T EH1 K S AH0 S
 text	10	T EH1 K S T
 textbook	20	T EH1 K S T B UH2 K
 textbooks	20	T EH1 K S T B UH2 K S
@@ -41330,6 +41408,7 @@ timberland	50	T IH1 M B ER0 L AE2 N D
 timberline	50	T IH1 M B ER0 L AY2 N
 timbers	35	T IH1 M B ER0 Z
 timbre	50	T IH1 M B ER0
+timbs	50	T IH1 M Z
 time	10	T AY1 M
 timed	10	T AY1 M D
 timeless	35	T AY1 M L AH0 S
@@ -41601,6 +41680,7 @@ torments	35	T AO1 R M EH2 N T S
 torn	20	T AO1 R N
 tornado	35	T AO0 R N EY1 D OW2
 tornadoes	35	T AO0 R N EY1 D OW0 Z
+toronto	50	T ER0 AA1 N T OW0
 torpedo	35	T AO0 R P IY1 D OW2
 torpedoed	35	T AO0 R P IY1 D OW2 D
 torpedoes	35	T AO0 R P IY1 D OW0 Z
@@ -42401,6 +42481,7 @@ turnpikes	35	T ER1 N P AY2 K S
 turns	10	T ER1 N Z
 turnstile	35	T ER1 N S T AY2 L
 turnstiles	35	T ER1 N S T AY2 L Z
+turnt	50	T ER1 N T
 turntable	20	T ER1 N T EY2 B AH0 L
 turntables	35	T ER1 N T EY2 B AH0 L Z
 turpentine	35	T ER1 P AH0 N T AY2 N
@@ -44580,6 +44661,7 @@ waver	35	W EY1 V ER0
 wavered	35	W EY1 V ER0 D
 wavering	35	W EY1 V ER0 IH0 NG
 waves	20	W EY1 V Z
+wavey	50	W EY1 V IY0
 waving	20	W EY1 V IH0 NG
 wavy	35	W EY1 V IY0
 wax	35	W AE1 K S
@@ -44789,6 +44871,7 @@ wheelchair	35	W IY1 L CH EH2 R|HH W IY1 L CH EH2 R
 wheelchairs	35	W IY1 L CH EH2 R Z|HH W IY1 L CH EH2 R Z
 wheeled	35	W IY1 L D|HH W IY1 L D
 wheeler	50	W IY1 L ER0|HH W IY1 L ER0
+wheelie	50	W IY1 L IY0
 wheeling	35	W IY1 L IH0 NG|HH W IY1 L IH0 NG
 wheels	10	W IY1 L Z|HH W IY1 L Z
 wheelwright	50	W IY1 L R AY2 T|HH W IY1 L R AY2 T
@@ -45185,6 +45268,7 @@ wobble	35	W AA1 B AH0 L
 wobbled	35	W AA1 B AH0 L D
 wobbling	35	W AA1 B AH0 L IH0 NG|W AA1 B L IH0 NG
 wobbly	35	W AA1 B AH0 L IY0
+wock	50	W AA1 K
 woe	35	W OW1
 woebegone	40	W OW1 B IH0 G AO2 N
 woeful	50	W OW1 F AH0 L
@@ -45369,6 +45453,7 @@ wows	35	W AW1 Z
 wrack	50	R AE1 K
 wracked	55	R AE1 K T
 wracking	55	R AE1 K IH0 NG
+wraith	50	R EY1 TH
 wrangle	35	R AE1 NG G AH0 L
 wrangled	35	R AE1 NG G AH0 L D
 wrangler	35	R AE1 NG G AH0 L ER0|R AE1 NG G L ER0
@@ -45458,6 +45543,7 @@ wryness	50	R AY1 N AH0 S
 wunderkind	55	W AH1 N D ER0 K AY2 N D|W AH1 N D ER0 K IH2 N D
 wurst	60	W ER1 S T
 wuss	50	W AH1 S
+xan	50	Z AE1 N
 xenon	50	Z IY1 N AA0 N
 xenophobia	35	Z EH2 N AH0 F OW1 B IY0 AH0
 xenophobic	40	Z EH2 N AH0 F AA1 B IH0 K
@@ -45520,6 +45606,7 @@ years	10	Y IH1 R Z|Y ER0 Z
 yeas	50	Y EY1 Z|Y IY1 Z|Y IY1 S
 yeast	35	Y IY1 S T
 yeasts	35	Y IY1 S T S
+yee	50	Y IY1
 yell	35	Y EH1 L
 yelled	35	Y EH1 L D
 yelling	35	Y EH1 L IH0 NG
@@ -45603,6 +45690,7 @@ yuppies	40	Y AH1 P IY0 Z
 yuppified	55	Y AH1 P IH0 F AY2 D
 yuppify	55	Y AH1 P IH0 F AY2
 yurt	60	Y UH1 R T
+yute	50	Y UW1 T
 zaniest	35	Z EY1 N IY0 AH0 S T
 zany	35	Z EY1 N IY0
 zap	40	Z AE1 P

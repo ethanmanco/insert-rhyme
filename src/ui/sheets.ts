@@ -1,5 +1,6 @@
 import { BEATS, beatById } from "../core/beats";
 import { CATEGORIES } from "../core/categories";
+import type { Accent } from "../core/phonetics";
 import type { RhymeIndex, Tier } from "../core/rhymes";
 import { PACES, SCHEMES } from "../core/schemes";
 import { currentStreak, dayKey, type Stats } from "../core/stats";
@@ -76,13 +77,14 @@ export function optionsSheet(get: () => Settings, stats: () => Stats, change: (p
     if (!c) return "ANY WORDS: everyday words with lots of rhymes.";
     const names = c.artists ?? [];
     const list = names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : (names[0] ?? "");
-    return `${c.name}: ${c.hint}${list ? ` Words and swearing in the style of ${list}.` : ""}`;
+    const accent = c.accent === "uk" ? " Rhymes the UK way: car with ma." : c.accent === "south" ? " Rhymes the Southern way: Benz with wins." : "";
+    return `${c.name}: ${c.hint}${list ? ` Words and swearing in the style of ${list}.` : ""}${accent}`;
   };
 
   const themes = (value: string) => `
     <fieldset class="group" data-section="theme">
       <legend>WORD THEME</legend>
-      <p class="choice-hint">With a theme, the first word of each rhyme comes from it. Drug and weapon words in the rap styles only show with explicit words on.</p>
+      <p class="choice-hint">With a theme, each rhyme starts with one of its words. Rap styles fill the rest with the scene's words and rap words before everyday ones. Drug and weapon words in the rap styles only show with explicit words on.</p>
       <p class="choice-hint theme-note" aria-live="polite">${esc(themeNote(value))}</p>
       <div class="minis">${mini("any", "ANY WORDS", "Everyday words with lots of rhymes.", value)}</div>
       <p class="sub">RAP STYLES</p>
@@ -203,6 +205,7 @@ export function helperSheet(
   allowed: () => ReadonlySet<Tier>,
   explicitOn: () => boolean,
   hidden: () => ((word: string) => boolean) | undefined = () => undefined,
+  accent: () => Accent = () => "us",
 ): HelperSheet {
   const { dialog, body } = sheet("RHYMES", "rhymes");
   body.innerHTML = `
@@ -232,7 +235,7 @@ export function helperSheet(
       results.innerHTML = `<p class="choice-hint">Loading the word list...</p>`;
       return;
     }
-    const r = ix.lookup(word, allowed(), 60, hidden());
+    const r = ix.lookup(word, allowed(), 60, hidden(), accent());
     if (!r.known) {
       const more = explicitOn() ? "" : " Some words only show with explicit words turned on in Options.";
       results.innerHTML = `<p class="choice-hint">No rhymes found for "${esc(word)}". Try another spelling or a more common word.${more}</p>`;

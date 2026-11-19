@@ -14,10 +14,18 @@
  * consonants in between go: dinner / killer / picture / villa, or money /
  * honey / country / hungry. That is how most rap rhymes.
  *
+ * Some scenes say words their own way, and rhyme by it (accentPhones): UK
+ * rappers drop the R after a vowel (car rhymes with ma, garms with palms),
+ * and Southern rappers say "e" as "i" before N and M (Benz rhymes with
+ * wins, pen with in).
+ *
  * This file imports nothing, so the data build script can use it too.
  */
 
 export type Phones = string[];
+
+/** How a scene says its words: plain US rap, UK (no R after vowels) or Southern (pen like pin). */
+export type Accent = "us" | "uk" | "south";
 
 export const isVowel = (phone: string) => /\d$/.test(phone);
 const bare = (phone: string) => phone.replace(/\d$/, "");
@@ -76,9 +84,45 @@ export function rapPhones(phones: Phones): Phones {
   return out;
 }
 
+/** Vowels a UK accent says without the R after them: car as "kah", door as "daw", sure as "shaw". */
+const UK_DROPS_R: Record<string, string> = { AA: "AA", AO: "AO", UH: "AO" };
+
+/**
+ * A rap pronunciation said with a scene's accent. UK: no R after AA, AO
+ * or UH unless a vowel follows (car, bars, door, sure; "carry" keeps it).
+ * South: EH before N or M is IH (pen, Benz, ten, them).
+ */
+export function accentPhones(phones: Phones, accent: Accent = "us"): Phones {
+  if (accent === "us") return phones;
+  const out: Phones = [];
+  for (let k = 0; k < phones.length; k++) {
+    const p = phones[k]!;
+    const next = phones[k + 1];
+    if (accent === "uk" && isVowel(p) && UK_DROPS_R[bare(p)] && next === "R" && !(phones[k + 2] && isVowel(phones[k + 2]!))) {
+      out.push(UK_DROPS_R[bare(p)]! + p.slice(-1));
+      k++;
+      continue;
+    }
+    if (accent === "south" && bare(p) === "EH" && (next === "N" || next === "M")) {
+      out.push("IH" + p.slice(-1));
+      continue;
+    }
+    out.push(p);
+  }
+  return out;
+}
+
+/** The pronunciation a rap key is built from: rap habits, then the scene's accent. */
+const said = (phones: Phones, accent: Accent) => accentPhones(rapPhones(phones), accent);
+
 /** The perfect rhyme key of the rap pronunciation: bigger and nigga are both "IH G AH". */
-export function rapKey(phones: Phones): string {
-  return perfectKey(rapPhones(phones));
+export function rapKey(phones: Phones, accent: Accent = "us"): string {
+  return perfectKey(said(phones, accent));
+}
+
+/** The near rhyme key of the rap pronunciation. */
+export function rapNearKey(phones: Phones, accent: Accent = "us"): string {
+  return nearKey(said(phones, accent));
 }
 
 /** Unstressed vowels that blur into one "uh" when rapped. */
@@ -90,8 +134,8 @@ const SCHWA = new Set(["AH0", "IH0", "UH0"]);
  * "IH AH |" for dinner, killer and villa; "AH IY |" for money and country;
  * "AY | T" for night.
  */
-export function slantKey(phones: Phones): string {
-  const p = rapPhones(phones);
+export function slantKey(phones: Phones, accent: Accent = "us"): string {
+  const p = said(phones, accent);
   const i = stressIndex(p);
   if (i < 0) return "";
   const tail = p.slice(i);

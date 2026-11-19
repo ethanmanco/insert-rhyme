@@ -18,7 +18,7 @@ beforeAll(() => {
 
 /** True when all the words share at least one rhyme sound (rap slant: same vowels and ending). */
 const shareSound = (words: string[]) => {
-  const sets = words.map((w) => new Set(index.entry(w)!.prons.map(slantKey)));
+  const sets = words.map((w) => new Set(index.entry(w)!.prons.map((p) => slantKey(p))));
   return [...sets[0]!].some((k) => sets.every((s) => s.has(k)));
 };
 
