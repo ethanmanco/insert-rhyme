@@ -1,5 +1,6 @@
 import { cursesFor, EXPLICIT_PROMPTS, RAP_SLURS, slursFor, type Weighted } from "./explicit";
 import { slantKey, syllables, type Accent } from "./phonetics";
+import type { LyricStats } from "./rapWords";
 import type { Entry, RhymeIndex, Tier } from "./rhymes";
 
 /**
@@ -20,6 +21,9 @@ import type { Entry, RhymeIndex, Tier } from "./rhymes";
  * leads, then other style words that rhyme with it, then rap words that
  * rhyme (`flavor`), and only then everyday words, with rare everyday words
  * held back. Sounds are heard with the style's accent (phonetics.ts).
+ * With lyric stats for the style (rapWords.ts), its artists' most used
+ * words lead too, the most used most often, and right after the lead come
+ * words those artists actually rhymed with it.
  *
  * With explicit words on, a good share of groups starts with a swear word
  * (and swear words that rhyme get mixed into other groups); with slurs on,
@@ -141,6 +145,10 @@ const STYLE_RARE = 0.15;
 /** Most style words, and most rap words, that join a group after its lead. */
 const STYLE_MATES = 3;
 const FLAVOR_MATES = 3;
+/** Most words the artists rhymed with the lead that join its group. */
+const PAIR_MATES = 3;
+/** How likely a hand-picked style word is to lead, next to lyric words (1 to 10 by use). */
+const PICKED_WEIGHT = 3;
 /** A theme sound used in this many recent groups is skipped while others are left. */
 const RECENT_THEME_SOUNDS = 8;
 
@@ -164,6 +172,8 @@ export interface DeckOptions {
   flavor?: string[] | null;
   /** How the style says its words, which decides what rhymes. */
   accent?: Accent;
+  /** The style's lyric stats: its artists' words and the rhymes they used. */
+  lyrics?: LyricStats | null;
   memory?: Memory;
 }
 
@@ -197,6 +207,10 @@ export class PromptDeck {
   private flavorBySound = new Map<string, string[]>();
   /** How many other theme and flavor words share each theme word's sound: leads with mates come up more. */
   private mateCount = new Map<string, number>();
+  /** How likely each theme word is to lead: lyric words by how much the artists use them. */
+  private leadWeight = new Map<string, number>();
+  /** For each word, the words the style's artists rhymed with it, and how often. */
+  private partners = new Map<string, Map<string, number>>();
 
   constructor(
     private index: RhymeIndex,
@@ -209,7 +223,25 @@ export class PromptDeck {
     this.recentSounds = [...(opts.memory?.sounds ?? [])].slice(-RECENT_SOUNDS);
     this.recentWords = [...(opts.memory?.words ?? [])].slice(-RECENT_WORDS);
     const usable = (w: string) => !!index.entry(w) && allowed.has(index.entry(w)!.tier) && !opts.hidden?.(w);
+    const cleanWord = (w: string) => w.length <= MAX_LETTERS && index.entry(w)?.tier === "clean" && !opts.hidden?.(w);
     this.theme = opts.theme?.filter(usable) ?? null;
+    for (const w of this.theme ?? []) this.leadWeight.set(w, PICKED_WEIGHT);
+    if (opts.lyrics) {
+      // Lyric words lead alongside the hand-picked ones; swears stay with the explicit groups.
+      const lyricWords = opts.lyrics.words.filter(([w]) => cleanWord(w));
+      for (const [w, weight] of lyricWords) this.leadWeight.set(w, Math.max(this.leadWeight.get(w) ?? 0, 1 + (9 * weight) / 1000));
+      this.theme = [...new Set([...(this.theme ?? []), ...lyricWords.map(([w]) => w)])];
+      const link = (a: string, b: string, n: number) => {
+        if (!usable(a) || !cleanWord(b)) return;
+        const map = this.partners.get(a) ?? new Map<string, number>();
+        map.set(b, (map.get(b) ?? 0) + n);
+        this.partners.set(a, map);
+      };
+      for (const [a, b, n] of opts.lyrics.pairs) {
+        link(a, b, n);
+        link(b, a, n);
+      }
+    }
     const flavor = (opts.flavor ?? []).filter((w) => usable(w) && w.length <= MAX_LETTERS);
     if (flavor.length) this.rare = STYLE_RARE;
     const bySound = (words: string[], into: Map<string, string[]>) => {
@@ -224,7 +256,7 @@ export class PromptDeck {
     bySound(flavor, this.flavorBySound);
     for (const w of this.theme ?? []) {
       const key = soundOf(index, w, allowed, this.accent) ?? "";
-      const mates = new Set([...(this.themeBySound.get(key) ?? []), ...(this.flavorBySound.get(key) ?? [])]);
+      const mates = new Set([...(this.themeBySound.get(key) ?? []), ...(this.flavorBySound.get(key) ?? []), ...(this.partners.get(w)?.keys() ?? [])]);
       mates.delete(w);
       this.mateCount.set(w, mates.size);
     }
@@ -307,14 +339,36 @@ export class PromptDeck {
     return shuffle(list, this.random).slice(0, max);
   }
 
-  /** A group's words after its lead: style words, then rap words, then everyday words. */
+  /**
+   * Up to `max` words the style's artists rhymed with `lead` that have this
+   * sound, the most rhymed most likely, fresh ones first.
+   */
+  private rhymedWith(lead: string, key: string, exclude: Set<string>, max: number): string[] {
+    const options = [...(this.partners.get(lead) ?? [])].filter(
+      ([w]) => !exclude.has(w) && this.index.entry(w)!.prons.some((p) => slantKey(p, this.accent) === key),
+    );
+    const recent = new Set(this.recentWords.slice(-RECENT_WORDS));
+    const fresh = options.filter(([w]) => !recent.has(w));
+    const left = (fresh.length ? fresh : options.slice(0, 1)).map(([word, n]) => ({ word, weight: Math.sqrt(n) }));
+    const out: string[] = [];
+    while (out.length < max && left.length) {
+      const word = this.weighted(left);
+      out.push(word);
+      left.splice(left.findIndex((x) => x.word === word), 1);
+    }
+    return out;
+  }
+
+  /** A group's words after its lead: words the artists rhymed with it, style words, rap words, then everyday words. */
   private fill(lead: string, key: string, pool: Sound, everyday: number): string[] {
     const taken = new Set([lead]);
+    const rhymed = this.rhymedWith(lead, key, taken, PAIR_MATES);
+    rhymed.forEach((w) => taken.add(w));
     const style = this.mates(this.themeBySound, key, taken, STYLE_MATES);
     style.forEach((w) => taken.add(w));
     const flavor = this.mates(this.flavorBySound, key, taken, FLAVOR_MATES);
     flavor.forEach((w) => taken.add(w));
-    return [lead, ...style, ...flavor, ...this.pick(pool.clean, everyday, taken)];
+    return [lead, ...rhymed, ...style, ...flavor, ...this.pick(pool.clean, everyday, taken)];
   }
 
   /** The next sound from the shuffled deck, refilled (minus recent ones) when it runs out. */
@@ -381,9 +435,10 @@ export class PromptDeck {
   }
 
   /**
-   * A group led by the next theme word, then other theme words that rhyme,
-   * then rap words that rhyme, then everyday rhymes. Theme words with more
-   * rhyming mates lead more often, so groups stay in the style.
+   * A group led by the next theme word, then words the artists rhymed with
+   * it, other theme words that rhyme, rap words that rhyme, then everyday
+   * rhymes. The artists' most used words and words with more rhyming mates
+   * lead more often, so groups stay in the style.
    */
   private themeGroup(): string[] | null {
     const theme = this.theme!;
@@ -392,8 +447,8 @@ export class PromptDeck {
         const recent = new Set(this.recentWords);
         const fresh = theme.filter((w) => !recent.has(w));
         // A weighted shuffle: the end of the queue leads first, and words with mates sort toward it.
-        const mates = (w: string) => 1 + Math.min(4, this.mateCount.get(w) ?? 0);
-        const keyed = (fresh.length >= 5 ? fresh : theme).map((w) => ({ w, k: this.random() ** (1 / mates(w)) }));
+        const pull = (w: string) => (this.leadWeight.get(w) ?? PICKED_WEIGHT) * (1 + Math.min(4, this.mateCount.get(w) ?? 0));
+        const keyed = (fresh.length >= 5 ? fresh : theme).map((w) => ({ w, k: this.random() ** (1 / pull(w)) }));
         this.themeQueue = keyed.sort((a, b) => a.k - b.k).map((x) => x.w);
       }
       const lead = this.themeQueue.pop()!;

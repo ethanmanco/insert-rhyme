@@ -6,7 +6,8 @@ import { canRecord, Recorder, type Take } from "./audio/recorder";
 import { beatById, ENCODER_DELAY, POSTROLL } from "./core/beats";
 import { doubleTempo, findGrid, halfTempo, monoOpening, ownGain, shiftBeats, syncFromTaps, type Grid } from "./core/ownBeat";
 import { categoryWords, CATEGORIES } from "./core/categories";
-import { flavorWords } from "./core/rapWords";
+import { flavorWords, lyricStats, type LyricStats } from "./core/rapWords";
+import { LYRIC_SONGS } from "./core/lyricCounts";
 import { isNWord } from "./core/explicit";
 import { PromptDeck, type Memory } from "./core/prompts";
 import { allowedTiers, RhymeIndex, type Tier } from "./core/rhymes";
@@ -99,11 +100,33 @@ async function loadTier(tier: Tier): Promise<void> {
   }
 }
 
+/** Each rap style's lyric stats, loaded the first time the style is picked. */
+const lyricCache = new Map<string, LyricStats | null>();
+async function loadLyrics(id: string): Promise<LyricStats | null> {
+  if (!LYRIC_SONGS[id]) return null;
+  if (!lyricCache.has(id)) {
+    try {
+      const res = await fetch(`${import.meta.env.BASE_URL}data/styles/${id}.json`);
+      if (!res.ok) throw new Error(String(res.status));
+      lyricCache.set(id, (await res.json()) as LyricStats);
+    } catch {
+      // Without them the style still works from its hand-picked words; try again next time.
+      return null;
+    }
+  }
+  return lyricCache.get(id) ?? null;
+}
+
 /** Load whatever the toggles need, then deal fresh prompt words. */
+let refreshes = 0;
 async function refreshWords(): Promise<void> {
+  const run = ++refreshes;
   const want = [...allowed()].filter((t) => !index?.loaded.has(t));
   for (const tier of want) await loadTier(tier);
   const category = CATEGORIES.find((c) => c.id === settings.category);
+  const lyrics = category?.kind === "style" ? await loadLyrics(category.id) : null;
+  // A newer change started its own refresh while this one waited: let that one deal.
+  if (run !== refreshes) return;
   if (deck) save("recent", deck.memory());
   if (index)
     deck = new PromptDeck(index, allowed(), {
@@ -114,6 +137,7 @@ async function refreshWords(): Promise<void> {
       hidden: hiddenWords(),
       flavor: flavorWords(category, settings.explicit),
       accent: category?.accent ?? "us",
+      lyrics: lyrics && lyricStats(lyrics, settings.explicit),
       memory: load<Memory>("recent", { sounds: [], words: [] }),
     });
   stage.refresh();

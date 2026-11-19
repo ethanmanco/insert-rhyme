@@ -36,6 +36,40 @@ export const RAP_MATURE = w(`
   gun glock strap pistol stick drum blunt weed kush lean pills dope coke brick bricks plug pack bullet clip trigger smoke chopper
 `);
 
+/**
+ * Drug, weapon and killing words that show up in the lyric stats. Like the
+ * styles' `mature` words, they only join prompts with explicit words on.
+ */
+const MATURE = new Set(w(`
+  ${RAP_MATURE.join(" ")}
+  barrel blick blicky browning bullets calico cannon chamber choppers clips cocked corn draco gat gats gauge glizzy glocks
+  guns gunning hammer hammers heater iron mac macs mash nines pistols pole poles rifle shank shanks shells shelling shoot
+  shooter shooters shooting shootout shots shotgun silencer skeng slug slugs sticks strap strapped straps switches weapon
+  triggers knife knives tec murder murdered murders murk kill killed killer killers killing homicide kidnap
+  bale bales blunted blunts cocaine codeine crack dank dealer drank druggie drug drugs ecstasy edible fiends grams hash
+  hydro junkies kilo kilos molly ounce ounces perc percs perky perking pill pint pints powder reefer roaches sniff snort
+  stoner swisher syrup wock xan xans addict
+`));
+
+export const isMature = (word: string): boolean => MATURE.has(word);
+
+/** A rap style's lyric stats: its most used words, and the end rhymes its artists use (scripts/lyrics/stats.py). */
+export interface LyricStats {
+  /** [word, weight 1-1000]: higher is more typical of the style. */
+  words: [string, number][];
+  /** [word, word, times]: two words the artists rhymed at the ends of nearby lines. */
+  pairs: [string, string, number][];
+}
+
+/** The stats with drug and weapon words left out unless explicit words are on. */
+export function lyricStats(raw: LyricStats, explicit: boolean): LyricStats {
+  if (explicit) return raw;
+  return {
+    words: raw.words.filter(([word]) => !isMature(word)),
+    pairs: raw.pairs.filter(([a, b]) => !isMature(a) && !isMature(b)),
+  };
+}
+
 /** The rap words that fill a rap style's groups; topics get none. */
 export function flavorWords(category: Category | undefined, explicit: boolean): string[] | null {
   if (category?.kind !== "style") return null;

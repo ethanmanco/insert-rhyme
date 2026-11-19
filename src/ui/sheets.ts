@@ -1,5 +1,6 @@
 import { BEATS, beatById } from "../core/beats";
 import { CATEGORIES } from "../core/categories";
+import { LYRIC_SONGS } from "../core/lyricCounts";
 import type { Accent } from "../core/phonetics";
 import type { RhymeIndex, Tier } from "../core/rhymes";
 import { PACES, SCHEMES } from "../core/schemes";
@@ -78,13 +79,15 @@ export function optionsSheet(get: () => Settings, stats: () => Stats, change: (p
     const names = c.artists ?? [];
     const list = names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : (names[0] ?? "");
     const accent = c.accent === "uk" ? " Rhymes the UK way: car with ma." : c.accent === "south" ? " Rhymes the Southern way: Benz with wins." : "";
-    return `${c.name}: ${c.hint}${list ? ` Words and swearing in the style of ${list}.` : ""}${accent}`;
+    const songs = LYRIC_SONGS[c.id];
+    const from = !list ? "" : songs ? ` Words and rhymes from ${songs.toLocaleString("en-US")} songs by ${list}.` : ` Words and swearing in the style of ${list}.`;
+    return `${c.name}: ${c.hint}${from}${accent}`;
   };
 
   const themes = (value: string) => `
     <fieldset class="group" data-section="theme">
       <legend>WORD THEME</legend>
-      <p class="choice-hint">With a theme, each rhyme starts with one of its words. Rap styles fill the rest with the scene's words and rap words before everyday ones. Drug and weapon words in the rap styles only show with explicit words on.</p>
+      <p class="choice-hint">With a theme, each rhyme starts with one of its words. Rap styles fill the rest with words their artists use and rhyme, before everyday ones. Drug and weapon words in the rap styles only show with explicit words on.</p>
       <p class="choice-hint theme-note" aria-live="polite">${esc(themeNote(value))}</p>
       <div class="minis">${mini("any", "ANY WORDS", "Everyday words with lots of rhymes.", value)}</div>
       <p class="sub">RAP STYLES</p>

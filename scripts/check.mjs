@@ -141,6 +141,7 @@ try {
   await page.click("dialog[open] input[value='ukdrill']");
   const ukNote = await page.evaluate(() => document.querySelector("dialog[open] .theme-note").textContent);
   check(ukNote.includes("UK way"), `the UK drill note should mention the UK way, got ${ukNote}`);
+  check(/Words and rhymes from [\d,]+ songs by/.test(ukNote), `the UK drill note should say how many songs it learned from, got ${ukNote}`);
   await page.keyboard.press("Escape");
   await page.click("[data-tool='rhymes']");
   await page.waitForSelector("dialog[open] #rhyme-word");
