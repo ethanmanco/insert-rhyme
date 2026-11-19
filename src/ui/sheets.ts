@@ -214,8 +214,7 @@ export function helperSheet(
   body.innerHTML = `
     <form class="search" role="search">
       <label class="sr-only" for="rhyme-word">Word to rhyme</label>
-      <input id="rhyme-word" class="px" type="search" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="night" />
-      <button class="btn px" type="submit">FIND</button>
+      <input id="rhyme-word" class="px" type="search" enterkeyhint="search" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="night" />
     </form>
     <div class="results" aria-live="polite"></div>`;
   const input = body.querySelector("input")!;
@@ -239,21 +238,40 @@ export function helperSheet(
       return;
     }
     const r = ix.lookup(word, allowed(), 60, hidden(), accent());
+    // Words that start with what is typed so far: tap one to finish the word.
+    const more = ix.complete(word, allowed(), 12, hidden());
     if (!r.known) {
-      const more = explicitOn() ? "" : " Some words only show with explicit words turned on in Options.";
-      results.innerHTML = `<p class="choice-hint">No rhymes found for "${esc(word)}". Try another spelling or a more common word.${more}</p>`;
+      if (more.length) {
+        results.innerHTML = list("KEEP TYPING", more, "Or tap a word to see its rhymes.");
+        return;
+      }
+      const tip = explicitOn() ? "" : " Some words only show with explicit words turned on in Options.";
+      results.innerHTML = `<p class="choice-hint">No rhymes found for "${esc(word)}". Try another spelling or a more common word.${tip}</p>`;
       return;
     }
     results.innerHTML =
       list("PERFECT", r.perfect, "Same sound from the stressed vowel on, the way rappers say it: -er and -a match.") +
       list("SLANT", r.slant, "Same vowels and the same ending, like dinner, killer and picture. How most rap rhymes.") +
-      list("NEAR", r.near, "Same vowel sounds, different consonants.");
+      list("NEAR", r.near, "Same vowel sounds, different consonants.") +
+      (more.length ? list("LONGER WORDS", more.slice(0, 8), "Words that start the same.") : "");
   }
 
-  body.querySelector("form")!.addEventListener("submit", (e) => {
-    e.preventDefault();
+  // Results follow the box as you type, after a short pause so fast typing stays smooth.
+  let typing = 0;
+  const search = () => {
+    clearTimeout(typing);
     word = input.value.trim().toLowerCase();
     show();
+  };
+  input.addEventListener("input", () => {
+    clearTimeout(typing);
+    typing = window.setTimeout(search, 120);
+  });
+  body.querySelector("form")!.addEventListener("submit", (e) => {
+    e.preventDefault();
+    search();
+    // Enter puts the phone keyboard away so the rhymes have the screen.
+    input.blur();
   });
   results.addEventListener("click", (e) => {
     const b = (e.target as HTMLElement).closest<HTMLButtonElement>(".word");

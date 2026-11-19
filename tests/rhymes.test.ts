@@ -160,4 +160,20 @@ describe("rhyme lookups on the real dictionary data", () => {
     expect(explicit.length).toBeGreaterThan(0);
     for (const w of explicit) expect(index.entry(w)!.tier).toBe("profane");
   });
+
+  it("suggests whole words while one is half typed, common ones first", () => {
+    const words = index.complete("nig", kids);
+    expect(words).toContain("night");
+    expect(words.length).toBeGreaterThan(3);
+    for (const w of words) expect(w.startsWith("nig")).toBe(true);
+    expect(words[0]).toBe("night");
+    // The word itself is not suggested, and nothing for an empty box.
+    expect(index.complete("night", kids)).not.toContain("night");
+    expect(index.complete("  ", kids)).toEqual([]);
+    expect(index.complete("zzzxq", kids)).toEqual([]);
+    // Explicit and hidden words stay out, as in the rhyme lists.
+    for (const w of index.complete("fu", kids, 500)) expect(index.entry(w)!.tier).toBe("clean");
+    expect(index.complete("nig", kids, 12, (w) => w === "night")).not.toContain("night");
+    expect(index.complete("nig", kids, 3)).toHaveLength(3);
+  });
 });

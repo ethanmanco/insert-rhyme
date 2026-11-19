@@ -721,11 +721,6 @@ a.btn {
   outline-offset: -4px;
 }
 
-.search .btn {
-  min-height: 52px;
-  padding: 0 14px;
-}
-
 .results h3 {
   font-family: var(--pixel);
   font-size: 11px;

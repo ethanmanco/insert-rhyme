@@ -97,6 +97,23 @@ export class RhymeIndex {
     return this.keys(accent).slant.entries();
   }
 
+  /**
+   * Known words that start with what has been typed so far, most common
+   * first, then shortest: suggestions while a word is half typed.
+   */
+  complete(raw: string, allowed: ReadonlySet<Tier>, limit = 12, hidden?: (word: string) => boolean): string[] {
+    const start = raw.trim().toLowerCase();
+    if (!start) return [];
+    const found: Entry[] = [];
+    for (const e of this.words.values()) {
+      if (e.word.startsWith(start) && e.word !== start && allowed.has(e.tier) && !hidden?.(e.word)) found.push(e);
+    }
+    return found
+      .sort((a, b) => a.size - b.size || a.word.length - b.word.length || (a.word < b.word ? -1 : 1))
+      .slice(0, limit)
+      .map((e) => e.word);
+  }
+
   /** Every word in one tier. */
   tierWords(tier: Tier): Entry[] {
     return [...this.words.values()].filter((e) => e.tier === tier);

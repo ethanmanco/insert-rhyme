@@ -14,7 +14,7 @@ Free 8-bit freestyle rap practice. Pick a beat, watch the ball bounce across eac
 - **A bar view that shows exactly when to rhyme.** Each bar is a row of four blocks, one per beat. The ball lands on each block right on the beat, the target block where your rhyme should land is highlighted, and the next three bars wait underneath so you can plan.
 - **5 rhyme schemes at 3 paces:** AABB, ABAB, AAAA, ABBA and AAXA (line 3 free), each at every line, skip a line (a free line before each rhyming line) or double-time (two rhymes per line, on beats 2 and 4). That's 15 layouts. Both can also be random: a random scheme picks a new one every 4 bars (8 when skipping lines, since a verse takes that long), repeating one at most twice in a row, and a random pace flips between every line and skip a line every 8 bars. The bars ahead always show what's coming.
 - **Word prompts with three levels:** every rhyme word shown, only the first word of each rhyme shown (you find the rest), or no words (free practice with the scheme only).
-- **Rhyme helper:** tap any word for its perfect, slant and near rhymes, or type your own.
+- **Rhyme helper:** tap any word for its perfect, slant and near rhymes, or type your own. Rhymes update as you type, and half a word suggests whole words to tap.
 - **Tap tempo:** rapping over music from somewhere else? Tap along and the bars follow, with no built-in beat.
 - **Recording:** record your verse over the beat, play it back, and download it. It stays on your device.
 - **Daily streak and stats:** sessions and minutes practiced, saved in your browser.

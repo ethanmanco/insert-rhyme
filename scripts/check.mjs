@@ -146,9 +146,14 @@ try {
   await page.click("[data-tool='rhymes']");
   await page.waitForSelector("dialog[open] #rhyme-word");
   await page.$eval("dialog[open] #rhyme-word", (el) => (el.value = ""));
-  await page.type("dialog[open] #rhyme-word", "car");
-  await page.keyboard.press("Enter");
-  await page.waitForFunction(() => document.querySelector("dialog[open] #rhyme-word")?.value === "car" && document.querySelector("dialog[open] .words .word"), { timeout: 5000 });
+  // Results follow the box as you type, with no Enter: half a word suggests whole ones.
+  await page.type("dialog[open] #rhyme-word", "ca");
+  await page.waitForFunction(() => [...document.querySelectorAll("dialog[open] .results h3")].some((h) => h.textContent.startsWith("KEEP TYPING")), { timeout: 5000 });
+  const half = await page.evaluate(() => [...document.querySelectorAll("dialog[open] .word")].map((b) => b.textContent));
+  console.log(`typed "ca", suggestions: ${half.join(" ")}`);
+  check(half.length > 3 && half.every((w) => w.startsWith("ca")), "half a word should suggest whole words that start with it");
+  await page.type("dialog[open] #rhyme-word", "r");
+  await page.waitForFunction(() => document.querySelector("dialog[open] #rhyme-word")?.value === "car" && [...document.querySelectorAll("dialog[open] .results h3")].some((h) => h.textContent.startsWith("PERFECT")), { timeout: 5000 });
   const ukRhymes = await page.evaluate(() => [...document.querySelectorAll("dialog[open] .word")].map((b) => b.textContent));
   console.log(`UK drill, rhymes for car: ${ukRhymes.slice(0, 12).join(" ")}`);
   check(ukRhymes.includes("spa"), "with UK drill picked, car should rhyme with spa");
