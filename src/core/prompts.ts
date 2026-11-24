@@ -2,6 +2,7 @@ import { cursesFor, EXPLICIT_PROMPTS, RAP_SLURS, slursFor, type Weighted } from 
 import { slantKey, syllables, type Accent } from "./phonetics";
 import type { LyricStats } from "./rapWords";
 import type { Entry, RhymeIndex, Tier } from "./rhymes";
+import { SUBJECT_STRETCHES, type Subject } from "./subjects";
 
 /**
  * Prompt words. Every rhyme group in a verse gets a rhyme SOUND, and its
@@ -24,6 +25,12 @@ import type { Entry, RhymeIndex, Tier } from "./rhymes";
  * With lyric stats for the style (rapWords.ts), its artists' most used
  * words lead too, the most used most often, and right after the lead come
  * words those artists actually rhymed with it.
+ *
+ * With subjects on (subjects.ts), the verse keeps one loose subject for 8
+ * or 16 bars: most groups lead with a word from it (for a rap style, its
+ * own words that fit the subject first), and subject words that rhyme join
+ * right after the lead. Groups are numbered by 8-bar stretch (schemes.ts),
+ * so the subject of a group is known from its number alone.
  *
  * With explicit words on, a good share of groups starts with a swear word
  * (and swear words that rhyme get mixed into other groups); with slurs on,
@@ -152,6 +159,15 @@ const PICKED_WEIGHT = 3;
 /** A theme sound used in this many recent groups is skipped while others are left. */
 const RECENT_THEME_SOUNDS = 8;
 
+/** Share of groups in a subject stretch that lead with a subject word: the rest keep the verse loose. */
+export const SUBJECT_RATE = 0.7;
+/** Most subject words that join a group after its lead. */
+const SUBJECT_MATES = 2;
+/** Groups in one 8-bar stretch (schemes.ts numbers them stretch * 8 + ...). */
+const GROUPS_PER_STRETCH = 8;
+/** A new subject is none of the last few. */
+const RECENT_SUBJECTS = 4;
+
 /** Remembered between visits, so a reload does not bring back the same words. */
 export interface Memory {
   sounds: string[];
@@ -174,6 +190,8 @@ export interface DeckOptions {
   accent?: Accent;
   /** The style's lyric stats: its artists' words and the rhymes they used. */
   lyrics?: LyricStats | null;
+  /** Loose subjects that each hold for 8 or 16 bars (subjects.ts). */
+  subjects?: Subject[] | null;
   memory?: Memory;
 }
 
@@ -211,13 +229,21 @@ export class PromptDeck {
   private leadWeight = new Map<string, number>();
   /** For each word, the words the style's artists rhymed with it, and how often. */
   private partners = new Map<string, Map<string, number>>();
+  /** Subjects with their usable words, by rhyme sound too. */
+  private subjects: { subject: Subject; words: string[]; bySound: Map<string, string[]> }[] = [];
+  /** The subject of each 8-bar stretch, worked out ahead from the seed alone. */
+  private subjectPlan: number[] = [];
+  private seed: number;
+  /** The subject of the group being drawn. */
+  private current: PromptDeck["subjects"][number] | null = null;
 
   constructor(
     private index: RhymeIndex,
     private allowed: ReadonlySet<Tier>,
     opts: DeckOptions = {},
   ) {
-    this.random = rng(opts.seed ?? Date.now());
+    this.seed = opts.seed ?? Date.now();
+    this.random = rng(this.seed);
     this.accent = opts.accent ?? "us";
     this.pools = soundPools(index, allowed, this.accent);
     this.recentSounds = [...(opts.memory?.sounds ?? [])].slice(-RECENT_SOUNDS);
@@ -254,6 +280,12 @@ export class PromptDeck {
     };
     bySound(this.theme ?? [], this.themeBySound);
     bySound(flavor, this.flavorBySound);
+    for (const subject of opts.subjects ?? []) {
+      const words = subject.words.filter(cleanWord);
+      const map = new Map<string, string[]>();
+      bySound(words, map);
+      if (words.length) this.subjects.push({ subject, words, bySound: map });
+    }
     for (const w of this.theme ?? []) {
       const key = soundOf(index, w, allowed, this.accent) ?? "";
       const mates = new Set([...(this.themeBySound.get(key) ?? []), ...(this.flavorBySound.get(key) ?? []), ...(this.partners.get(w)?.keys() ?? [])]);
@@ -287,12 +319,42 @@ export class PromptDeck {
   word(group: number, slot: number): string {
     let words = this.groups.get(group);
     if (!words) {
-      words = this.draw();
+      words = this.draw(group);
       this.groups.set(group, words);
       // Only the bars around the player matter; forget old groups.
       for (const g of this.groups.keys()) if (g < group - 16) this.groups.delete(g);
     }
     return words[slot % words.length]!;
+  }
+
+  /**
+   * The subject of an 8-bar stretch of the verse (lines after the count-in,
+   * schemes.ts SEGMENT), or null with subjects off. Each subject holds for
+   * one or two stretches, and is none of the last few.
+   */
+  subjectAt(stretch: number): Subject | null {
+    const i = this.subjectIndex(stretch);
+    return i < 0 ? null : this.subjects[i]!.subject;
+  }
+
+  private subjectIndex(stretch: number): number {
+    if (!this.subjects.length || stretch < 0) return -1;
+    if (this.subjectPlan.length <= stretch) {
+      // Its own random from the seed, so the plan never depends on which words were drawn first.
+      const random = rng(this.seed ^ 0x2545f491);
+      const plan: number[] = [];
+      const runs: number[] = [];
+      while (plan.length <= stretch + 16) {
+        const recent = runs.slice(-Math.min(RECENT_SUBJECTS, this.subjects.length - 1));
+        const options = this.subjects.map((_, i) => i).filter((i) => !recent.includes(i));
+        const pick = options[Math.floor(random() * options.length)]!;
+        runs.push(pick);
+        const length = SUBJECT_STRETCHES[Math.floor(random() * SUBJECT_STRETCHES.length)]!;
+        for (let k = 0; k < length; k++) plan.push(pick);
+      }
+      this.subjectPlan = plan;
+    }
+    return this.subjectPlan[stretch]!;
   }
 
   /** What to remember for next time. */
@@ -364,11 +426,14 @@ export class PromptDeck {
     const taken = new Set([lead]);
     const rhymed = this.rhymedWith(lead, key, taken, PAIR_MATES);
     rhymed.forEach((w) => taken.add(w));
+    // Words on the stretch's subject that rhyme keep the verse on topic.
+    const subject = this.current ? this.mates(this.current.bySound, key, taken, SUBJECT_MATES) : [];
+    subject.forEach((w) => taken.add(w));
     const style = this.mates(this.themeBySound, key, taken, STYLE_MATES);
     style.forEach((w) => taken.add(w));
     const flavor = this.mates(this.flavorBySound, key, taken, FLAVOR_MATES);
     flavor.forEach((w) => taken.add(w));
-    return [lead, ...rhymed, ...style, ...flavor, ...this.pick(pool.clean, everyday, taken)];
+    return [lead, ...rhymed, ...subject, ...style, ...flavor, ...this.pick(pool.clean, everyday, taken)];
   }
 
   /** The next sound from the shuffled deck, refilled (minus recent ones) when it runs out. */
@@ -382,11 +447,17 @@ export class PromptDeck {
     return this.pools.get(this.queue.pop()!)!;
   }
 
-  private draw(): string[] {
+  private draw(group: number): string[] {
+    this.current = this.subjects[this.subjectIndex(Math.floor(group / GROUPS_PER_STRETCH))] ?? null;
     const r = this.random();
     if (this.slurs.length && r < this.slurRate) return this.explicitGroup(this.slurs);
     const swearShare = this.slurs.length ? this.slurRate + EXPLICIT_RATE : EXPLICIT_RATE;
     if (this.swears.length && r < swearShare) return this.explicitGroup(this.swears);
+    // Most groups lead with the subject; a style's own words on it come first (subjectGroup).
+    if (this.current && this.random() < SUBJECT_RATE) {
+      const onSubject = this.subjectGroup();
+      if (onSubject) return onSubject;
+    }
     if (this.theme?.length) {
       const themed = this.themeGroup();
       if (themed) return themed;
@@ -434,6 +505,42 @@ export class PromptDeck {
     return words;
   }
 
+  /** How strongly a theme word pulls toward leading: the artists' most used words, and words with more rhyming mates. */
+  private pull(word: string): number {
+    return (this.leadWeight.get(word) ?? PICKED_WEIGHT) * (1 + Math.min(4, this.mateCount.get(word) ?? 0));
+  }
+
+  /**
+   * A group led by a word on the stretch's subject. With a rap style, the
+   * style's own words on the subject are much likelier to lead than plain
+   * ones; common words lead more than rare ones. Words and sounds used
+   * recently wait their turn. Null when nothing fresh is left.
+   */
+  private subjectGroup(): string[] | null {
+    const sub = this.current!;
+    const recent = new Set(this.recentWords);
+    const recentSounds = new Set(this.recentSounds.slice(-RECENT_THEME_SOUNDS));
+    const theme = new Set(this.theme ?? []);
+    const options: Weighted[] = [];
+    for (const word of sub.words) {
+      if (recent.has(word)) continue;
+      const key = soundOf(this.index, word, this.allowed, this.accent);
+      const pool = key ? this.pools.get(key) : undefined;
+      if (!key || !pool || recentSounds.has(key) || pool.clean.filter((e) => e.word !== word).length < 3) continue;
+      const size = this.index.entry(word)!.size;
+      options.push({ word, weight: theme.has(word) ? 2 * this.pull(word) : size <= 10 ? 3 : size <= 20 ? 2 : 1 });
+    }
+    if (!options.length) return null;
+    const lead = this.weighted(options);
+    const key = soundOf(this.index, lead, this.allowed, this.accent)!;
+    const pool = this.pools.get(key)!;
+    const words = this.fill(lead, key, pool, 5);
+    const extra = this.extraFor(pool, words);
+    if (extra) words.splice(2, 0, extra);
+    this.remember(key, words);
+    return words;
+  }
+
   /**
    * A group led by the next theme word, then words the artists rhymed with
    * it, other theme words that rhyme, rap words that rhyme, then everyday
@@ -447,7 +554,7 @@ export class PromptDeck {
         const recent = new Set(this.recentWords);
         const fresh = theme.filter((w) => !recent.has(w));
         // A weighted shuffle: the end of the queue leads first, and words with mates sort toward it.
-        const pull = (w: string) => (this.leadWeight.get(w) ?? PICKED_WEIGHT) * (1 + Math.min(4, this.mateCount.get(w) ?? 0));
+        const pull = (w: string) => this.pull(w);
         const keyed = (fresh.length >= 5 ? fresh : theme).map((w) => ({ w, k: this.random() ** (1 / pull(w)) }));
         this.themeQueue = keyed.sort((a, b) => a.k - b.k).map((x) => x.w);
       }

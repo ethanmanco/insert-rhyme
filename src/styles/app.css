@@ -132,6 +132,17 @@ input {
   min-height: 24px;
 }
 
+.bar-title {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  column-gap: 12px;
+}
+
+.bar-title .subject {
+  color: var(--ink);
+}
+
 .lane {
   position: relative;
   height: 56px;

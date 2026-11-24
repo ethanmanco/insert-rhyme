@@ -106,6 +106,11 @@ try {
   check(takeSize > 5000, `the recording is empty or tiny: ${takeSize} bytes`);
   await shot(page, "04-take");
 
+  // A loose subject for the stretch shows above the bars.
+  const subject = await page.evaluate(() => document.querySelector(".bar-title .subject")?.textContent ?? "");
+  console.log(`subject: ${subject}`);
+  check(/^ON: [A-Z ]+$/.test(subject), `the bars should show a subject, got "${subject}"`);
+
   // Rhyme helper from a word on a block.
   await page.evaluate(() => document.querySelector("button.block.target")?.click());
   await page.waitForSelector("dialog[open] .words .word", { timeout: 5000 });

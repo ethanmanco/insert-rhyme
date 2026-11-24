@@ -11,6 +11,7 @@ import { LYRIC_SONGS } from "./core/lyricCounts";
 import { isNWord } from "./core/explicit";
 import { PromptDeck, type Memory } from "./core/prompts";
 import { allowedTiers, RhymeIndex, type Tier } from "./core/rhymes";
+import { SUBJECTS } from "./core/subjects";
 import { layoutName } from "./core/schemes";
 import { addSession, cleanStats, currentStreak, dayKey, type Stats } from "./core/stats";
 import { TapTempo } from "./core/tapTempo";
@@ -138,6 +139,8 @@ async function refreshWords(): Promise<void> {
       flavor: flavorWords(category, settings.explicit),
       accent: category?.accent ?? "us",
       lyrics: lyrics && lyricStats(lyrics, settings.explicit),
+      // A picked topic already is the subject; with none or a rap style, the verse moves through loose ones.
+      subjects: category?.kind === "topic" ? null : SUBJECTS,
       memory: load<Memory>("recent", { sounds: [], words: [] }),
     });
   stage.refresh();
@@ -180,6 +183,7 @@ const stage = new Stage({
   layout: { scheme: settings.scheme, pace: settings.pace, seed: layoutSeed },
   announce,
   onWord: (word) => helper.open(word),
+  subject: (stretch) => deck?.subjectAt(stretch)?.name ?? null,
   label(t) {
     if (settings.difficulty === "none" || !deck) return { text: t.letter };
     if (settings.difficulty === "first" && t.slot > 0) return { text: "????" };

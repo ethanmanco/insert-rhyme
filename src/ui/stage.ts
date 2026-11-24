@@ -1,4 +1,4 @@
-import { barPlan, layoutName, type BarPlan, type Layout, type Target } from "../core/schemes";
+import { barPlan, layoutName, SEGMENT, type BarPlan, type Layout, type Target } from "../core/schemes";
 import { ballPoint, beatPosition, BEATS_PER_BAR, snap, type BeatPosition } from "../core/timing";
 
 /** How many bars show below the current one. */
@@ -23,6 +23,8 @@ export interface StageOptions {
   announce: (text: string) => void;
   /** A shown word was tapped. */
   onWord: (word: string) => void;
+  /** The loose subject of an 8-bar stretch of the verse, if any. */
+  subject?: (stretch: number) => string | null;
 }
 
 const el = <K extends keyof HTMLElementTagNameMap>(tag: K, className = "", text = ""): HTMLElementTagNameMap[K] => {
@@ -44,6 +46,9 @@ const sizeClass = (text: string) => (text.length <= 4 ? "w-l" : text.length <= 6
 export class Stage {
   readonly root: HTMLElement;
   private caption: HTMLParagraphElement;
+  private lineText: HTMLSpanElement;
+  private subjectText: HTMLSpanElement;
+  private lastSubject = "";
   private lane: HTMLDivElement;
   private ball: HTMLDivElement;
   private current: HTMLDivElement;
@@ -58,7 +63,10 @@ export class Stage {
   constructor(private opts: StageOptions) {
     this.root = el("section", "stage");
     this.root.setAttribute("aria-label", "Bars");
-    this.caption = el("p", "caption");
+    this.caption = el("p", "caption bar-title");
+    this.lineText = el("span");
+    this.subjectText = el("span", "subject");
+    this.caption.append(this.lineText, this.subjectText);
     this.lane = el("div", "lane");
     this.lane.setAttribute("aria-hidden", "true");
     this.ball = el("div", "ball");
@@ -85,12 +93,14 @@ export class Stage {
   refresh(): void {
     const bar = Number.isNaN(this.shownBar) ? 0 : this.shownBar;
     this.lastGroup = -1;
+    this.lastSubject = "";
     this.showBar(bar, false, true);
   }
 
   /** Back to the top, as when playback stops. */
   reset(): void {
     this.lastGroup = -1;
+    this.lastSubject = "";
     this.showBar(0, false);
     this.light(-1);
     this.placeBall({ bar: 0, beat: 0, frac: 0 });
@@ -136,7 +146,10 @@ export class Stage {
     // With a random scheme or pace, say which one is in play.
     const { scheme, pace } = this.opts.layout;
     const now = scheme === "mix" || pace === "mix" ? layoutName({ scheme: plan.scheme, pace: plan.pace }) : "";
-    this.caption.textContent = now ? `${line} - ${now}` : line;
+    this.lineText.textContent = now ? `${line} - ${now}` : line;
+    // The count-in already shows the first stretch's subject, so you can get ready.
+    const subject = this.opts.subject?.(Math.floor(Math.max(0, plan.line) / SEGMENT)) ?? "";
+    this.subjectText.textContent = subject ? `ON: ${subject}` : "";
     this.blocks = this.fillRow(this.current, plan, true);
     this.next.replaceChildren();
     for (let i = 1; i <= AHEAD; i++) {
@@ -185,14 +198,21 @@ export class Stage {
 
   /**
    * Screen reader news, kept rare so it never talks over the beat: once
-   * when a new rhyme group starts, naming its word when words are shown.
+   * when a new rhyme group starts, naming its word when words are shown,
+   * and once when the subject changes.
    */
   private speak(plan: BarPlan) {
-    if (!this.announceOn || plan.intro) return;
-    const target = plan.targets[0];
-    if (!target || target.group === this.lastGroup) return;
-    this.lastGroup = target.group;
-    const label = this.opts.label(target);
-    this.opts.announce(label.word ? `Next rhyme: ${label.word}.` : `New rhyme, group ${target.letter}.`);
+    if (!this.announceOn) return;
+    const news: string[] = [];
+    const subject = this.subjectText.textContent ?? "";
+    if (subject && subject !== this.lastSubject) news.push(`Subject: ${subject.replace("ON: ", "").toLowerCase()}.`);
+    this.lastSubject = subject;
+    const target = plan.intro ? undefined : plan.targets[0];
+    if (target && target.group !== this.lastGroup) {
+      this.lastGroup = target.group;
+      const label = this.opts.label(target);
+      news.push(label.word ? `Next rhyme: ${label.word}.` : `New rhyme, group ${target.letter}.`);
+    }
+    if (news.length) this.opts.announce(news.join(" "));
   }
 }
