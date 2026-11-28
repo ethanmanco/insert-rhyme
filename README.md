@@ -1,6 +1,6 @@
 # Insert Rhyme
 
-Free 8-bit freestyle rap practice. Pick a beat, watch the ball bounce across each bar, and land your rhymes on the bright blocks. No accounts, no ads, nothing to pay for, and nothing leaves your device.
+Free 8-bit freestyle rap practice. Pick a beat, watch the ball bounce across each bar, and land your rhymes on the bright blocks. No accounts, no ads, nothing to pay for, and your voice, beats and settings never leave your device (see [Privacy](#privacy)).
 
 **Play it:** https://ethanmanco.github.io/insert-rhyme/
 
@@ -60,6 +60,12 @@ The filter (`filter/`) is thorough because the pronunciation dictionary contains
 The tests check every listed word and its forms, a set of innocent look-alikes, and every single word in the shipped default file. The word lists are stored in ROT13 so the repository does not show them as plain text.
 
 With a switch on, prompts don't use everything the filter catches. They use the words regular rap uses, weighted by how often (`src/core/explicit.ts`). Each rap style has its own list, so UK drill and grime curse like UK rappers and Miami bass leans on party words, while topics and any words use everyday rap cursing. Slur prompts are only the slurs rap uses, mostly the n-word, which the dictionary lacks; it's added ending in "-a", and with "-er" said as "-a" it rhymes with bigger, trigger, killer, dinner and figure. The rhyme helper still knows every word in the switched-on files. With slurs on, an "I'm white" switch appears (off by default) that leaves the n-word out of prompts and the rhyme helper; the other slurs stay as rare as before.
+
+## Privacy
+
+No accounts, no cookies, no ads. Your recordings, your own beat files and your settings stay on your device.
+
+To see how many people use it, the published site sends one anonymous count a day: once when you open it (marked "new" the first time), and once the first time you press play that day. The count has no ID and nothing about you or what you rap; the server only adds 1 to that day's totals, by country. It is skipped when your browser asks sites not to track you (Global Privacy Control or Do Not Track), and nothing is sent from a local copy. The code is in [src/usage.ts](src/usage.ts).
 
 ## Credits and licenses
 

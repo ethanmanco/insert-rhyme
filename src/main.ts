@@ -20,6 +20,10 @@ import { DIFFICULTIES, loadSettings, saveSettings, type Settings } from "./setti
 import { load, save } from "./storage";
 import { helperSheet, micExplainer, optionsSheet, type OptionsSection } from "./ui/sheets";
 import { Stage } from "./ui/stage";
+import { countPlay, countVisit } from "./usage";
+
+// An anonymous once-a-day count (usage.ts), before anything else is saved.
+countVisit();
 
 const isTouch = () => window.matchMedia("(pointer: coarse)").matches;
 // On phones, trade a little delay for audio that never crackles or drags.
@@ -481,6 +485,7 @@ async function play() {
   if (!engine.hasLoop) return;
   engine.play();
   beginSession();
+  countPlay();
   announce("Count in.");
   showPlaying();
 }

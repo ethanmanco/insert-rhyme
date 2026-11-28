@@ -152,7 +152,7 @@ export function optionsSheet(get: () => Settings, stats: () => Stats, change: (p
         <p class="choice-hint center">It's free and has no ads. A star helps other people find it.</p>
       </fieldset>
       <p class="choice-hint center">Beat: ${esc(beatById(s.beat).credit.title)} by ${esc(beatById(s.beat).credit.artist)}, <a href="${beatById(s.beat).credit.url}">${beatById(s.beat).credit.license}</a>, cut to a loop.</p>
-      <p class="choice-hint center">Everything stays on this device. Words: CMU Pronouncing Dictionary and SCOWL. <a href="${REPO}">Source and credits</a></p>`;
+      <p class="choice-hint center">Your voice, beats and settings stay on this device. The only thing sent is an anonymous daily count, with no ID. Words: CMU Pronouncing Dictionary and SCOWL. <a href="${REPO}">Source and credits</a></p>`;
   }
 
   body.addEventListener("change", (e) => {

@@ -13,6 +13,16 @@ export function load<T>(key: string, fallback: T): T {
   }
 }
 
+/** Whether this app has saved anything on this device before. */
+export function hasSaved(): boolean {
+  try {
+    for (let i = 0; i < window.localStorage.length; i++) if (window.localStorage.key(i)?.startsWith(PREFIX)) return true;
+  } catch {
+    // Storage is off.
+  }
+  return false;
+}
+
 export function save(key: string, value: unknown): void {
   try {
     window.localStorage.setItem(PREFIX + key, JSON.stringify(value));
